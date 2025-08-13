@@ -28,7 +28,8 @@ if not AOAI_API_KEY: missing.append("AZURE_OPENAI_API_KEY (use ACA secret)")
 if not AOAI_DEPLOYMENT: missing.append("AZURE_OPENAI_DEPLOYMENT")
 
 if missing:
-    raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
+    print(f"WARNING: Missing environment variables: {', '.join(missing)}")
+    # Do NOT raise here; allow app to start
 
 
 app = FastAPI()
