@@ -22,21 +22,11 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build & push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          provenance: false
-          sbom: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Output image tags
+      - name: Build image (classic docker)
         run: |
-          echo "Pushed:"
-          echo "  $REGISTRY/$IMAGE_NAME:${GITHUB_SHA}"
-          echo "  $REGISTRY/$IMAGE_NAME:latest"
+          docker build -t $REGISTRY/$IMAGE_NAME:${GITHUB_SHA} -t $REGISTRY/$IMAGE_NAME:latest .
+
+      - name: Push image
+        run: |
+          docker push $REGISTRY/$IMAGE_NAME:${GITHUB_SHA}
+          docker push $REGISTRY/$IMAGE_NAME:latest
