@@ -1,0 +1,81 @@
+HITACHI APPLICATION RELIABILITY CENTERS (HARC) - KNOWLEDGE BASE
+
+OVERVIEW
+Hitachi Application Reliability Centers (HARC), part of Hitachi Digital Services, help enterprises design, build, manage, and optimize cloud applications for reliability, cost-efficiency, and continuous operations. They combine cloud expertise, automation, and SRE methodologies.
+
+KEY BENEFITS
+- Operational Efficiency & Cost Savings: ~35% reduction in cost of operations, ~60% reduction in business risk, ~30% cost optimization via FinOps.
+- Always-On Reliability: 24/7 engineering-led operations.
+- Engineering-Led Service Management: Combines DevSecOps, SRE, and automation for incident management, observability, and governance.
+
+SERVICES & FRAMEWORK
+- Advisory Services – Cloud Ops transformation and reliability strategy.
+- Design Services – SRE-based architecture and pipelines.
+- Run Services – Automated daily operations with DevOps integration.
+- Cloud Cost Management – FinOps-driven optimization.
+
+Delivered via physical and virtual Centers of Excellence (CoEs) with 4,000+ engineers for migration, modernization, observability, and automation.
+
+GLOBAL FOOTPRINT & TIMELINE
+- Global CoEs in Hyderabad (India), Dallas (USA), and services in Japan.
+- 2022: CoEs launched in Hyderabad and Dallas.
+- 2023: HARC launched in Japan.
+
+HARC FOR AI (2025 EXTENSION)
+- AI Resilience & Performance Management
+- Data Drift Detection
+- Cost Optimization
+- AI Observability
+- Security & Governance
+- Agent Lifecycle Management
+
+EVENT: HARC AI LAUNCH (INTERNAL)
+Date: 15 September
+Location: Hitachi Digital Services — Dallas Office, 14643 Dallas Parkway, Suite 800, Dallas, TX 75254
+Theme: "From Reliable Ops to Autonomous AI Agents"
+Audience: Executives, Ops leaders, Architects, SRE/Platform, Data & AI leaders
+
+PROGRAM (Draft)
+10:00 — Check-in & Networking Coffee
+10:30 — Opening Remarks (Site Leader)
+10:40 — Keynote: "AI Agents at Enterprise Scale" — CTO PremKumar
+11:15 — Live Demos (1–7) — Reliability + Cost + Safety Agents
+12:15 — Lunch & Partner Pavilion
+13:30 — Live Demos (8–15) — Industry Agents & Tooling
+15:00 — Panel: "What Changes on Day 2?" (SRE, FinOps, SecOps, DataOps)
+16:00 — Closing, Feedback & Customer Roundtables
+
+DEMO ROSTER (Mock — 15 AI Agent Demos)
+1. Ops Co‑Pilot — Incident summarization, auto‑runbooks, change impact analysis.
+2. Reliability Guard — SLO/SLA drift prediction, error‑budget spend alerts, auto‑mitigations.
+3. Cost Optimizer — Multicloud rightsizing + idle cleanup + anomaly explainers.
+4. Release Navigator — Safe deploy assistant with canary/feature‑flag orchestration.
+5. FinOps Advisor — Budget guardrails, "what‑if" scenarios, chargeback/showback.
+6. Data Quality Sentinel — Data‑drift & schema‑change detection with rollback playbooks.
+7. Pipeline Fixer — CI/CD failure triage and flaky‑test suppression suggestions.
+8. Compliance Clerk — Policy‑as‑code checks for privacy, residency, and security.
+9. Access Steward — Just‑in‑time access requests + toxic combination detection.
+10. Service Mapper — L4–L7 app map + dependency blast‑radius reasoning.
+11. Capacity Forecaster — Seasonal & campaign load modeling with autoscale plans.
+12. Edge Inspector — OT/IoT reliability agent for plants and logistics yards.
+13. Field Assist — Vision AI + mobile co‑pilot for technician workflows.
+14. Customer Pulse — GenAI on NPS/CSAT/CRM notes → churn/upsell signals.
+15. Exec Brief — Board‑ready briefings on risk, spend, and service health.
+
+DAY-2 RUNBOOK (Example Pillars)
+- Reliability: SLO governance, error‑budget policy, platform SRE patterns.
+- Cost: FinOps KPIs (unit cost, anomaly MTTR, rightsizing yield).
+- Security: AI policy & model‑risk controls, data governance.
+- Operations: Tool‑calling agents with human‑in‑the‑loop workflows.
+- Adoption: Change‑management, training, and center‑of‑excellence setup.
+
+SUCCESS METRICS (Draft)
+- MTTR improvement target: 30–50%
+- Cost optimization uplift: 10–20% vs. baseline
+- Deployment frequency: +25–40% with guardrails
+- Policy conformance: >95% on pre‑prod checks for gated workloads
+
+VENUE & HELP
+Wi-Fi: HARC-Guest • Pass: launch2025
+Help Desk: near main entrance
+Emergency: dial 100 from venue phone
