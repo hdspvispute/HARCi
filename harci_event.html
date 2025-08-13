@@ -175,25 +175,29 @@
 
   <!-- Config (single block) -->
   <script>
-    window.HARCI_CONFIG = {
-      region: "eastus2",
-      voice: "en-US-AvaMultilingualNeural",
-      character: "lisa",
-      style: "casual-sitting",
-      backendBase: "http://localhost:8000",
-      relayPath: "/relay-token",
-      speechTokenPath: "/speech-token",
-      askPath: "/ask",
+  window.HARCI_CONFIG = {
+    region: "eastus",                      // your Speech region
+    voice: "en-US-AvaMultilingualNeural",
+    character: "lisa",
+    style: "casual-sitting",
 
-      // Optional voice tuning
-      speakingStyle: "chat",
-      styleDegree:  "1.25",
-      speakingRate: "+6%",
-      speakingPitch:"+2st"
-    };
-  </script>
+    // 👇 same-origin: app serves both UI + API
+    backendBase: window.location.origin,
+
+    relayPath: "/relay-token",
+    speechTokenPath: "/speech-token",
+    askPath: "/ask",
+
+    speakingStyle: "chat",
+    styleDegree:  "1.25",
+    speakingRate: "+6%",
+    speakingPitch:"+2st"
+  };
+</script>
+
   <!-- SDK -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
-  <script src="harci.js?v=25"></script>
+  <script src="/static/harci.js?v=25"></script>
+
 </body>
 </html>

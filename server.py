@@ -2,6 +2,8 @@ import os, requests, re, json
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, Response
 
 # ===== Azure Speech =====
 SPEECH_REGION = os.getenv("SPEECH_REGION")
@@ -38,6 +40,21 @@ app.add_middleware(
     allow_methods=["GET","POST","OPTIONS","WEBSOCKET"],
     allow_headers=["*"],
 )
+
+# Health endpoint for probes
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
+
+# Serve static files (JS, images) under /static
+# We'll keep the HTML at root for a clean URL.
+app.mount("/static", StaticFiles(directory=".", html=False), name="static")
+
+# Root route serves the event page
+@app.get("/")
+def index():
+    # Cache lightly to reduce cold starts; adjust as you like
+    return FileResponse("harci_event.html", headers={"Cache-Control": "public, max-age=60"})
 
 def load_kb():
     try:
