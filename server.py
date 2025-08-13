@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, Response
 
 
-# ===== Azure Speech  Creds =====
+# ===== Azure Speech =====
 SPEECH_REGION = os.getenv("SPEECH_REGION")
 SPEECH_KEY = os.getenv("SPEECH_KEY")
 
