@@ -1,0 +1,14 @@
+{
+  "name": "harci",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "build:css": "tailwindcss -i app/static/css/input.css -o app/static/css/harci.css --minify",
+    "dev:css": "tailwindcss -i app/static/css/input.css -o app/static/css/harci.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.10",
+    "postcss": "^8.4.44",
+    "autoprefixer": "^10.4.20"
+  }
+}

@@ -1,0 +1,26 @@
+{% extends "_base.html" %}
+{% block title %}Starting… · HARCi{% endblock %}
+
+{% block content %}
+<section id="unlockCard" class="mx-auto max-w-xl text-center">
+  <div class="rounded-2xl border border-white/10 bg-neutral-800/50 p-8">
+    <div class="mx-auto mb-4 h-12 w-12 rounded-full bg-[var(--brand-red)] animate-pulse"></div>
+    <h2 class="text-xl font-semibold mb-2">HARCi is booting…</h2>
+    <p class="text-neutral-300 mb-6">We’ll initialize voice and video next.</p>
+    <ul class="text-sm text-neutral-400 mb-6 space-y-1">
+      <li>• Ask for the <strong>agenda</strong></li>
+      <li>• Find a <strong>session room</strong></li>
+      <li>• Learn about the <strong>speakers</strong></li>
+    </ul>
+
+    <button id="btnUnlock"
+            class="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-red)] px-5 py-2.5 font-medium">
+      Tap to continue
+    </button>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <!-- (Optional) We don't need Speech SDK here, unlock uses WebAudio only and is gated in JS -->
+{% endblock %}

@@ -1,0 +1,9 @@
+{
+  "name": "HARCi",
+  "short_name": "HARCi",
+  "start_url": "/register",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#E60027",
+  "icons": []
+}

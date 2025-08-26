@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="{{ cfg.brandRed or '#E60027' }}">
+  <link rel="manifest" href="{{ url_for('static', path='manifest.webmanifest') }}">
+  <title>{% block title %}HARCi{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.css') }}?v=10" />
+  <style>
+    :root { --brand-red: {{ cfg.brandRed or '#E60027' }}; }
+  </style>
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+</head>
+<body class="min-h-full bg-neutral-900 text-neutral-100">
+  <!-- Header -->
+  <header class="w-full border-b border-white/10 bg-neutral-950/60 backdrop-blur">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center gap-3">
+      <div class="w-8 h-8 rounded bg-[var(--brand-red)]"></div>
+      <div class="text-lg font-semibold tracking-wide">HARCi – Hitachi AI Concierge</div>
+      {% block header_right %}{% endblock %}
+    </div>
+  </header>
+
+  <!-- Page content -->
+  <main class="mx-auto max-w-6xl px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+  <!-- Global scripts (present on all pages) -->
+  <script src="{{ url_for('static', path='js/logger.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/api.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/idle.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/stt.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/earcon.js') }}?v=10"></script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

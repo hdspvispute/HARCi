@@ -1,0 +1,76 @@
+{% extends "_base.html" %}
+{% block title %}Guide · HARCi{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <!-- Left: Avatar, controls -->
+  <section class="space-y-4">
+    <div class="relative rounded-2xl overflow-hidden border border-white/10 bg-black">
+      <video id="remoteVideo" class="w-full aspect-video bg-black" playsinline autoplay muted></video>
+      <audio id="remoteAudio" playsinline></audio>
+
+      <div class="absolute left-3 top-3 flex items-center gap-2">
+        <span class="inline-flex items-center rounded-full bg-neutral-900/70 px-3 py-1 text-xs border border-white/10">
+          <span class="h-2 w-2 rounded-full bg-[var(--brand-red)] mr-2"></span>
+          <span id="status">Tap start</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button id="btnStartSession"
+              class="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-red)] px-4 py-2 font-medium">
+        Start session
+      </button>
+
+      <button id="btnHoldMic"
+              class="inline-flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 border border-white/10">
+        Hold to talk
+      </button>
+
+      <button id="btnEnd"
+              class="ml-auto inline-flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 border border-white/10">
+        End
+      </button>
+    </div>
+
+    <div class="rounded-xl border border-white/10 bg-neutral-800/50 p-3 text-sm min-h-10">
+      <span id="caption" class="text-neutral-300"></span>
+    </div>
+
+    <!-- Quick chips -->
+    <div id="quickChips" class="flex flex-wrap gap-2">
+      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
+              data-prompt="Agenda">Agenda</button>
+      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
+              data-prompt="Venue Map">Venue Map</button>
+      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
+              data-prompt="Speakers">Speakers</button>
+      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
+              data-prompt="Help">Help</button>
+    </div>
+  </section>
+
+  <!-- Right: Briefing + Image -->
+  <section class="space-y-4">
+    <div class="rounded-2xl border border-white/10 bg-neutral-800/50 p-5 min-h-48">
+      <div id="briefing" class="prose prose-invert max-w-none"></div>
+    </div>
+
+    <div id="imagePanel" class="hidden rounded-2xl border border-white/10 bg-neutral-800/50 overflow-hidden">
+      <img id="briefImage" alt="" class="w-full object-cover">
+      <div class="p-3 text-xs text-neutral-300"><span id="imgAlt"></span></div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <!-- Microsoft Cognitive Services Speech SDK (must include on Guide) -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+  <!-- Avatar + STT + Mic earcons -->
+  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/stt.js') }}?v=10"></script>
+  <script src="{{ url_for('static', path='js/earcon.js') }}?v=10"></script>
+{% endblock %}
