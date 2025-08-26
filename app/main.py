@@ -10,9 +10,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from starlette.templating import Jinja2Templates
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-load_dotenv(override=True)
+#load_dotenv(override=True)
 
 # === Azure Agents SDK (only used if AGENT_TOKEN present) ===
 try:
