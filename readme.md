@@ -3,6 +3,10 @@ az account get-access-token `
   --query accessToken `
   --output tsv
 
+git add .github/workflows/deploy.yml
+git commit -m "CI/CD: deploy only from deploy-20250826-0010"
+git push origin deploy-20250826-0010
+
 
   await HARCI_AVATAR.speak("Hello from the avatar. This should be audible.");
 
