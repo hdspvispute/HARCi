@@ -1,0 +1,78 @@
+name: build-and-push-image
+
+on:
+  push:
+    branches:
+      - main
+      - deploy-**
+  workflow_dispatch:
+
+env:
+  # you already use this repo variable
+  REGISTRY: ${{ vars.AZURE_CONTAINER_REGISTRY }}    # e.g. hangaracr.azurecr.io
+  IMAGE_NAME: harci-backend
+
+  # Azure targets
+  SUBSCRIPTION_NAME: Digital_Modernization_Azure_Lab
+  RESOURCE_GROUP: AgentPlane-Hangar
+  CONTAINER_APP: harci-backend
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------- Build & push (your existing steps) ----------
+      - name: Login to ACR (admin creds)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build image
+        run: |
+          docker build -t $REGISTRY/$IMAGE_NAME:${GITHUB_SHA} -t $REGISTRY/$IMAGE_NAME:latest .
+
+      - name: Push image
+        run: |
+          docker push $REGISTRY/$IMAGE_NAME:${GITHUB_SHA}
+          docker push $REGISTRY/$IMAGE_NAME:latest
+
+      # ---------- Deploy to Azure Container Apps ----------
+      # Requires a Service Principal JSON in secret AZURE_CREDENTIALS
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set subscription & add containerapp extension
+        run: |
+          az account set --subscription "${{ env.SUBSCRIPTION_NAME }}"
+          az extension add -n containerapp --yes || az extension update -n containerapp
+
+      # (Idempotent) make sure the app can pull from your ACR using admin creds you already have
+      # If you've already configured registry on the app, you can delete this step.
+      - name: Ensure registry on Container App
+        run: |
+          az containerapp registry set \
+            -g "${{ env.RESOURCE_GROUP }}" -n "${{ env.CONTAINER_APP }}" \
+            --server "${{ env.REGISTRY }}" \
+            --username "${{ secrets.ACR_USERNAME }}" \
+            --password "${{ secrets.ACR_PASSWORD }}"
+
+      - name: Update Container App image
+        run: |
+          az containerapp update \
+            -g "${{ env.RESOURCE_GROUP }}" \
+            -n "${{ env.CONTAINER_APP }}" \
+            --image "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${GITHUB_SHA}"
+
+      - name: Show URL and revision
+        run: |
+          az containerapp revision list -g "${{ env.RESOURCE_GROUP }}" -n "${{ env.CONTAINER_APP }}" -o table
+          echo "FQDN:"
+          az containerapp show -g "${{ env.RESOURCE_GROUP }}" -n "${{ env.CONTAINER_APP }}" \
+            --query properties.configuration.ingress.fqdn -o tsv
