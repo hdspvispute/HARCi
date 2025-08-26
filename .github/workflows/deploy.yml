@@ -3,8 +3,7 @@ name: build-and-push-image
 on:
   push:
     branches:
-      - main
-      - deploy-**
+      - deploy-20250826-0010     
   workflow_dispatch:
 
 env:
