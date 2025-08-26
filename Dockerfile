@@ -9,8 +9,9 @@ RUN npm ci --no-audit --no-fund || npm i
 # Copy configs + assets and build CSS
 COPY postcss.config.js tailwind.config.js ./
 COPY app/static ./app/static
-# If package.json has "build" script it will run; otherwise fallback to postcss
-RUN npm run build || npx postcss app/static/css/input.css -o app/static/css/harci.css
+
+# Skip asset build; rely on prebuilt app/static/css/harci.css in repo
+RUN echo "Skipping CSS build (using precompiled harci.css)"
 
 # ---------- Stage 2: python app ----------
 FROM python:3.11-slim
