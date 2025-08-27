@@ -3,57 +3,46 @@
 
 {% block content %}
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-  <!-- Top left logo -->
-  <div class="absolute left-6 top-6 z-50">
-    <img src="{{ url_for('static', path='assets/hitachi_logo.png') }}" alt="Hitachi Logo" class="h-10 w-auto drop-shadow-lg">
-  </div>
-
-  <!-- Left: Avatar, controls -->
+  <!-- Left: Avatar + controls -->
   <section class="space-y-4">
     <div class="relative rounded-2xl overflow-hidden border border-white/10 bg-black">
       <video id="remoteVideo" class="w-full aspect-video bg-black" playsinline autoplay muted></video>
       <audio id="remoteAudio" playsinline></audio>
 
+      <!-- Status chip -->
       <div class="absolute left-3 top-3 flex items-center gap-2">
         <span class="inline-flex items-center rounded-full bg-neutral-900/70 px-3 py-1 text-xs border border-white/10">
           <span class="h-2 w-2 rounded-full bg-[var(--brand-red)] mr-2"></span>
-          <!-- Use statusText id to align with UI.setStatus shim -->
           <span id="statusText">Tap start</span>
         </span>
       </div>
     </div>
 
     <div class="flex items-center gap-3">
-      <button id="btnStartSession"
-              class="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-red)] px-4 py-2 font-medium">
+      <button id="btnStartSession" class="btn btn-brand">
         Start session
       </button>
 
-      <button id="btnHoldMic"
-              class="inline-flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 border border-white/10">
+      <button id="btnHoldMic" class="btn btn-outline">
         Hold to talk
       </button>
 
-      <button id="btnEnd"
-              class="ml-auto inline-flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 border border-white/10">
+      <button id="btnEnd" class="ml-auto btn btn-plain">
         End
       </button>
     </div>
 
+    <!-- Live captions -->
     <div class="rounded-xl border border-white/10 bg-neutral-800/50 p-3 text-sm min-h-10">
       <span id="caption" class="text-neutral-300"></span>
     </div>
 
     <!-- Quick chips -->
     <div id="quickChips" class="flex flex-wrap gap-2">
-      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
-              data-prompt="Agenda">Agenda</button>
-      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
-              data-prompt="Venue Map">Venue Map</button>
-      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
-              data-prompt="Speakers">Speakers</button>
-      <button class="rounded-full px-4 py-1.5 border border-white/10 bg-neutral-800 text-sm"
-              data-prompt="Help">Help</button>
+      <button class="chip" data-prompt="Agenda">Agenda</button>
+      <button class="chip" data-prompt="Venue Map">Venue Map</button>
+      <button class="chip" data-prompt="Speakers">Speakers</button>
+      <button class="chip" data-prompt="Help">Help</button>
     </div>
   </section>
 
@@ -72,5 +61,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-  {# Scripts are loaded globally in _base.html (deferred) to prevent duplicates and race conditions. #}
+  <!-- Load Speech SDK only on the guide screen -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 {% endblock %}

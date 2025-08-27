@@ -6,17 +6,12 @@
   <meta name="theme-color" content="{{ cfg.brandRed or '#E60027' }}">
   <link rel="manifest" href="{{ url_for('static', path='manifest.webmanifest') }}">
   <title>{% block title %}HARCi{% endblock %}</title>
-
-  <!-- Avoid favicon 404s with an inline icon -->
-  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="{{ (cfg.brandRed or "#E60027") | replace("#","%23") }}"/></svg>'>
-
-  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.css') }}?v=11" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.css') }}?v=13" />
   <style>
     :root { --brand-red: {{ cfg.brandRed or '#E60027' }}; }
   </style>
-
-  <!-- Microsoft Cognitive Services Speech SDK (load once, globally) -->
-  <script src="https://aka.ms/csspeech/jsbrowserpackageraw" defer></script>
+  <!-- Speech SDK (available globally; needed on Guide) -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 </head>
 <body class="min-h-full bg-neutral-900 text-neutral-100">
   <!-- Header -->
@@ -33,21 +28,19 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Global scripts (single load, ordered, deferred) -->
-  <script src="{{ url_for('static', path='js/logger.js') }}?v=11" defer></script>
-  <script src="{{ url_for('static', path='js/api.js') }}?v=11" defer></script>
+  <!-- Global scripts (present on all pages); load foundation first -->
+  <script src="{{ url_for('static', path='js/logger.js') }}?v=13"></script>
+  <script src="{{ url_for('static', path='js/api.js') }}?v=13"></script>
+  <script src="{{ url_for('static', path='js/idle.js') }}?v=13"></script>
+  <script src="{{ url_for('static', path='js/harci_lifecycle_patch.js') }}?v=13"></script>
 
-  <!-- Load lifecycle + UI shims BEFORE avatar_rtc uses setStatus/speak -->
-  <script src="{{ url_for('static', path='js/harci_lifecycle_patch.js') }}?v=11" defer></script>
-  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=11" defer></script>
+  <!-- Avatar + STT + Earcon before UI bindings so the UI can call into them -->
+  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=13"></script>
+  <script src="{{ url_for('static', path='js/stt.js') }}?v=13"></script>
+  <script src="{{ url_for('static', path='js/earcon.js') }}?v=13"></script>
 
-  <!-- Idle timer after UI is ready -->
-  <script src="{{ url_for('static', path='js/idle.js') }}?v=11" defer></script>
-
-  <!-- Voice/AV stack (only loaded once globally; guide page hooks into them) -->
-  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=11" defer></script>
-  <script src="{{ url_for('static', path='js/stt.js') }}?v=11" defer></script>
-  <script src="{{ url_for('static', path='js/earcon.js') }}?v=11" defer></script>
+  <!-- UI bindings LAST so everything above is available -->
+  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=13"></script>
 
   {% block extra_scripts %}{% endblock %}
 </body>

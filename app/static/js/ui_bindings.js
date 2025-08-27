@@ -18,15 +18,43 @@
     try { const b = document.getElementById('btnHoldMic'); if (b) b.disabled = !on; } catch {}
   });
 
-  // Legacy global shim so older files don’t crash
+  // Legacy shim
   window.setStatus = window.setStatus || (s => UI.setStatus(s));
+
+  // --- Soft WebAudio unlock (fallback when avatar module not ready) -----------
+  async function softAudioUnlock() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      await ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.02);
+      LOG.info('[ui] soft audio unlocked');
+    } catch (e) {
+      LOG.warn('[ui] soft audio unlock failed', e);
+    }
+  }
+
+  // --- Wait until avatar is available (or time out) ---------------------------
+  async function waitForAvatar(ms = 2000) {
+    const start = Date.now();
+    while (!window.HARCI_AVATAR && Date.now() - start < ms) {
+      await new Promise(r => setTimeout(r, 50));
+    }
+    return !!window.HARCI_AVATAR;
+  }
 
   // --- Speech helper (works with or without lifecycle patch) ------------------
   function estimateMs(text) {
     const t = (text || '').trim();
     if (!t) return 1200;
     const w = t.split(/\s+/).length;
-    return Math.min(25_000, Math.max(1200, Math.round((w / 2.5) * 1000))); // ~2.5 wps
+    return Math.min(25_000, Math.max(1200, Math.round((w / 2.5) * 1000)));
   }
   function speakNow(text, opts) {
     if (window.speakSafe) return window.speakSafe(text, opts);
@@ -86,15 +114,15 @@
     }
   }
 
-  // --- Minimal ask() helper with session cookie -------------------------------
+  // --- ask() ------------------------------------------------------------------
   window.ask = async (text) => {
     const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
     return window.API.assistRun(text, sid);
   };
 
   // --- Flow control: only-latest + cancellation -------------------------------
-  let turnSeq = 0;           // increases per user action
-  let inflight = null;       // AbortController for /assist/run
+  let turnSeq = 0;
+  let inflight = null;
 
   function cancelPending(reason = 'user-preempt') {
     try { if (inflight) inflight.abort(); } catch {}
@@ -115,7 +143,12 @@
     btn.addEventListener('click', async () => {
       try {
         await window.bootstrapConfig();
-        await window.HARCI_AVATAR?.ensureAudioUnlocked?.();
+        // Prefer avatar unlock if available; otherwise fallback
+        if (await waitForAvatar(500)) {
+          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch {}
+        } else {
+          await softAudioUnlock();
+        }
       } catch {}
       location.href = '/guide';
     }, { once: true });
@@ -161,13 +194,22 @@
     startBtn.addEventListener('click', async () => {
       try {
         UI.setStatus('Starting…');
-        await window.HARCI_AVATAR.ensureAudioUnlocked();
+
+        // Ensure an audio unlock before creating/starting WebRTC
+        if (await waitForAvatar(800)) {
+          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
+        } else {
+          await softAudioUnlock();
+        }
         primeAudioEl();
 
+        // Wait again, then start the avatar
+        if (!await waitForAvatar(1500)) {
+          throw new Error('Avatar runtime not ready');
+        }
         await window.HARCI_AVATAR.startSession();
         UI.setStatus('Ready');
 
-        // Welcome (non-blocking)
         speakNow('Welcome to the event! I am your HARCi avatar guide. I can answer questions about the agenda, venue, speakers, and help you navigate the event. Just tap a quick chip or hold the mic to talk to me.');
       } catch (e) {
         LOG.error('[ui] avatar start error', e);
@@ -178,19 +220,14 @@
     // Quick chips --------------------------------------------------------------
     const chips = $$('#quickChips [data-prompt]');
 
-    // ui_bindings.js  (inside onGuidePage -> runPrompt)
-    async function runPrompt(p) {
+    async function runPrompt(p){
       const myTurn = ++turnSeq;
-      cancelPending('chip');                      // stop speech / abort previous
-      chips.forEach(c => c.disabled = true);
-      UI.setMicEnabled(false);
+      cancelPending('chip');
+      chips.forEach(c=> c.disabled = true);
+      UI.setStatus('Thinking…'); UI.setMicEnabled(false);
 
-      // Clear UI first
       const cap = $('#caption'); if (cap) cap.textContent = '';
       const brief = $('#briefing'); if (brief) brief.innerHTML = '';
-
-      // Make sure status shows now and isn't overridden by any late stop()
-      UI.setStatus('Thinking…');
 
       const ac = new AbortController(); inflight = ac;
       let res = null;
@@ -198,7 +235,7 @@
         res = await window.API.assistRun(p, undefined, { signal: ac.signal });
       } catch (e) {
         if (e.name !== 'AbortError') { LOG.error('[ui] chip error', e); UI.setStatus('Error'); }
-        chips.forEach(c => c.disabled = false); UI.setMicEnabled(true);
+        chips.forEach(c=> c.disabled = false); UI.setMicEnabled(true);
         return;
       } finally {
         inflight = null;
@@ -207,18 +244,16 @@
       if (myTurn !== turnSeq || !res) { chips.forEach(c=> c.disabled = false); UI.setMicEnabled(true); return; }
 
       applyResponse(res);
-      // speakNow will flip to “Speaking…” (then back to Ready) automatically
       speakNow(res.narration || 'Here is the information.', { turn: myTurn });
 
       chips.forEach(c=> c.disabled = false); UI.setMicEnabled(true);
     }
-
     chips.forEach(btn => btn.addEventListener('click', ()=> runPrompt(btn.dataset.prompt)));
 
-    // Mic press & hold — single event system with strict guards ----------------
+    // Mic press & hold (pointer-only, dedup releases) --------------------------
     const hold = $('#btnHoldMic');
     let isHolding = false;
-    let activePointerId = null;
+    let holdToken = 0;
 
     if (window.HARCI_STT && typeof window.HARCI_STT.on === 'function') {
       window.HARCI_STT.on('partial', ({ text }) => {
@@ -233,58 +268,61 @@
 
     const press = async (e) => {
       e.preventDefault();
-      if (isHolding) return;                      // guard re-entry
+      if (isHolding) return;
       isHolding = true;
-      activePointerId = e.pointerId ?? 'mouse';
+      holdToken++;
 
-      try { hold?.setPointerCapture?.(e.pointerId); } catch {}
       cancelPending('ptt');
-      try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch {}
+      try { await (window.HARCI_AVATAR?.ensureAudioUnlocked?.() ?? softAudioUnlock()); } catch {}
       try { window.EARCON?.start?.(); } catch {}
       const cap = $('#caption'); if (cap) cap.textContent = 'Listening…';
 
       UI.setStatus('Listening'); UI.setMicEnabled(false);
-      try { await window.HARCI_STT.beginHold(); hold?.classList.add('ring-2','ring-white/50'); }
-      catch (err) { LOG.warn('[ui] beginHold failed', err); isHolding = false; activePointerId = null; UI.setStatus('Ready'); UI.setMicEnabled(true); }
+      try {
+        await window.HARCI_STT.beginHold();
+        hold?.classList.add('ring-2','ring-white/50');
+      } catch (err) {
+        LOG.warn('[ui] beginHold failed', err);
+        isHolding = false;
+        UI.setStatus('Ready'); UI.setMicEnabled(true);
+      }
     };
 
     const release = async (e) => {
       e.preventDefault();
-      // Only the pointer that started can end it
       if (!isHolding) return;
-      if (activePointerId != null && e.pointerId != null && e.pointerId !== activePointerId) return;
+      const myToken = holdToken;
+      isHolding = false;
 
       hold?.classList.remove('ring-2','ring-white/50');
-      try { hold?.releasePointerCapture?.(e.pointerId); } catch {}
       try { window.EARCON?.stop?.(); } catch {}
+      let text = '';
+      try {
+        const r = await window.HARCI_STT.endHold();
+        text = (r && r.text) || '';
+      } catch (err) {
+        LOG.warn('[ui] endHold failed', err);
+      }
 
-      // Flip flags BEFORE async to avoid double-calls on fast sequences
-      isHolding = false;
-      activePointerId = null;
-
-      const { text } = await window.HARCI_STT.endHold();
+      if (myToken !== holdToken) return;
       UI.setStatus('Processing…');
 
-      if (!text) { const cap = $('#caption'); if (cap) cap.textContent = ''; UI.setStatus('Ready'); UI.setMicEnabled(true); return; }
+      if (!text) {
+        const cap = $('#caption'); if (cap) cap.textContent = '';
+        UI.setStatus('Ready'); UI.setMicEnabled(true);
+        return;
+      }
 
       const cap = $('#caption'); if (cap) cap.textContent = text;
-      const askInput = $('#askInput'); if (askInput) { askInput.removeAttribute('disabled'); askInput.removeAttribute('readonly'); }
       await runPrompt(text);
       UI.setStatus('Ready'); UI.setMicEnabled(true);
     };
 
-    const supportsPointer = 'onpointerdown' in window;
     if (hold) {
-      if (supportsPointer) {
-        hold.addEventListener('pointerdown', press, { passive:false });
-        hold.addEventListener('pointerup', release);
-        hold.addEventListener('pointercancel', release);
-        hold.addEventListener('pointerleave', release);
-      } else {
-        // Fallback for very old browsers
-        hold.addEventListener('touchstart', (e) => press({ ...e, pointerId: 1, preventDefault: () => e.preventDefault() }), { passive:false });
-        hold.addEventListener('touchend',   (e) => release({ ...e, pointerId: 1, preventDefault: () => e.preventDefault() }));
-      }
+      hold.addEventListener('pointerdown', press);
+      hold.addEventListener('pointerup', release);
+      hold.addEventListener('pointercancel', release);
+      hold.addEventListener('pointerleave', release);
     }
 
     // End session --------------------------------------------------------------

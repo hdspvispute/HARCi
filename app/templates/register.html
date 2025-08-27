@@ -1,31 +1,39 @@
 {% extends "_base.html" %}
-{% block title %}Register · HARCi{% endblock %}
+{% block title %}Event Check-in · HARCi{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-xl">
-  <h1 class="text-2xl font-semibold mb-2">Welcome to the HARC AI Launch Event</h1>
-  <p class="text-neutral-300 mb-6">Quick registration lets HARCi greet you by name and personalize guidance.</p>
+  <h1 class="text-2xl font-semibold mb-2">Welcome to the HARC AI Launch</h1>
+  <p class="text-neutral-300 mb-6">
+    Check in so HARCi can greet you by name and personalize your guidance.
+  </p>
 
-  <form id="regForm" class="space-y-4 bg-neutral-800/60 p-5 rounded-xl border border-white/10">
+  <form id="regForm" class="space-y-4 card">
     <div>
-      <label class="block mb-1 text-sm text-neutral-300" for="name">Name <span class="text-red-400">*</span></label>
+      <label class="block mb-1 text-sm text-neutral-300" for="name">
+        Your name <span class="text-red-400">*</span>
+      </label>
       <input id="name" name="name" required
              class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]"
-             placeholder="Your name" />
-    </div>
-    <div>
-      <label class="block mb-1 text-sm text-neutral-300" for="company">Company <span class="text-red-400">*</span></label>
-      <input id="company" name="company" required
-             class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]"
-             placeholder="Your company" />
+             placeholder="e.g., Priya Sharma" />
     </div>
 
-    <p class="text-xs text-neutral-400">We only store minimal info during the event. See on-site privacy notice.</p>
+    <div>
+      <label class="block mb-1 text-sm text-neutral-300" for="company">
+        Company <span class="text-red-400">*</span>
+      </label>
+      <input id="company" name="company" required
+             class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]"
+             placeholder="e.g., Hitachi Vantara" />
+    </div>
+
+    <p class="text-xs text-neutral-400">
+      We store minimal information for the duration of this event only.
+    </p>
 
     <div id="regError" class="hidden text-sm text-red-400"></div>
 
-    <button type="submit"
-            class="mt-2 inline-flex items-center gap-2 rounded-lg bg-[var(--brand-red)] px-4 py-2 font-medium">
+    <button type="submit" class="btn btn-brand mt-2 w-full">
       Continue
     </button>
   </form>

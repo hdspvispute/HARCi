@@ -42,7 +42,6 @@ HITACHI_RED      = os.getenv("HITACHI_RED", "#E60027")
 
 PROJECT_ENDPOINT = os.getenv("PROJECT_ENDPOINT")   # https://<acct>.services.ai.azure.com/api/projects/<project>
 AGENT_ID         = os.getenv("AGENT_ID")
-AGENT_TOKEN      = os.getenv("AGENT_TOKEN")        # Optional static token (fast in dev)
 
 SPEECH_REGION    = os.getenv("SPEECH_REGION")
 SPEECH_KEY       = os.getenv("SPEECH_KEY")
@@ -271,58 +270,28 @@ _PROJECT_CLIENT: Optional["AIProjectClient"] = None
 _AGENT_OBJ = None
 _CREDENTIAL = None  # Optional["TokenCredential"]
 
-def _is_aca_environment() -> bool:
-    """Heuristic to detect Azure Container Apps / MI or WI environments."""
-    return any(k in os.environ for k in (
-        "IDENTITY_ENDPOINT", "MSI_ENDPOINT", "IDENTITY_HEADER",
-        "AZURE_FEDERATED_TOKEN_FILE", "AZURE_TENANT_ID"
-    ))
-
-def _build_agent_credential():
+def _build_credential():
     """
-    Build a DefaultAzureCredential tuned for:
-      - Local Windows/dev: prefer env + Azure CLI; skip MI/WI probes (avoid timeouts)
-      - Azure Container Apps: prefer Managed Identity / Workload Identity; skip CLI
-    Warm a token to avoid first-call latency. Fall back to AGENT_TOKEN if present.
+    Single path: DefaultAzureCredential.
+
+    - On local Windows dev, IMDS/MI probes can be slow; we still allow them but
+      prefer env/CLI if present.
+    - In Azure Container Apps or when a Managed Identity is injected
+      (IDENTITY_ENDPOINT/MSI_ENDPOINT), DAC will pick it up.
     """
-    try:
-        from azure.identity import DefaultAzureCredential  # type: ignore
-    except Exception as e:
-        log.warning("azure-identity not installed: %s", e)
-        if AGENT_TOKEN and AccessToken is not None:
-            class StaticTokenCredential:
-                def get_token(self, *scopes, **kwargs):
-                    return AccessToken(AGENT_TOKEN, int(time.time()) + 50 * 60)
-            return StaticTokenCredential()
-        raise
-
-    in_aca = _is_aca_environment()
-    try:
-        cred = DefaultAzureCredential(
-            exclude_managed_identity_credential=not in_aca,
-            exclude_workload_identity_credential=not in_aca,
-            exclude_environment_credential=False,
-            exclude_azure_cli_credential=in_aca,
-            exclude_developer_cli_credential=True,
-            exclude_visual_studio_code_credential=True,
-            exclude_powershell_credential=True,
-            exclude_shared_token_cache_credential=True,
-            exclude_interactive_browser_credential=True,
-        )
-        # Warm once so the first Agents call isn't stuck on token acquisition.
-        cred.get_token("https://cognitiveservices.azure.com/.default")
-        return cred
-    except Exception as e:
-        log.warning("DefaultAzureCredential failed to get token: %s", e)
-
-    # Dev fallback if provided
-    if AGENT_TOKEN and AccessToken is not None:
-        class StaticTokenCredential:
-            def get_token(self, *scopes, **kwargs):
-                return AccessToken(AGENT_TOKEN, int(time.time()) + 50 * 60)
-        return StaticTokenCredential()
-
-    raise RuntimeError("No usable Azure credential found (and no AGENT_TOKEN).")
+    from azure.identity import DefaultAzureCredential
+    # Heuristic: if running with MI available, keep MI enabled; otherwise allow all,
+    # DAC will prefer fast sources first (env/CLI).
+    mi_present = bool(os.getenv("IDENTITY_ENDPOINT") or os.getenv("MSI_ENDPOINT"))
+    return DefaultAzureCredential(
+        exclude_environment_credential=False,
+        exclude_managed_identity_credential=not mi_present,
+        exclude_shared_token_cache_credential=True,
+        exclude_visual_studio_code_credential=True,
+        exclude_powershell_credential=True,
+        exclude_workload_identity_credential=True,
+        # CLI credential is left enabled for local dev convenience
+    )
 
 def _get_client_and_agent():
     """Create/cached AIProjectClient + Agent lazily and thread-safely."""
@@ -338,7 +307,7 @@ def _get_client_and_agent():
     with _CLIENT_LOCK:
         if _PROJECT_CLIENT and _AGENT_OBJ:
             return _PROJECT_CLIENT, _AGENT_OBJ
-        _CREDENTIAL = _build_agent_credential()
+        _CREDENTIAL = _build_credential()
         client = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=_CREDENTIAL)
         agent = client.agents.get_agent(AGENT_ID)
         _PROJECT_CLIENT, _AGENT_OBJ = client, agent
@@ -382,7 +351,7 @@ async def assist_run(req: Request, body: dict = Body(default={})):
     Invoke the Azure Agent with the given text.
     - One thread per session (context preserved).
     - Poll run status quickly to reduce latency.
-    - Fetch the latest agent message(s) without using unsupported 'after' filter.
+    - IMPORTANT: do NOT pass unsupported params (e.g., 'after') to messages.list().
     """
     text = (body.get("text") or "").strip()
     sid  = body.get("session_id") or req.cookies.get(SESSION_COOKIE)
@@ -413,53 +382,80 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             if sess:
                 sess.agent_thread_id = thread_id
 
-        # Create user message (remember id)
-        user_msg = project.agents.messages.create(
-            thread_id=thread_id, role="user", content=text
-        )
+        # Create user message
+        project.agents.messages.create(thread_id=thread_id, role="user", content=text)
 
-        # Start run and poll quickly (reduce latency)
+        # Start run and poll quickly
         run = project.agents.runs.create(thread_id=thread_id, agent_id=agent.id)
-        deadline = time.time() + 30.0  # 30s safety ceiling
-        while run.status not in ("completed", "failed") and time.time() < deadline:
-            time.sleep(0.25)  # 250ms poll
+        deadline = time.time() + 30.0  # 30s ceiling
+        while getattr(run, "status", None) not in ("completed", "failed") and time.time() < deadline:
+            time.sleep(0.25)
             run = project.agents.runs.get(thread_id=thread_id, run_id=run.id)
 
-        if run.status == "failed":
-            log.error("Agent run failed: %s", run.last_error)
+        if getattr(run, "status", None) == "failed":
+            log.error("Agent run failed: %s", getattr(run, "last_error", None))
             return JSONResponse(
-                {"narration": "Agent run failed.", "briefing_md": f"### Error\n- {run.last_error}"},
+                {"narration": "Agent run failed.", "briefing_md": f"### Error\n- {getattr(run, 'last_error', 'unknown')}"},
                 status_code=500
             )
 
-        # ---- List messages WITHOUT 'after' (SDK 1.1.0 doesn't support it) ----
-        list_kwargs = {"thread_id": thread_id, "limit": 16}
+        # ---------- Fast path: run-scoped outputs (if exposed by this SDK build)
+        try:
+            output_ids = getattr(run, "output_messages", None) or []
+        except Exception:
+            output_ids = []
+
+        if output_ids:
+            get_by_id = getattr(project.agents.messages, "get", None)
+            if callable(get_by_id):
+                for mid in output_ids:
+                    try:
+                        m = project.agents.messages.get(thread_id=thread_id, message_id=mid)
+                    except Exception:
+                        continue
+                    role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
+                    if role_name != "agent":
+                        continue
+                    txt = _extract_text(m)
+                    if txt:
+                        return JSONResponse(_parse_payload(txt))
+
+        # ---------- Fallback: list a small window of recent messages
+        list_kwargs = {"thread_id": thread_id, "limit": 20}
         if ListSortOrder is not None:
-            list_kwargs["order"] = ListSortOrder.ASCENDING  # optional in this SDK
+            list_kwargs["order"] = ListSortOrder.DESCENDING  # newest first
+
         msgs = project.agents.messages.list(**list_kwargs)
 
-        out_payload = None
+        chosen_payload = None
+        newest_agent_any = None
 
-        # Prefer reply from THIS run (if run_id is present)
-        latest_any = None
         for m in msgs:
             role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
             if role_name != "agent":
                 continue
-            if getattr(m, "run_id", None) and str(m.run_id) == str(run.id):
+
+            if newest_agent_any is None:
+                newest_agent_any = m  # first agent msg is newest when DESC
+
+            # Prefer message produced by this run
+            mid_run_id = getattr(m, "run_id", None)
+            if mid_run_id and str(mid_run_id) == str(run.id):
                 txt = _extract_text(m)
                 if txt:
-                    out_payload = _parse_payload(txt)
+                    chosen_payload = _parse_payload(txt)
                     break
-            latest_any = m  # keep newest agent we see in this iteration order
 
-        # Fallback: newest agent message we saw
-        if out_payload is None and latest_any is not None:
-            txt = _extract_text(latest_any)
+        if chosen_payload is None and newest_agent_any is not None:
+            txt = _extract_text(newest_agent_any)
             if txt:
-                out_payload = _parse_payload(txt)
+                chosen_payload = _parse_payload(txt)
 
-        return JSONResponse(out_payload or {"narration": "No agent reply found.", "briefing_md": "", "image": None})
+        return JSONResponse(chosen_payload or {
+            "narration": "No agent reply found.",
+            "briefing_md": "",
+            "image": None
+        })
     except Exception:
         log.exception("assist_run agent SDK error")
         return JSONResponse({
