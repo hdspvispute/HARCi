@@ -1,46 +1,55 @@
-import os, json, time, uuid, random, logging, threading, asyncio
-# Ensure Azure CLI path is set for Windows
-if os.name == "nt":
-    os.environ["AZURE_CLI_PATH"] = r"C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
+# app/main.py
+import os
+import json
+import time
+import uuid
+import random
+import logging
+import threading
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from typing import Optional, Dict, List
-from pathlib import Path
+
+# Ensure Azure CLI path is set for Windows (dev convenience)
+if os.name == "nt":
+    os.environ.setdefault("AZURE_CLI_PATH", r"C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd")
 
 import httpx
-from fastapi import FastAPI, Request, HTTPException, Form
+from fastapi import FastAPI, Request, HTTPException, Form, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from starlette.templating import Jinja2Templates
 from dotenv import load_dotenv
-from fastapi import Body
 
 load_dotenv(override=False)
 
-# === Azure Agents SDK (only used if AGENT_TOKEN present) ===
+# ===== Azure Agents SDK (optional) ============================================
 try:
-    from azure.core.credentials import AccessToken, TokenCredential
-    from azure.ai.projects import AIProjectClient
-    from azure.ai.agents.models import ListSortOrder
+    from azure.core.credentials import AccessToken, TokenCredential  # type: ignore
+    from azure.ai.projects import AIProjectClient  # type: ignore
+    from azure.ai.agents.models import ListSortOrder  # type: ignore
 except Exception:
-    # Keep server bootable even if the SDK isn't installed
-    AccessToken = TokenCredential = AIProjectClient = ListSortOrder = None  # type: ignore
+    # Keep server bootable even if SDK isn't installed or env not set
+    AccessToken = None          # type: ignore
+    TokenCredential = None      # type: ignore
+    AIProjectClient = None      # type: ignore
+    ListSortOrder = None        # type: ignore
 
+# ===== Env ====================================================================
+HITACHI_RED      = os.getenv("HITACHI_RED", "#E60027")
 
-# ==== Env ====
-HITACHI_RED     = os.getenv("HITACHI_RED", "#E60027")
-
-PROJECT_ENDPOINT = os.getenv("PROJECT_ENDPOINT")  # e.g. https://<acct>.services.ai.azure.com/api/projects/<project>
+PROJECT_ENDPOINT = os.getenv("PROJECT_ENDPOINT")   # https://<acct>.services.ai.azure.com/api/projects/<project>
 AGENT_ID         = os.getenv("AGENT_ID")
-AGENT_TOKEN      = os.getenv("AGENT_TOKEN")       # Fallback for local/dev use
+AGENT_TOKEN      = os.getenv("AGENT_TOKEN")        # Optional static token (fast in dev)
 
 SPEECH_REGION    = os.getenv("SPEECH_REGION")
 SPEECH_KEY       = os.getenv("SPEECH_KEY")
-SPEECH_RESOURCES = (os.getenv("SPEECH_RESOURCES") or "").strip()  # optional JSON: [{"region":"eastus2","key":"..."}]
+SPEECH_RESOURCES = (os.getenv("SPEECH_RESOURCES") or "").strip()  # JSON: [{"region":"eastus2","key":"..."}]
 
-# Optional TURN/relay override (if you have a TURN service handy)
-RELAY_URLS      = os.getenv("RELAY_URLS", "")     # comma-separated turn: / turns: urls
+# Optional TURN/relay override (not used server-side if you rely on service relay token)
+RELAY_URLS      = os.getenv("RELAY_URLS", "")
 RELAY_USERNAME  = os.getenv("RELAY_USERNAME", "")
 RELAY_PASSWORD  = os.getenv("RELAY_PASSWORD", "")
 
@@ -50,18 +59,25 @@ SPEECH_LANG      = os.getenv("SPEECH_LANG", "en-US")
 SPEECH_VOICE     = os.getenv("SPEECH_VOICE", "en-US-JennyNeural")
 
 LOG_LEVEL        = os.getenv("LOG_LEVEL", "INFO").upper()
+LOG_FILE         = os.getenv("LOG_FILE")  # If set, logs will also be written to this file (rotating)
 
-logging.basicConfig(level=getattr(logging, LOG_LEVEL, logging.INFO),
-                    format="%(asctime)s %(levelname)s %(name)s :: %(message)s")
+# ===== Logging ================================================================
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s :: %(message)s"
+)
+if LOG_FILE:
+    fh = RotatingFileHandler(LOG_FILE, maxBytes=2_000_000, backupCount=3, encoding="utf-8")
+    fh.setLevel(getattr(logging, LOG_LEVEL, logging.INFO))
+    fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s :: %(message)s"))
+    logging.getLogger().addHandler(fh)
+
 log = logging.getLogger("harci")
-
 
 def agent_config_ok() -> bool:
     return bool(PROJECT_ENDPOINT and AGENT_ID)
 
-
-
-# ==== App and static/templates ====
+# ===== App / Static / Templates ==============================================
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -69,13 +85,13 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
-_app_root = Path(__file__).resolve().parent      # .../harci/app
-_static_dir = _app_root / "static"
-_templates_dir = _app_root / "templates"
-app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
-templates = Jinja2Templates(directory=str(_templates_dir))
+_APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+_STATIC_DIR = os.path.join(_APP_ROOT, "static")
+_TEMPLATES_DIR = os.path.join(_APP_ROOT, "templates")
+app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 
-# ==== Sessions (in-memory MVP) ====
+# ===== Sessions (in-memory MVP) ==============================================
 SESSION_COOKIE = "harci_sid"
 
 class Session(BaseModel):
@@ -97,12 +113,13 @@ def touch_sid(sid: str):
     if s:
         s.last_active = datetime.utcnow()
 
-# ==== Speech resource pool ====
+# ===== Speech resource pool ===================================================
 _pool: List[Dict[str, str]] = []
 _pool_idx = 0
 _pool_lock = threading.Lock()
 
 def _init_pool():
+    """Initialize rotating pool of speech resources (for rate balancing)."""
     global _pool
     _pool = []
     if SPEECH_RESOURCES:
@@ -131,7 +148,7 @@ def _next_speech_resource() -> Dict[str, str]:
         _pool_idx += 1
         return res
 
-# ==== UI config ====
+# ===== UI config ==============================================================
 def ui_cfg():
     return {
         "brandRed": HITACHI_RED,
@@ -145,7 +162,7 @@ def ui_cfg():
 async def api_config():
     return ui_cfg()
 
-# ==== Pages ====
+# ===== Pages ==================================================================
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     sid = request.cookies.get(SESSION_COOKIE)
@@ -170,7 +187,7 @@ async def page_guide(request: Request):
 async def page_ended(request: Request):
     return templates.TemplateResponse("ended.html", {"request": request, "cfg": ui_cfg()})
 
-# ==== Registration + session ====
+# ===== Registration + session =================================================
 @app.post("/api/register")
 async def api_register(name: str = Form(...), company: str = Form(...)):
     name = (name or "").strip()
@@ -178,8 +195,10 @@ async def api_register(name: str = Form(...), company: str = Form(...)):
     if not name or not company:
         raise HTTPException(400, "Name and Company are required")
     sid = new_sid()
-    SESSIONS[sid] = Session(sid=sid, name=name, company=company,
-                            created_at=datetime.utcnow(), last_active=datetime.utcnow(), active=True)
+    SESSIONS[sid] = Session(
+        sid=sid, name=name, company=company,
+        created_at=datetime.utcnow(), last_active=datetime.utcnow(), active=True
+    )
     res = JSONResponse({"ok": True, "sid": sid, "next": "/transition"})
     # Not HttpOnly so client JS can read it if needed; fine for MVP
     res.set_cookie(SESSION_COOKIE, sid, httponly=False, samesite="Lax", max_age=60*60*8, path="/")
@@ -209,10 +228,7 @@ async def api_session_end(body: SidBody):
         touch_sid(sid)
     return {"ok": True}
 
-# ==== Tokens (Speech + Relay) ====
-# -------------------------
-# Tokens (Speech + Relay)
-# -------------------------
+# ===== Tokens (Speech + Relay) ===============================================
 @app.get("/speech-token")
 @app.get("/api/speech/token")  # alias
 async def speech_token():
@@ -236,7 +252,7 @@ async def speech_token():
 
 @app.get("/relay-token")
 async def relay_token():
-    # pick a speech resource just like you do for /speech-token
+    # For Microsoft Avatar WebRTC relay discovery
     res = _next_speech_resource()
     region, key = res["region"], res["key"]
     url = f"https://{region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1"
@@ -244,26 +260,137 @@ async def relay_token():
         async with httpx.AsyncClient(timeout=10) as client:
             r = await client.get(url, headers={"Ocp-Apim-Subscription-Key": key})
         if r.status_code == 200:
-            # Example successful body: { "Urls": ["turn:...", "turns:..."], "Username": "...", "Password": "..." }
             return r.json()
         raise HTTPException(r.status_code, f"Relay token error {r.status_code}: {r.text[:200]}")
     except Exception as e:
         raise HTTPException(502, f"Relay token request failed: {e}")
 
-# ---- Assist proxy with fallback ----
-from fastapi import Body
-from fastapi.responses import JSONResponse
+# ===== Azure Agent client/credential (cached) =================================
+_CLIENT_LOCK = threading.Lock()
+_PROJECT_CLIENT: Optional["AIProjectClient"] = None
+_AGENT_OBJ = None
+_CREDENTIAL = None  # Optional["TokenCredential"]
 
+def _is_aca_environment() -> bool:
+    """Heuristic to detect Azure Container Apps / MI or WI environments."""
+    return any(k in os.environ for k in (
+        "IDENTITY_ENDPOINT", "MSI_ENDPOINT", "IDENTITY_HEADER",
+        "AZURE_FEDERATED_TOKEN_FILE", "AZURE_TENANT_ID"
+    ))
+
+def _build_agent_credential():
+    """
+    Build a DefaultAzureCredential tuned for:
+      - Local Windows/dev: prefer env + Azure CLI; skip MI/WI probes (avoid timeouts)
+      - Azure Container Apps: prefer Managed Identity / Workload Identity; skip CLI
+    Warm a token to avoid first-call latency. Fall back to AGENT_TOKEN if present.
+    """
+    try:
+        from azure.identity import DefaultAzureCredential  # type: ignore
+    except Exception as e:
+        log.warning("azure-identity not installed: %s", e)
+        if AGENT_TOKEN and AccessToken is not None:
+            class StaticTokenCredential:
+                def get_token(self, *scopes, **kwargs):
+                    return AccessToken(AGENT_TOKEN, int(time.time()) + 50 * 60)
+            return StaticTokenCredential()
+        raise
+
+    in_aca = _is_aca_environment()
+    try:
+        cred = DefaultAzureCredential(
+            exclude_managed_identity_credential=not in_aca,
+            exclude_workload_identity_credential=not in_aca,
+            exclude_environment_credential=False,
+            exclude_azure_cli_credential=in_aca,
+            exclude_developer_cli_credential=True,
+            exclude_visual_studio_code_credential=True,
+            exclude_powershell_credential=True,
+            exclude_shared_token_cache_credential=True,
+            exclude_interactive_browser_credential=True,
+        )
+        # Warm once so the first Agents call isn't stuck on token acquisition.
+        cred.get_token("https://cognitiveservices.azure.com/.default")
+        return cred
+    except Exception as e:
+        log.warning("DefaultAzureCredential failed to get token: %s", e)
+
+    # Dev fallback if provided
+    if AGENT_TOKEN and AccessToken is not None:
+        class StaticTokenCredential:
+            def get_token(self, *scopes, **kwargs):
+                return AccessToken(AGENT_TOKEN, int(time.time()) + 50 * 60)
+        return StaticTokenCredential()
+
+    raise RuntimeError("No usable Azure credential found (and no AGENT_TOKEN).")
+
+def _get_client_and_agent():
+    """Create/cached AIProjectClient + Agent lazily and thread-safely."""
+    global _PROJECT_CLIENT, _AGENT_OBJ, _CREDENTIAL
+    if not agent_config_ok():
+        raise HTTPException(500, "Agent not configured")
+    if AIProjectClient is None:
+        raise HTTPException(500, "Azure AI SDK not installed")
+
+    if _PROJECT_CLIENT and _AGENT_OBJ:
+        return _PROJECT_CLIENT, _AGENT_OBJ
+
+    with _CLIENT_LOCK:
+        if _PROJECT_CLIENT and _AGENT_OBJ:
+            return _PROJECT_CLIENT, _AGENT_OBJ
+        _CREDENTIAL = _build_agent_credential()
+        client = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=_CREDENTIAL)
+        agent = client.agents.get_agent(AGENT_ID)
+        _PROJECT_CLIENT, _AGENT_OBJ = client, agent
+        return client, agent
+
+# ===== Helpers for parsing agent replies ======================================
+def _extract_text(msg):
+    """Best-effort to extract a text string from an agent message object."""
+    try:
+        tms = getattr(msg, "text_messages", None) or []
+        if tms:
+            last = tms[-1]
+            val = getattr(getattr(last, "text", None), "value", None) or getattr(last, "text", None)
+            if val:
+                return str(val)
+    except Exception:
+        pass
+    c = getattr(msg, "content", None)
+    if isinstance(c, str) and c.strip():
+        return c.strip()
+    return None
+
+def _parse_payload(s: str):
+    """Parse the agent's JSON-ish payload, with markdown fences tolerated."""
+    s2 = (s or "").strip()
+    if s2.startswith("```"):
+        fence = "```json" if s2.lower().startswith("```json") else "```"
+        s2 = s2[len(fence):].strip()
+        if s2.endswith("```"):
+            s2 = s2[:-3].strip()
+    try:
+        return json.loads(s2)
+    except Exception:
+        # Fall back to narration-only
+        return {"narration": s, "briefing_md": "", "image": None}
+
+# ===== Assist endpoint ========================================================
 @app.post("/assist/run")
 async def assist_run(req: Request, body: dict = Body(default={})):
+    """
+    Invoke the Azure Agent with the given text.
+    - One thread per session (context preserved).
+    - Poll run status quickly to reduce latency.
+    - Fetch the latest agent message(s) without using unsupported 'after' filter.
+    """
     text = (body.get("text") or "").strip()
     sid  = body.get("session_id") or req.cookies.get(SESSION_COOKIE)
 
-    # Fallback: if agent config is missing, return a dummy response
-    if not (PROJECT_ENDPOINT and AGENT_ID):
-        log.warning("assist_run: missing agent config; serving dummy response")
+    # Fallback demo path (if agent not configured or SDK missing)
+    if not agent_config_ok() or AIProjectClient is None:
         topic = text or "Welcome"
-        demo = {
+        return JSONResponse({
             "narration": f"{topic}: Here's what you need to know for the HARC AI Launch.",
             "briefing_md": (
                 f"### {topic}\n"
@@ -271,172 +398,71 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                 f"- Time: 10:00–17:00\n"
                 f"- Tip: Use the quick chips (Agenda, Venue Map, Speakers, Help)\n"
             ),
-            "image": {
-                "url": "/static/assets/venue-map.png",
-                "alt": "Venue map"
-            }
-        }
-        return JSONResponse(demo)
+            "image": {"url": "/static/assets/venue-map.png", "alt": "Venue map"}
+        })
 
-    # Live path: use Azure Agents SDK (sync, but safe for FastAPI threadpool)
     try:
-        # --- Credential resolution (DefaultAzureCredential, else AGENT_TOKEN) ---
-        from azure.identity import DefaultAzureCredential
-        from azure.core.credentials import TokenCredential  # used for StaticTokenCredential
-        cred = None
-        try:
-            cred = DefaultAzureCredential()
-            _ = cred.get_token("https://cognitiveservices.azure.com/.default")
-        except Exception as e:
-            log.warning("DefaultAzureCredential unavailable: %s", e)
-            cred = None
-        if not cred and AGENT_TOKEN:
-            class StaticTokenCredential(TokenCredential):
-                def get_token(self, *scopes, **kwargs):
-                    from azure.core.credentials import AccessToken
-                    token = AGENT_TOKEN
-                    return AccessToken(token, int(time.time()) + 50 * 60)
-            cred = StaticTokenCredential()
-        if not cred:
-            raise Exception("No valid Azure credential or AGENT_TOKEN found.")
+        project, agent = _get_client_and_agent()
 
-        # --- Project/Agent bootstrap ---
-        from azure.ai.projects import AIProjectClient
-        project = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=cred)
-        agent = project.agents.get_agent(AGENT_ID)
-
-        # --- Session/thread management ---
+        # Thread per session
         sess = SESSIONS.get(sid) if sid else None
-        thread_id = None
-        if sess:
-            thread_id = sess.agent_thread_id or ""
+        thread_id = getattr(sess, "agent_thread_id", None) or ""
         if not thread_id:
             thread = project.agents.threads.create()
             thread_id = thread.id
             if sess:
                 sess.agent_thread_id = thread_id
 
-        # --- Post user message and run the agent ---
-        user_msg = project.agents.messages.create(thread_id=thread_id, role="user", content=text)
-        run = project.agents.runs.create_and_process(thread_id=thread_id, agent_id=agent.id)
+        # Create user message (remember id)
+        user_msg = project.agents.messages.create(
+            thread_id=thread_id, role="user", content=text
+        )
 
-        # --- Poll until the run is done (avoid returning too early) ---
-        max_wait = 30  # seconds
-        poll_interval = 1
-        waited = 0
-        while run.status not in ("completed", "failed") and waited < max_wait:
-            time.sleep(poll_interval)
-            waited += poll_interval
+        # Start run and poll quickly (reduce latency)
+        run = project.agents.runs.create(thread_id=thread_id, agent_id=agent.id)
+        deadline = time.time() + 30.0  # 30s safety ceiling
+        while run.status not in ("completed", "failed") and time.time() < deadline:
+            time.sleep(0.25)  # 250ms poll
             run = project.agents.runs.get(thread_id=thread_id, run_id=run.id)
 
         if run.status == "failed":
             log.error("Agent run failed: %s", run.last_error)
-            return JSONResponse({
-                "narration": "Agent run failed.",
-                "briefing_md": f"### Error\n- {run.last_error}",
-            }, status_code=500)
+            return JSONResponse(
+                {"narration": "Agent run failed.", "briefing_md": f"### Error\n- {run.last_error}"},
+                status_code=500
+            )
 
-        # ---------- Robust reply selection (no ordering assumptions) ----------
-        # Helpers to extract text and parse JSON (with ```json fences tolerated)
-        def _extract_text(msg):
-            # Try text_messages[-1].text.value, then .text, then .content
-            try:
-                tms = getattr(msg, "text_messages", None) or []
-                if tms:
-                    last = tms[-1]
-                    val = getattr(getattr(last, "text", None), "value", None)
-                    if not val:
-                        val = getattr(last, "text", None)
-                    if val:
-                        return str(val)
-            except Exception:
-                pass
-            c = getattr(msg, "content", None)
-            if isinstance(c, str) and c.strip():
-                return c.strip()
-            return None
+        # ---- List messages WITHOUT 'after' (SDK 1.1.0 doesn't support it) ----
+        list_kwargs = {"thread_id": thread_id, "limit": 16}
+        if ListSortOrder is not None:
+            list_kwargs["order"] = ListSortOrder.ASCENDING  # optional in this SDK
+        msgs = project.agents.messages.list(**list_kwargs)
 
-        def _parse_payload(s: str):
-            s2 = (s or "").strip()
-            if s2.startswith("```"):
-                fence = "```json" if s2.lower().startswith("```json") else "```"
-                s2 = s2[len(fence):].strip()
-                if s2.endswith("```"):
-                    s2 = s2[:-3].strip()
-            try:
-                return json.loads(s2)
-            except Exception:
-                return {"narration": s, "briefing_md": "", "image": None}
+        out_payload = None
 
-        # Try to use run-scoped outputs first (if available on this SDK build)
-        try:
-            output_ids = getattr(run, "output_messages", None) or []
-        except Exception:
-            output_ids = []
-        if output_ids:
-            # If the SDK exposes message IDs for this run, fetch those exactly.
-            try:
-                # Some SDKs offer a get-by-id; if not, we’ll fall back to list().
-                get_by_id = getattr(project.agents.messages, "get", None)
-                if callable(get_by_id):
-                    for mid in output_ids:
-                        try:
-                            m = project.agents.messages.get(thread_id=thread_id, message_id=mid)
-                        except Exception:
-                            continue
-                        role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
-                        if role_name != "agent":
-                            continue
-                        txt = _extract_text(m)
-                        if txt:
-                            return JSONResponse(_parse_payload(txt))
-            except Exception:
-                pass  # fall through to list-based selection
-
-        # List ALL messages and choose:
-        # 1) the newest *agent* message whose run_id == current run.id (if present)
-        # 2) else the newest *agent* message by iteration order (works for asc/desc)
-        msgs = project.agents.messages.list(thread_id=thread_id)
-
-        latest_same_run = None
+        # Prefer reply from THIS run (if run_id is present)
         latest_any = None
-        idx = 0
         for m in msgs:
-            idx += 1
             role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
             if role_name != "agent":
                 continue
-            # Prefer messages produced by this run
-            mid_run_id = getattr(m, "run_id", None)
-            if mid_run_id and str(mid_run_id) == str(run.id):
-                latest_same_run = (idx, m)
-            # Always track latest agent we see (last wins regardless of order)
-            latest_any = (idx, m)
+            if getattr(m, "run_id", None) and str(m.run_id) == str(run.id):
+                txt = _extract_text(m)
+                if txt:
+                    out_payload = _parse_payload(txt)
+                    break
+            latest_any = m  # keep newest agent we see in this iteration order
 
-        chosen = None
-        if latest_same_run is not None:
-            chosen = latest_same_run[1]
-        elif latest_any is not None:
-            chosen = latest_any[1]
-
-        if chosen is not None:
-            txt = _extract_text(chosen)
+        # Fallback: newest agent message we saw
+        if out_payload is None and latest_any is not None:
+            txt = _extract_text(latest_any)
             if txt:
-                return JSONResponse(_parse_payload(txt))
+                out_payload = _parse_payload(txt)
 
-        # No agent reply found; return a neutral response
-        return JSONResponse({
-            "narration": "No agent reply found.",
-            "briefing_md": "",
-            "image": None
-        }, status_code=200)
-
-    except Exception as e:
+        return JSONResponse(out_payload or {"narration": "No agent reply found.", "briefing_md": "", "image": None})
+    except Exception:
         log.exception("assist_run agent SDK error")
-        return JSONResponse(
-            {
-                "narration": "I couldn’t reach the agent service just now. Here’s a quick brief.",
-                "briefing_md": f"### {text or 'Info'}\n- The service is temporarily unavailable.\n- Please try again in a moment.",
-            },
-            status_code=200
-        )
+        return JSONResponse({
+            "narration": "I couldn’t reach the agent service just now. Here’s a quick brief.",
+            "briefing_md": f"### {text or 'Info'}\n- The service is temporarily unavailable.\n- Please try again in a moment.",
+        }, status_code=200)

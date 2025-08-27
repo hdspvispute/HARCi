@@ -1,39 +1,80 @@
-// avatar_rtc.js  (replace your current startSession/speak with this version)
-
+// avatar_rtc.js
 (function () {
-  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('avatar') : console;
+  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child)
+    ? window.HARCI_LOG.child('avatar')
+    : console;
 
-  async function fetchCfgAndTokens() {
-    const [cfg, st, rt] = await Promise.all([
-      fetch('/api/config').then(r => r.json()),
-      fetch('/speech-token').then(r => r.json()),
-      fetch('/relay-token').then(r => r.json()).catch(() => ({})),
-    ]);
-    return { cfg, st, rt };
+  // ---- Safe UI helpers (never assume globals) --------------------------------
+  function setUIStatus(s) {
+    try {
+      if (window.UI && typeof window.UI.setStatus === 'function') {
+        window.UI.setStatus(s);
+      } else if (typeof window.setStatus === 'function') {
+        window.setStatus(s);
+      } else {
+        // last-resort: write into #status / #statusText if present
+        const el = document.getElementById('statusText') || document.getElementById('status');
+        if (el) el.textContent = s;
+      }
+    } catch {}
   }
 
+  // ---- Audio unlock (idempotent) --------------------------------------------
+  let _audioCtx;
   async function unlockAudioPlayback() {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
-      const ctx = new Ctx(); await ctx.resume();
-      const osc = ctx.createOscillator(), gain = ctx.createGain();
-      gain.gain.value = 0; osc.connect(gain).connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + 0.02);
+      if (!_audioCtx && Ctx) _audioCtx = new Ctx();
+      if (!_audioCtx) return;
+      await _audioCtx.resume();
+
+      // short, silent blip to satisfy autoplay policies
+      const osc = _audioCtx.createOscillator();
+      const gain = _audioCtx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain).connect(_audioCtx.destination);
+      osc.start();
+      osc.stop(_audioCtx.currentTime + 0.02);
       LOG.info('[avatar] Audio unlocked');
     } catch (e) {
       LOG.warn('[avatar] Audio unlock failed (will rely on user gesture):', e);
     }
   }
 
-  let synth = null;
-  let pc = null;
-
+  // ---- State ----------------------------------------------------------------
+  let synth = null;                 // SpeechSDK.AvatarSynthesizer
+  let pc = null;                    // RTCPeerConnection
   let sessionActive = false;
+  let speakTicket = 0;              // preemption token for overlapping speaks
+
+  // ---- Helpers ---------------------------------------------------------------
+  function hasTurn(iceServers) {
+    return (iceServers || []).some(s => {
+      const u = s && (s.urls || s.url);
+      const list = Array.isArray(u) ? u : [u];
+      return list.filter(Boolean).some(x => /^(turns?:)/i.test(String(x)));
+    });
+  }
+
+  async function fetchCfgAndTokens() {
+    const [cfg, st, rt] = await Promise.all([
+      window.API.config(),
+      window.API.speechToken(),
+      window.API.relayToken().catch(() => ({})), // optional
+    ]);
+    return { cfg, st, rt };
+  }
+
+  // ---- Public API ------------------------------------------------------------
   async function startSession() {
-    if (sessionActive) return;
+    if (sessionActive) {
+      LOG.info('[avatar] session already active');
+      return;
+    }
     sessionActive = true;
     const startBtn = document.getElementById('btnStartSession');
     if (startBtn) startBtn.disabled = true;
+
     try {
       const S = window.SpeechSDK;
       if (!S) throw new Error('SpeechSDK not loaded');
@@ -42,53 +83,47 @@
 
       const { cfg, st, rt } = await fetchCfgAndTokens();
 
+      // Speech config
       const sc = S.SpeechConfig.fromAuthorizationToken(st.token, st.region);
       sc.speechSynthesisLanguage  = cfg.speechLang  || 'en-US';
       sc.speechSynthesisVoiceName = cfg.speechVoice || 'en-US-JennyNeural';
 
-      // Optional: video profile
+      // Avatar config
       const vf    = new S.AvatarVideoFormat('h264', 1_500_000, 640, 360);
       const avcfg = new S.AvatarConfig(cfg.avatarId || 'lisa', cfg.avatarStyle || 'casual-sitting', vf);
 
       if (rt?.Urls?.length) {
-        avcfg.remoteIceServers = [{ urls: rt.Urls, username: rt.Username, credential: rt.Password }];
+        avcfg.remoteIceServers = [{
+          urls: rt.Urls,
+          username: rt.Username,
+          credential: rt.Password
+        }];
       } else {
-        LOG.warn('[avatar] /relay-token is empty — TURN is required for reliable A/V');
+        LOG.warn('[avatar] /relay-token empty; TURN strongly recommended for reliability');
       }
-
-      synth = new S.AvatarSynthesizer(sc, avcfg);
-
-      // ---- attach the same events that helped in console ----
-      synth.synthesisStarted   = () => LOG.info('[avatar] synthesisStarted');
-      synth.synthesizing       = () => LOG.info('[avatar] synthesizing…');
-      synth.synthesisCompleted = (s, e) => LOG.info('[avatar] synthesisCompleted', e?.result?.reason);
-      synth.synthesisCanceled  = (s, e) => LOG.error('[avatar] synthesisCanceled:', e?.errorDetails || e);
-      synth.visemeReceived     = (s, e) => LOG.info('[avatar] viseme', e?.visemeId);
-      synth.bookmarkReached    = (s, e) => LOG.info('[avatar] bookmark', e?.text);
 
       const video = document.getElementById('remoteVideo');
       const audio = document.getElementById('remoteAudio');
       if (!video || !audio) throw new Error('Missing #remoteVideo/#remoteAudio');
 
-      // PeerConnection (force relay to use TURN when provided)
+      // Build RTCPeerConnection, prefer TURN if present; otherwise allow STUN.
       const iceServers = (avcfg.remoteIceServers ?? []).length
         ? avcfg.remoteIceServers
         : [{ urls: ['stun:stun.l.google.com:19302'] }];
 
-      pc = new RTCPeerConnection({ iceServers, iceTransportPolicy: 'relay' });
+      pc = new RTCPeerConnection({
+        iceServers,
+        // if TURN present, relay-only gives more predictable behavior through strict networks
+        iceTransportPolicy: hasTurn(iceServers) ? 'relay' : 'all',
+      });
 
-      // --- HARCi drop-in: TURN presence logging (no behavior change) ---
+      // visibility logs
       try {
-        const cfg = pc.getConfiguration ? pc.getConfiguration() : { iceServers: [] };
-        const servers = cfg.iceServers || [];
-        const haveTurn = servers.some(s => /(turn:|turns:)/i.test(String(s.urls || s.url || '')));
-        console.info('[HARCi] TURN available:', haveTurn, 'policy=', cfg.iceTransportPolicy || 'default');
-        if (!haveTurn && (cfg.iceTransportPolicy === 'relay')) {
-          console.warn('[HARCi] policy=relay but no TURN servers present; expect connection failures if relay required.');
-        }
-      } catch (e) { console.debug('[HARCi] TURN check skipped', e); }
+        const cfgNow = pc.getConfiguration ? pc.getConfiguration() : { iceServers: [] };
+        LOG.info('[HARCi] TURN available:', hasTurn(cfgNow.iceServers), 'policy=', cfgNow.iceTransportPolicy || 'default');
+      } catch {}
 
-      // Receive-only (explicit)
+      // Receive-only
       pc.addTransceiver('audio', { direction: 'recvonly' });
       pc.addTransceiver('video', { direction: 'recvonly' });
 
@@ -102,18 +137,29 @@
           video.srcObject = stream;
           video.muted = true;
           video.playsInline = true;
-          video.play?.().catch(()=>{});
+          video.play?.().catch(() => {});
         }
         if (ev.track.kind === 'audio') {
           audio.srcObject = stream;
-          audio.muted = false;        // make sure we hear it
+          audio.muted = false;
           audio.volume = 1.0;
           audio.playsInline = true;
-          audio.play?.().catch(()=>{});
+          audio.play?.().catch(() => {});
         }
       };
 
-      // Newer SDK API; fallbacks included
+      // Synthesizer
+      synth = new S.AvatarSynthesizer(sc, avcfg);
+
+      // Diagnostics (non-intrusive)
+      synth.synthesisStarted   = () => LOG.info('[avatar] synthesisStarted');
+      synth.synthesizing       = () => LOG.info('[avatar] synthesizing…');
+      synth.synthesisCompleted = (s, e) => LOG.info('[avatar] synthesisCompleted', e?.result?.reason);
+      synth.synthesisCanceled  = (s, e) => LOG.error('[avatar] synthesisCanceled:', e?.errorDetails || e);
+      synth.visemeReceived     = (s, e) => LOG.info('[avatar] viseme', e?.visemeId);
+      synth.bookmarkReached    = (s, e) => LOG.info('[avatar] bookmark', e?.text);
+
+      // Start avatar (support multiple SDK shapes)
       if (typeof synth.startAvatarAsync === 'function') {
         await synth.startAvatarAsync(pc);
       } else if (typeof synth.enableWebrtc === 'function' && typeof synth.createAvatarWebRTCConnection === 'function') {
@@ -127,14 +173,14 @@
       }
 
       LOG.info('[avatar] session started');
-      setTimeout(() => {
-        if (startBtn) startBtn.disabled = false;
-      }, 1000);
+      setUIStatus('Ready');
     } catch (err) {
       LOG.error('[avatar] session start error:', err);
-      setStatus('Failed to start session');
-      if (startBtn) startBtn.disabled = false;
+      setUIStatus('Failed to start');
       sessionActive = false;
+      throw err;
+    } finally {
+      if (startBtn) setTimeout(() => { startBtn.disabled = false; }, 800);
     }
   }
 
@@ -142,90 +188,53 @@
     if (!synth) throw new Error('Avatar not started');
     const t = String(text || '').trim();
     if (!t) return;
-    LOG.info('[avatar] speak: attempting to speak:', t);
+
+    // Preempt: stop any current speech before starting a new one
+    const my = ++speakTicket;
+    try { await stopSpeaking(); } catch {}
+
+    LOG.info('[avatar] speak: attempting:', t);
     try {
-      await new Promise((res, rej) => synth.speakTextAsync(t, res, rej));
-      LOG.info('[avatar] speak: completed:', t);
+      // Some SDK builds return a promise; others require callbacks.
+      await new Promise((resolve, reject) => {
+        if (!synth) return resolve(); // already torn down
+        const maybe = synth.speakTextAsync(t, resolve, reject);
+        // if the SDK returns a thenable, prefer it
+        if (maybe && typeof maybe.then === 'function') {
+          maybe.then(resolve).catch(reject);
+        }
+      });
+      if (my !== speakTicket) {
+        LOG.debug('[avatar] speak superseded');
+        return;
+      }
+      LOG.info('[avatar] speak: completed');
     } catch (err) {
+      if (my !== speakTicket) return; // superseded; ignore
       LOG.error('[avatar] speak: error:', err);
     }
   }
-
 
   async function stopSpeaking() {
     try { await synth?.stopSpeakingAsync?.(); } catch {}
   }
 
   async function end() {
+    try { await stopSpeaking(); } catch {}
     try { await synth?.stopAvatarAsync?.(); } catch {}
+    try { pc?.getSenders?.().forEach(s => { try { s.track?.stop?.(); } catch {} }); } catch {}
+    try { pc?.getReceivers?.().forEach(r => { try { r.track?.stop?.(); } catch {} }); } catch {}
     try { pc?.close?.(); } catch {}
-    synth = null; pc = null;
+
+    synth = null;
+    pc = null;
+    sessionActive = false;
+    LOG.info('[avatar] session ended');
   }
 
-
-  // --- Hold to Talk logic ---
-  let micStream = null;
-  let mediaRecorder = null;
-  let recordedChunks = [];
-
-  // Start mic stream when session starts
-  const origStartSession = startSession;
-  startSession = async function() {
-    await origStartSession.apply(this, arguments);
-    try {
-      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      LOG.info('[avatar] mic stream started');
-      // Attach Hold to Talk listeners only after mic is ready and session started
-      const holdBtn = document.getElementById('btnHoldMic');
-      if (holdBtn && !holdBtn._listenersAttached) {
-        holdBtn.addEventListener('mousedown', startCapturingSpeech);
-        holdBtn.addEventListener('touchstart', startCapturingSpeech);
-        holdBtn.addEventListener('mouseup', stopCapturingSpeech);
-        holdBtn.addEventListener('touchend', stopCapturingSpeech);
-        holdBtn._listenersAttached = true;
-      }
-    } catch (err) {
-      LOG.error('[avatar] mic stream error:', err);
-    }
-  };
-
-  // Remove DOMContentLoaded listener for Hold to Talk, now attached after session starts
-
-  function startCapturingSpeech() {
-    if (!micStream) return;
-    recordedChunks = [];
-    mediaRecorder = new MediaRecorder(micStream);
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-    mediaRecorder.onstart = () => {
-      setStatus('Captioning…');
-    };
-    mediaRecorder.start();
-  }
-
-  function stopCapturingSpeech() {
-    if (!mediaRecorder || mediaRecorder.state !== 'recording') return;
-    mediaRecorder.onstop = async () => {
-      setStatus('Submitting…');
-      const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-      await submitSpeechToAvatar(audioBlob);
-      setStatus('Ready');
-    };
-    mediaRecorder.stop();
-  }
-
-  async function submitSpeechToAvatar(audioBlob) {
-    // Implement API call to backend/avatar here
-    // Example:
-    // const formData = new FormData();
-    // formData.append('audio', audioBlob);
-    // const resp = await fetch('/api/avatar/speech', { method: 'POST', body: formData });
-    // const data = await resp.json();
-    // showAvatarResponse(data);
-    LOG.info('[avatar] speech submitted');
-    // Optionally show a response in the UI here
-  }
+  // NOTE: We intentionally removed MediaRecorder / mic capture here.
+  // Hold-to-talk and STT are handled solely by stt.js to avoid duplicate
+  // microphone access and the "setStatus is not defined" errors you saw.
 
   window.HARCI_AVATAR = {
     startSession,

@@ -3,6 +3,11 @@
 
 {% block content %}
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <!-- Top left logo -->
+  <div class="absolute left-6 top-6 z-50">
+    <img src="{{ url_for('static', path='assets/hitachi_logo.png') }}" alt="Hitachi Logo" class="h-10 w-auto drop-shadow-lg">
+  </div>
+
   <!-- Left: Avatar, controls -->
   <section class="space-y-4">
     <div class="relative rounded-2xl overflow-hidden border border-white/10 bg-black">
@@ -12,7 +17,8 @@
       <div class="absolute left-3 top-3 flex items-center gap-2">
         <span class="inline-flex items-center rounded-full bg-neutral-900/70 px-3 py-1 text-xs border border-white/10">
           <span class="h-2 w-2 rounded-full bg-[var(--brand-red)] mr-2"></span>
-          <span id="status">Tap start</span>
+          <!-- Use statusText id to align with UI.setStatus shim -->
+          <span id="statusText">Tap start</span>
         </span>
       </div>
     </div>
@@ -66,11 +72,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-  <!-- Microsoft Cognitive Services Speech SDK (must include on Guide) -->
-  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
-
-  <!-- Avatar + STT + Mic earcons -->
-  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=10"></script>
-  <script src="{{ url_for('static', path='js/stt.js') }}?v=10"></script>
-  <script src="{{ url_for('static', path='js/earcon.js') }}?v=10"></script>
+  {# Scripts are loaded globally in _base.html (deferred) to prevent duplicates and race conditions. #}
 {% endblock %}
