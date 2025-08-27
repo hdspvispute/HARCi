@@ -1,4 +1,5 @@
-// ui_bindings.js
+// ui_bindings.js — DROP-IN (unified status, safe STT lifecycle, avatar-friendly)
+// Keeps existing routes/IDs and behavior, but fixes "stuck Speaking" loops and listener leaks.
 (() => {
   'use strict';
   const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('ui') : console;
@@ -6,12 +7,32 @@
   const $  = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // ---- Status helper --------------------------------------------------------
-  function setStatus(msg) {
-    const el = document.getElementById('status');
-    if (el) el.textContent = msg;
-    else LOG.info('[ui] status:', msg);
-  }
+  // ---- Unified Status + Mic helpers (backward compatible) -------------------
+  (function initUiHelpers() {
+    function updateStatusDom(msg) {
+      let touched = false;
+      const el1 = document.getElementById('status');      // legacy target
+      if (el1) { el1.textContent = msg; touched = true; }
+      const el2 = document.getElementById('statusText');  // new target
+      if (el2) { el2.textContent = msg; touched = true; }
+      try { document.documentElement.dataset.harciStatus = String(msg || '').toLowerCase(); } catch {}
+      if (!touched) LOG.info('[ui] status:', msg);
+    }
+
+    // Public UI API
+    window.UI = window.UI || {};
+    UI.setStatus = (s) => { UI.status = s; updateStatusDom(s); };
+    UI.setMicEnabled = (on) => {
+      const b = document.getElementById('btnHoldMic');
+      if (!b) return;
+      b.disabled = !on;
+      b.classList.toggle('is-disabled', !on);
+      b.setAttribute('aria-disabled', (!on).toString());
+    };
+
+    // Back-compat: keep global setStatus working by delegating
+    window.setStatus = (msg) => UI.setStatus(msg);
+  })();
 
   // ---- MD-lite sanitizer ----------------------------------------------------
   function sanitize(md){
@@ -70,6 +91,26 @@
     });
   }
 
+  // ---- Safe speak with timeout (prevents "stuck Speaking") ------------------
+  async function speakSafe(text, opts = {}) {
+    try {
+      UI.setStatus('Speaking…');
+      UI.setMicEnabled(false);
+      const p = window.HARCI_AVATAR?.speak?.(text, opts);
+      // If lifecycle patch is present, speak() resolves on completion.
+      // If not, we still avoid deadlock by timing out.
+      await Promise.race([
+        p,
+        new Promise(res => setTimeout(res, 12000)) // 12s safety
+      ]);
+    } catch (e) {
+      LOG.error('[ui] speakSafe error', e);
+    } finally {
+      UI.setStatus('Ready');
+      UI.setMicEnabled(true);
+    }
+  }
+
   // ---- Guide page -----------------------------------------------------------
   async function onGuidePage(){
     await window.bootstrapConfig();
@@ -77,7 +118,7 @@
     const video = $('#remoteVideo');
     const audio = $('#remoteAudio');
     LOG.info('[ui] guide: video/audio elements', { video: !!video, audio: !!audio });
-    setStatus('Tap start');
+    UI.setStatus('Tap start');
 
     // Prepare audio element so it can play programmatically after gesture
     function primeAudioEl() {
@@ -86,8 +127,7 @@
         audio.muted = false;
         audio.volume = 1.0;
         audio.playsInline = true;
-        // Some browsers need a tiny, empty stream to allow .play() pre-start
-        if (!audio.srcObject) audio.srcObject = new MediaStream();
+        if (!audio.srcObject) audio.srcObject = new MediaStream(); // allow .play() on some browsers
         audio.play?.().catch(()=>{});
       } catch {}
     }
@@ -96,7 +136,9 @@
     const startBtn = document.getElementById('btnStartSession') || document.body;
     startBtn.addEventListener('click', async () => {
       try {
-        setStatus('Starting…');
+        UI.setStatus('Starting…');
+        UI.setMicEnabled(false);
+
         LOG.info('[ui] avatar: unlocking audio');
         await window.HARCI_AVATAR.ensureAudioUnlocked(); // user-gesture bound
         primeAudioEl();
@@ -104,15 +146,16 @@
         LOG.info('[ui] avatar: starting session');
         await window.HARCI_AVATAR.startSession();
 
-        // Kick: some SDK builds push remote tracks only after first speak
-        setStatus('Ready');
-        LOG.info('[ui] avatar: ready, about to speak welcome');
-        // Speak welcome message
-        await window.HARCI_AVATAR.speak('Welcome to the event! I am your HARCi avatar guide. I can answer questions about the agenda, venue, speakers, and help you navigate the event. Just tap a quick chip or hold the mic to talk to me.');
-        LOG.info('[ui] avatar: finished speaking welcome');
-        } catch (e) {
+        UI.setStatus('Ready');
+        LOG.info('[ui] avatar: ready, speak welcome');
+
+        await speakSafe(
+          'Welcome to the event! I am your HARCi avatar guide. I can answer questions about the agenda, venue, speakers, and help you navigate the event. Just tap a quick chip or hold the mic to talk to me.'
+        );
+      } catch (e) {
         LOG.error('[ui] avatar start error', e);
-        setStatus('Retrying…');
+        UI.setStatus('Retrying…');
+        UI.setMicEnabled(true);
       }
     }, { once: true });
 
@@ -121,68 +164,114 @@
     async function runPrompt(p){
       try {
         chips.forEach(c=> c.disabled = true);
-        setStatus('Thinking…');
+        UI.setStatus('Thinking…');
+        UI.setMicEnabled(false);
 
-        // Stop any ongoing avatar speech and clear UI
-        await window.HARCI_AVATAR.stopSpeaking();
-        $('#caption') && ($('#caption').textContent = '');
-        const brief = $('#briefing');
-        if (brief) brief.innerHTML = '';
+        // Stop any ongoing avatar speech
+        try {
+          if (typeof window.HARCI_AVATAR?.stopSpeaking === 'function') {
+            await window.HARCI_AVATAR.stopSpeaking();
+          } else {
+            // Fallback if lifecycle patch exposes HARCI_SPEECH.stop()
+            window.HARCI_SPEECH?.stop?.('chip');
+          }
+        } catch {}
+
+        // Clear UI
+        const cap = $('#caption'); if (cap) cap.textContent = '';
+        const brief = $('#briefing'); if (brief) brief.innerHTML = '';
 
         // Ask agent
         const res = await (window.ask ? window.ask(p) : API.assistRun(p));
 
         // Render + speak
         applyResponse(res);
-        setStatus('Speaking…');
-        await window.HARCI_AVATAR.speak(res.narration || 'Here is the information.');
-        setStatus('Ready');
+        await speakSafe(res?.narration || 'Here is the information.');
       } catch (e) {
         LOG.error('[ui] chip error', e);
-        setStatus('Error');
+        UI.setStatus('Error');
       } finally {
         chips.forEach(c=> c.disabled = false);
+        UI.setMicEnabled(true);
       }
     }
     chips.forEach(btn => btn.addEventListener('click', ()=> runPrompt(btn.dataset.prompt)));
 
-    // Mic press & hold (guard for modules)
+    // Mic press & hold — single partial listener (no leaks), guard by flag
     const hold = $('#btnHoldMic');
-    let partialListener = null;
+    let isHolding = false;
+
+    // Attach a single partial listener once; update caption only while holding
+    if (window.HARCI_STT && typeof window.HARCI_STT.on === 'function') {
+      window.HARCI_STT.on('partial', ({ text }) => {
+        if (!isHolding) return;
+        const cap = $('#caption'); if (cap) cap.textContent = text || '…';
+      });
+      // Optional: if STT emits 'final', you can update too
+      if (typeof window.HARCI_STT.on === 'function') {
+        window.HARCI_STT.on('final', ({ text }) => {
+          if (!isHolding) return;
+          const cap = $('#caption'); if (cap) cap.textContent = text || '';
+        });
+      }
+    }
+
     const press = async (e) => {
       e.preventDefault();
       try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch {}
       try { window.EARCON?.start?.(); } catch {}
-      $('#caption') && ($('#caption').textContent = 'Listening…');
-      // Attach partial listener only while holding
-      partialListener = ({ text }) => { $('#caption') && ($('#caption').textContent = text); };
-      window.HARCI_STT.on('partial', partialListener);
-      await window.HARCI_STT.beginHold();
-      hold.classList.add('ring-2','ring-white/50');
+      const cap = $('#caption'); if (cap) cap.textContent = 'Listening…';
+
+      // If avatar is speaking, preempt so user can talk immediately
+      try {
+        if (window.HARCI_SPEECH?.speaking) window.HARCI_SPEECH.stop?.('ptt');
+        if (typeof window.HARCI_AVATAR?.stopSpeaking === 'function') {
+          await window.HARCI_AVATAR.stopSpeaking();
+        }
+      } catch {}
+
+      isHolding = true;
+      UI.setStatus('Listening');
+      UI.setMicEnabled(false);
+
+      try {
+        await window.HARCI_STT.beginHold();
+        hold?.classList.add('ring-2','ring-white/50');
+      } catch (err) {
+        LOG.warn('[ui] beginHold failed', err);
+        isHolding = false;
+        UI.setStatus('Ready');
+        UI.setMicEnabled(true);
+      }
     };
+
     const release = async (e) => {
       e.preventDefault();
-      hold.classList.remove('ring-2','ring-white/50');
+      hold?.classList.remove('ring-2','ring-white/50');
       try { window.EARCON?.stop?.(); } catch {}
+
       const { text } = await window.HARCI_STT.endHold();
-      // Remove partial listener after release
-      if (partialListener) {
-        // Remove all listeners for 'partial' (simple approach)
-        window.HARCI_STT.listeners = window.HARCI_STT.listeners || {};
-        window.HARCI_STT.listeners['partial'] = [];
-        partialListener = null;
-      }
-      if (!text) { $('#caption') && ($('#caption').textContent = ''); return; }
+      isHolding = false;
+      UI.setStatus('Processing…');
+
+      if (!text) { const cap = $('#caption'); if (cap) cap.textContent = ''; UI.setStatus('Ready'); UI.setMicEnabled(true); return; }
+
       // Show recognized speech before sending to agent
-      $('#caption') && ($('#caption').textContent = text);
-      runPrompt(text);
+      const cap = $('#caption'); if (cap) cap.textContent = text;
+
       // Ensure askInput is editable
       const askInput = document.getElementById('askInput');
       if (askInput) {
         askInput.removeAttribute('disabled');
         askInput.removeAttribute('readonly');
       }
+
+      // Run prompt
+      await runPrompt(text);
+      UI.setStatus('Ready');
+      UI.setMicEnabled(true);
     };
+
     if (hold) {
       hold.addEventListener('pointerdown', press);
       hold.addEventListener('pointerup', release);

@@ -14,6 +14,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from starlette.templating import Jinja2Templates
 from dotenv import load_dotenv
+from fastapi import Body
 
 load_dotenv(override=False)
 
@@ -58,102 +59,7 @@ log = logging.getLogger("harci")
 def agent_config_ok() -> bool:
     return bool(PROJECT_ENDPOINT and AGENT_ID)
 
-def _extract_json_payload(text: str) -> Optional[Dict]:
-    """
-    Tries to pull a JSON object out of plain text or fenced code blocks.
-    Accepts ```json ...``` or bare { ... }.
-    """
-    if not text:
-        return None
-    # fenced block first
-    m = re.search(r"```(?:json)?\s*({[\s\S]*?})\s*```", text, re.IGNORECASE)
-    if not m:
-        # fallback: first top-level object
-        m = re.search(r"({[\s\S]*})", text)
-    if not m:
-        return None
-    try:
-        return json.loads(m.group(1))
-    except Exception:
-        return None
 
-def _dummy_agent_response(user_text: str) -> Dict:
-    """Deterministic mock shaped exactly like the real agent payload."""
-    t = (user_text or "").lower()
-    base = {
-        "narration": "",
-        "briefing_md": "",
-        "image": None
-    }
-
-    if "agenda" in t:
-        base["narration"] = "Here’s today’s agenda. The keynote starts at 10:00 in Hall A."
-        base["briefing_md"] = (
-            "### Agenda (Today)\n"
-            "- **09:30** Check-in & Badge Pickup\n"
-            "- **10:00** Keynote — Hall A\n"
-            "- **11:15** Breakout Sessions\n"
-            "- **13:00** Lunch — Expo Foyer\n"
-            "- **14:00** Demos & Booths\n"
-        )
-        base["image"] = {
-            "url": "/static/assets/agenda.png",   # place an image here if you have one
-            "alt": "Agenda overview"
-        }
-        return base
-
-    if "map" in t or "venue" in t or "room" in t:
-        base["narration"] = "I’ve shown the venue map. Tap a room for directions."
-        base["briefing_md"] = (
-            "### Venue Map\n"
-            "You’re here: **Entrance Lobby**  \n"
-            "- **Hall A** — Keynote  \n"
-            "- **Hall B** — Breakouts  \n"
-            "- **Expo Foyer** — Lunch & Demos  \n"
-        )
-        base["image"] = {
-            "url": "/static/assets/venue_map.png",
-            "alt": "Venue map with halls and foyer"
-        }
-        return base
-
-    if "speaker" in t or "speakers" in t:
-        base["narration"] = "Today’s speakers include Akira Tanaka from Hitachi and guest leaders."
-        base["briefing_md"] = (
-            "### Speakers (Highlights)\n"
-            "- **Akira Tanaka** — Hitachi, AI Strategy\n"
-            "- **Priya Rao** — Smart Infrastructure\n"
-            "- **Jordan Lee** — Edge AI Systems\n"
-        )
-        base["image"] = {
-            "url": "/static/assets/speakers.png",
-            "alt": "Speakers highlight"
-        }
-        return base
-
-    if "help" in t or "assist" in t or "support" in t:
-        base["narration"] = "I can guide you to sessions, maps, speakers, or assistance."
-        base["briefing_md"] = (
-            "### How I can help\n"
-            "- Ask for **Agenda**\n"
-            "- Show the **Venue Map**\n"
-            "- List **Speakers**\n"
-            "- Say **Help** for tips\n"
-        )
-        base["image"] = {
-            "url": "/static/assets/help.png",
-            "alt": "Help tips"
-        }
-        return base
-
-    # Default fallback
-    base["narration"] = "Here’s a quick brief related to your question."
-    base["briefing_md"] = (
-        "### HARCi\n"
-        "I respond with narration, a short briefing, and an optional image.  \n"
-        "Try: **Agenda**, **Venue Map**, **Speakers**, or **Help**."
-    )
-    return base
 
 # ==== App and static/templates ====
 app = FastAPI()
@@ -346,6 +252,7 @@ async def relay_token():
 
 # ---- Assist proxy with fallback ----
 from fastapi import Body
+from fastapi.responses import JSONResponse
 
 @app.post("/assist/run")
 async def assist_run(req: Request, body: dict = Body(default={})):
@@ -373,17 +280,16 @@ async def assist_run(req: Request, body: dict = Body(default={})):
 
     # Live path: use Azure Agents SDK (sync, but safe for FastAPI threadpool)
     try:
+        # --- Credential resolution (DefaultAzureCredential, else AGENT_TOKEN) ---
         from azure.identity import DefaultAzureCredential
+        from azure.core.credentials import TokenCredential  # used for StaticTokenCredential
         cred = None
-        # Try managed identity / Azure CLI / env
         try:
             cred = DefaultAzureCredential()
-            # Test credential (will raise if not available)
             _ = cred.get_token("https://cognitiveservices.azure.com/.default")
         except Exception as e:
             log.warning("DefaultAzureCredential unavailable: %s", e)
             cred = None
-        # Fallback to AGENT_TOKEN if present
         if not cred and AGENT_TOKEN:
             class StaticTokenCredential(TokenCredential):
                 def get_token(self, *scopes, **kwargs):
@@ -394,53 +300,137 @@ async def assist_run(req: Request, body: dict = Body(default={})):
         if not cred:
             raise Exception("No valid Azure credential or AGENT_TOKEN found.")
 
+        # --- Project/Agent bootstrap ---
+        from azure.ai.projects import AIProjectClient
         project = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=cred)
         agent = project.agents.get_agent(AGENT_ID)
 
-        # Get session and thread id
+        # --- Session/thread management ---
         sess = SESSIONS.get(sid) if sid else None
         thread_id = None
         if sess:
             thread_id = sess.agent_thread_id or ""
-
-        # If no thread, create one and persist
         if not thread_id:
             thread = project.agents.threads.create()
             thread_id = thread.id
             if sess:
                 sess.agent_thread_id = thread_id
 
-        # Send user message
-        project.agents.messages.create(thread_id=thread_id, role="user", content=text)
+        # --- Post user message and run the agent ---
+        user_msg = project.agents.messages.create(thread_id=thread_id, role="user", content=text)
         run = project.agents.runs.create_and_process(thread_id=thread_id, agent_id=agent.id)
 
+        # --- Poll until the run is done (avoid returning too early) ---
+        max_wait = 30  # seconds
+        poll_interval = 1
+        waited = 0
+        while run.status not in ("completed", "failed") and waited < max_wait:
+            time.sleep(poll_interval)
+            waited += poll_interval
+            run = project.agents.runs.get(thread_id=thread_id, run_id=run.id)
+
         if run.status == "failed":
-            log.error(f"Agent run failed: {run.last_error}")
+            log.error("Agent run failed: %s", run.last_error)
             return JSONResponse({
                 "narration": "Agent run failed.",
                 "briefing_md": f"### Error\n- {run.last_error}",
             }, status_code=500)
 
-        msgs = project.agents.messages.list(thread_id=thread_id, order=ListSortOrder.ASCENDING)
+        # ---------- Robust reply selection (no ordering assumptions) ----------
+        # Helpers to extract text and parse JSON (with ```json fences tolerated)
+        def _extract_text(msg):
+            # Try text_messages[-1].text.value, then .text, then .content
+            try:
+                tms = getattr(msg, "text_messages", None) or []
+                if tms:
+                    last = tms[-1]
+                    val = getattr(getattr(last, "text", None), "value", None)
+                    if not val:
+                        val = getattr(last, "text", None)
+                    if val:
+                        return str(val)
+            except Exception:
+                pass
+            c = getattr(msg, "content", None)
+            if isinstance(c, str) and c.strip():
+                return c.strip()
+            return None
+
+        def _parse_payload(s: str):
+            s2 = (s or "").strip()
+            if s2.startswith("```"):
+                fence = "```json" if s2.lower().startswith("```json") else "```"
+                s2 = s2[len(fence):].strip()
+                if s2.endswith("```"):
+                    s2 = s2[:-3].strip()
+            try:
+                return json.loads(s2)
+            except Exception:
+                return {"narration": s, "briefing_md": "", "image": None}
+
+        # Try to use run-scoped outputs first (if available on this SDK build)
+        try:
+            output_ids = getattr(run, "output_messages", None) or []
+        except Exception:
+            output_ids = []
+        if output_ids:
+            # If the SDK exposes message IDs for this run, fetch those exactly.
+            try:
+                # Some SDKs offer a get-by-id; if not, we’ll fall back to list().
+                get_by_id = getattr(project.agents.messages, "get", None)
+                if callable(get_by_id):
+                    for mid in output_ids:
+                        try:
+                            m = project.agents.messages.get(thread_id=thread_id, message_id=mid)
+                        except Exception:
+                            continue
+                        role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
+                        if role_name != "agent":
+                            continue
+                        txt = _extract_text(m)
+                        if txt:
+                            return JSONResponse(_parse_payload(txt))
+            except Exception:
+                pass  # fall through to list-based selection
+
+        # List ALL messages and choose:
+        # 1) the newest *agent* message whose run_id == current run.id (if present)
+        # 2) else the newest *agent* message by iteration order (works for asc/desc)
+        msgs = project.agents.messages.list(thread_id=thread_id)
+
+        latest_same_run = None
+        latest_any = None
+        idx = 0
         for m in msgs:
-            if hasattr(m, "role") and getattr(m.role, "name", "").lower() == "agent" and getattr(m, "text_messages", None):
-                agent_reply = m.text_messages[-1].text.value
-                # Try to extract JSON payload
-                try:
-                    out = json.loads(agent_reply)
-                except Exception:
-                    out = {
-                        "narration": agent_reply,
-                        "briefing_md": "",
-                        "image": None
-                    }
-                return JSONResponse(out)
-        # If no agent reply found
+            idx += 1
+            role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
+            if role_name != "agent":
+                continue
+            # Prefer messages produced by this run
+            mid_run_id = getattr(m, "run_id", None)
+            if mid_run_id and str(mid_run_id) == str(run.id):
+                latest_same_run = (idx, m)
+            # Always track latest agent we see (last wins regardless of order)
+            latest_any = (idx, m)
+
+        chosen = None
+        if latest_same_run is not None:
+            chosen = latest_same_run[1]
+        elif latest_any is not None:
+            chosen = latest_any[1]
+
+        if chosen is not None:
+            txt = _extract_text(chosen)
+            if txt:
+                return JSONResponse(_parse_payload(txt))
+
+        # No agent reply found; return a neutral response
         return JSONResponse({
             "narration": "No agent reply found.",
             "briefing_md": "",
             "image": None
         }, status_code=200)
+
     except Exception as e:
         log.exception("assist_run agent SDK error")
         return JSONResponse(
