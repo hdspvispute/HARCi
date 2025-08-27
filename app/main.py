@@ -1,4 +1,7 @@
 import os, json, time, uuid, random, logging, threading, asyncio
+# Ensure Azure CLI path is set for Windows
+if os.name == "nt":
+    os.environ["AZURE_CLI_PATH"] = r"C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
 from datetime import datetime
 from typing import Optional, Dict, List
 from pathlib import Path
@@ -10,9 +13,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from starlette.templating import Jinja2Templates
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-#load_dotenv(override=True)
+load_dotenv(override=False)
 
 # === Azure Agents SDK (only used if AGENT_TOKEN present) ===
 try:
@@ -29,7 +32,7 @@ HITACHI_RED     = os.getenv("HITACHI_RED", "#E60027")
 
 PROJECT_ENDPOINT = os.getenv("PROJECT_ENDPOINT")  # e.g. https://<acct>.services.ai.azure.com/api/projects/<project>
 AGENT_ID         = os.getenv("AGENT_ID")
-AGENT_TOKEN      = os.getenv("AGENT_TOKEN")       # Supply/refresh externally
+AGENT_TOKEN      = os.getenv("AGENT_TOKEN")       # Fallback for local/dev use
 
 SPEECH_REGION    = os.getenv("SPEECH_REGION")
 SPEECH_KEY       = os.getenv("SPEECH_KEY")
@@ -53,7 +56,7 @@ log = logging.getLogger("harci")
 
 
 def agent_config_ok() -> bool:
-    return bool(AGENT_TOKEN and PROJECT_ENDPOINT and AGENT_ID)
+    return bool(PROJECT_ENDPOINT and AGENT_ID)
 
 def _extract_json_payload(text: str) -> Optional[Dict]:
     """
@@ -350,8 +353,8 @@ async def assist_run(req: Request, body: dict = Body(default={})):
     sid  = body.get("session_id") or req.cookies.get(SESSION_COOKIE)
 
     # Fallback: if agent config is missing, return a dummy response
-    if not (PROJECT_ENDPOINT and AGENT_ID and AGENT_TOKEN):
-        log.warning("assist_run: missing agent creds; serving dummy response")
+    if not (PROJECT_ENDPOINT and AGENT_ID):
+        log.warning("assist_run: missing agent config; serving dummy response")
         topic = text or "Welcome"
         demo = {
             "narration": f"{topic}: Here's what you need to know for the HARC AI Launch.",
@@ -370,13 +373,27 @@ async def assist_run(req: Request, body: dict = Body(default={})):
 
     # Live path: use Azure Agents SDK (sync, but safe for FastAPI threadpool)
     try:
-        class StaticTokenCredential(TokenCredential):
-            def get_token(self, *scopes, **kwargs):
-                from azure.core.credentials import AccessToken
-                token = AGENT_TOKEN
-                return AccessToken(token, int(time.time()) + 50 * 60)
+        from azure.identity import DefaultAzureCredential
+        cred = None
+        # Try managed identity / Azure CLI / env
+        try:
+            cred = DefaultAzureCredential()
+            # Test credential (will raise if not available)
+            _ = cred.get_token("https://cognitiveservices.azure.com/.default")
+        except Exception as e:
+            log.warning("DefaultAzureCredential unavailable: %s", e)
+            cred = None
+        # Fallback to AGENT_TOKEN if present
+        if not cred and AGENT_TOKEN:
+            class StaticTokenCredential(TokenCredential):
+                def get_token(self, *scopes, **kwargs):
+                    from azure.core.credentials import AccessToken
+                    token = AGENT_TOKEN
+                    return AccessToken(token, int(time.time()) + 50 * 60)
+            cred = StaticTokenCredential()
+        if not cred:
+            raise Exception("No valid Azure credential or AGENT_TOKEN found.")
 
-        cred = StaticTokenCredential()
         project = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=cred)
         agent = project.agents.get_agent(AGENT_ID)
 
