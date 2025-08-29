@@ -1,41 +1,22 @@
 {% extends "_base.html" %}
 {% block title %}Event Check-in · HARCi{% endblock %}
-
 {% block content %}
 <section class="mx-auto max-w-xl">
-  <h1 class="text-2xl font-semibold mb-2">Welcome to the HARC AI Launch</h1>
-  <p class="text-neutral-300 mb-6">
-    Check in so HARCi can greet you by name and personalize your guidance.
-  </p>
-
+  <h1 class="text-2xl font-semibold mb-2">Welcome to the {{ (cfg.event and cfg.event.name) or 'HARCi Event' }} Event</h1>
+  <p class="text-neutral-300 mb-6">Check in so HARCi can greet you by name and personalize your guidance.</p>
   <form id="regForm" class="space-y-4 card">
     <div>
-      <label class="block mb-1 text-sm text-neutral-300" for="name">
-        Your name <span class="text-red-400">*</span>
-      </label>
-      <input id="name" name="name" required
-             class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]"
-             placeholder="e.g., Priya Sharma" />
+      <label class="block mb-1 text-sm text-neutral-300" for="name">Your name <span class="text-red-400">*</span></label>
+      <input id="name" name="name" required class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]" placeholder="Full Name" />
     </div>
-
     <div>
-      <label class="block mb-1 text-sm text-neutral-300" for="company">
-        Company <span class="text-red-400">*</span>
-      </label>
-      <input id="company" name="company" required
-             class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]"
-             placeholder="e.g., Hitachi Vantara" />
+      <label class="block mb-1 text-sm text-neutral-300" for="company">Company <span class="text-red-400">*</span></label>
+      <input id="company" name="company" required class="w-full rounded-lg bg-neutral-900 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]" placeholder="Company Name" />
     </div>
-
-    <p class="text-xs text-neutral-400">
-      We store minimal information for the duration of this event only.
-    </p>
-
+    <p class="text-xs text-neutral-400">We store minimal information for the duration of this event only.</p>
     <div id="regError" class="hidden text-sm text-red-400"></div>
-
-    <button type="submit" class="btn btn-brand mt-2 w-full">
-      Continue
-    </button>
+    <button type="submit" class="btn btn-brand mt-2 w-full">Continue</button>
   </form>
 </section>
 {% endblock %}
+

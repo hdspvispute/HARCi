@@ -7,8 +7,17 @@ import random
 import logging
 import threading
 from logging.handlers import RotatingFileHandler
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, Dict, List
+from zoneinfo import ZoneInfo
+
+EVENT_TZ   = os.getenv("EVENT_TZ", "America/Chicago")
+EVENT_DATE = os.getenv("EVENT_DATE", "2025-09-16")
+EVENT_CITY = os.getenv("EVENT_CITY", "Dallas, Texas, USA")
+EVENT_NAME = os.getenv("EVENT_NAME", "Powering Mission-Critical AI")
+
+# Session TTL (seconds) — controls both cookie Max-Age and server-side session retention
+SESSION_TTL_SECS = int(os.getenv("SESSION_TTL_SECS", "86400"))
 
 # Ensure Azure CLI path is set for Windows (dev convenience)
 if os.name == "nt":
@@ -22,6 +31,13 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from starlette.templating import Jinja2Templates
 from dotenv import load_dotenv
+
+# ---- Prompts module (centralized) -------------------------------------------
+try:
+    from .prompts import build_assist_preamble, build_welcome_prompt
+except Exception:
+    # fallback if relative import fails (e.g., when run in certain layouts)
+    from prompts import build_assist_preamble, build_welcome_prompt  # type: ignore
 
 load_dotenv(override=False)
 
@@ -90,7 +106,7 @@ _TEMPLATES_DIR = os.path.join(_APP_ROOT, "templates")
 app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 
-# ===== Sessions (in-memory MVP) ==============================================
+# ===== Sessions (in-memory with TTL) =========================================
 SESSION_COOKIE = "harci_sid"
 
 class Session(BaseModel):
@@ -99,18 +115,43 @@ class Session(BaseModel):
     company: str
     created_at: datetime
     last_active: datetime
+    expires_at: datetime
     active: bool = True
     agent_thread_id: str = ""
+    agent_ctx_seeded: bool = False  # avoid re-sending system context each turn
 
 SESSIONS: Dict[str, Session] = {}
+
+def _now_utc() -> datetime:
+    return datetime.utcnow()
 
 def new_sid() -> str:
     return uuid.uuid4().hex
 
-def touch_sid(sid: str):
-    s = SESSIONS.get(sid)
+def _is_expired(sess: Session) -> bool:
+    return sess.expires_at <= _now_utc()
+
+def get_session(sid: Optional[str]) -> Optional[Session]:
+    if not sid:
+        return None
+    sess = SESSIONS.get(sid)
+    if not sess:
+        return None
+    if _is_expired(sess):
+        # Lazy purge
+        try:
+            del SESSIONS[sid]
+        except Exception:
+            pass
+        return None
+    return sess
+
+def touch_sid(sid: str, slide_expiry: bool = True):
+    s = get_session(sid)
     if s:
-        s.last_active = datetime.utcnow()
+        s.last_active = _now_utc()
+        if slide_expiry:
+            s.expires_at = _now_utc() + timedelta(seconds=SESSION_TTL_SECS)
 
 # ===== Speech resource pool ===================================================
 _pool: List[Dict[str, str]] = []
@@ -155,6 +196,12 @@ def ui_cfg():
         "avatarStyle": AVATAR_STYLE,
         "speechLang": SPEECH_LANG,
         "speechVoice": SPEECH_VOICE,
+        "event": {  # handy for client hints / UI
+            "tz":   EVENT_TZ,
+            "date": EVENT_DATE,
+            "city": EVENT_CITY,
+            "name": EVENT_NAME,
+        },
     }
 
 @app.get("/api/config")
@@ -165,7 +212,8 @@ async def api_config():
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     sid = request.cookies.get(SESSION_COOKIE)
-    if sid and sid in SESSIONS:
+    sess = get_session(sid)
+    if sess:
         return RedirectResponse("/guide")
     return RedirectResponse("/register")
 
@@ -180,7 +228,7 @@ async def page_transition(request: Request):
 @app.get("/guide", response_class=HTMLResponse)
 async def page_guide(request: Request):
     sid = request.cookies.get(SESSION_COOKIE)
-    return templates.TemplateResponse("guide.html", {"request": request, "cfg": ui_cfg(), "has_sid": bool(sid)})
+    return templates.TemplateResponse("guide.html", {"request": request, "cfg": ui_cfg(), "has_sid": bool(get_session(sid))})
 
 @app.get("/ended", response_class=HTMLResponse)
 async def page_ended(request: Request):
@@ -193,14 +241,28 @@ async def api_register(name: str = Form(...), company: str = Form(...)):
     company = (company or "").strip()
     if not name or not company:
         raise HTTPException(400, "Name and Company are required")
+
     sid = new_sid()
+    now = _now_utc()
     SESSIONS[sid] = Session(
         sid=sid, name=name, company=company,
-        created_at=datetime.utcnow(), last_active=datetime.utcnow(), active=True
+        created_at=now, last_active=now, active=True,
+        expires_at=now + timedelta(seconds=SESSION_TTL_SECS)
     )
+
     res = JSONResponse({"ok": True, "sid": sid, "next": "/transition"})
-    # Not HttpOnly so client JS can read it if needed; fine for MVP
-    res.set_cookie(SESSION_COOKIE, sid, httponly=False, samesite="Lax", max_age=60*60*8, path="/")
+
+    # Persistent cookie (readable by JS because UI reads it; change httponly if you refactor)
+    expires_http = (now + timedelta(seconds=SESSION_TTL_SECS)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+    res.set_cookie(
+        SESSION_COOKIE, sid,
+        httponly=False,  # UI reads cookie today; keep False unless you refactor UI
+        samesite="Lax",
+        max_age=SESSION_TTL_SECS,
+        expires=expires_http,
+        path="/",
+        # secure=True,  # enable when served over HTTPS only
+    )
     return res
 
 class SidBody(BaseModel):
@@ -209,9 +271,7 @@ class SidBody(BaseModel):
 @app.post("/api/session/start")
 async def api_session_start(body: SidBody):
     sid = body.sid or ""
-    if not sid:
-        raise HTTPException(400, "sid required")
-    sess = SESSIONS.get(sid)
+    sess = get_session(sid)
     if not sess:
         raise HTTPException(404, "Session not found")
     sess.active = True
@@ -221,7 +281,7 @@ async def api_session_start(body: SidBody):
 @app.post("/api/session/end")
 async def api_session_end(body: SidBody):
     sid = body.sid or ""
-    sess = SESSIONS.get(sid)
+    sess = get_session(sid)
     if sess:
         sess.active = False
         touch_sid(sid)
@@ -280,8 +340,6 @@ def _build_credential():
       (IDENTITY_ENDPOINT/MSI_ENDPOINT), DAC will pick it up.
     """
     from azure.identity import DefaultAzureCredential
-    # Heuristic: if running with MI available, keep MI enabled; otherwise allow all,
-    # DAC will prefer fast sources first (env/CLI).
     mi_present = bool(os.getenv("IDENTITY_ENDPOINT") or os.getenv("MSI_ENDPOINT"))
     return DefaultAzureCredential(
         exclude_environment_credential=False,
@@ -290,7 +348,6 @@ def _build_credential():
         exclude_visual_studio_code_credential=True,
         exclude_powershell_credential=True,
         exclude_workload_identity_credential=True,
-        # CLI credential is left enabled for local dev convenience
     )
 
 def _get_client_and_agent():
@@ -344,6 +401,12 @@ def _parse_payload(s: str):
         # Fall back to narration-only
         return {"narration": s, "briefing_md": "", "image": None}
 
+def _now_local_str() -> str:
+    try:
+        return datetime.now(ZoneInfo(EVENT_TZ)).strftime("%Y-%m-%d %H:%M:%S %Z")
+    except Exception:
+        return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+
 # ===== Assist endpoint ========================================================
 @app.post("/assist/run")
 async def assist_run(req: Request, body: dict = Body(default={})):
@@ -374,7 +437,7 @@ async def assist_run(req: Request, body: dict = Body(default={})):
         project, agent = _get_client_and_agent()
 
         # Thread per session
-        sess = SESSIONS.get(sid) if sid else None
+        sess = get_session(sid)
         thread_id = getattr(sess, "agent_thread_id", None) or ""
         if not thread_id:
             thread = project.agents.threads.create()
@@ -382,11 +445,31 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             if sess:
                 sess.agent_thread_id = thread_id
 
-        # Create user message
+        # Decide whether to seed time-aware context for this session
+        should_seed = not bool(getattr(sess, "agent_ctx_seeded", False)) if sess else True
+
+        # Build optional per-run preamble (goes into additional_instructions)
+        preamble = build_assist_preamble(
+            event_name=EVENT_NAME,
+            event_city=EVENT_CITY,
+            event_date=EVENT_DATE,
+            event_tz=EVENT_TZ,
+            now_local=_now_local_str()
+        ) if should_seed else None
+
+        # Create the user message (role=user is required)
         project.agents.messages.create(thread_id=thread_id, role="user", content=text)
 
-        # Start run and poll quickly
-        run = project.agents.runs.create(thread_id=thread_id, agent_id=agent.id)
+        # Create the run with our time-aware preamble
+        run = project.agents.runs.create(
+            thread_id=thread_id,
+            agent_id=agent.id,
+            additional_instructions=preamble  # None if not seeding this turn
+        )
+        if should_seed and sess:
+            sess.agent_ctx_seeded = True
+
+        # Poll the run quickly
         deadline = time.time() + 30.0  # 30s ceiling
         while getattr(run, "status", None) not in ("completed", "failed") and time.time() < deadline:
             time.sleep(0.25)
@@ -418,6 +501,7 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                         continue
                     txt = _extract_text(m)
                     if txt:
+                        touch_sid(sid or "")
                         return JSONResponse(_parse_payload(txt))
 
         # ---------- Fallback: list a small window of recent messages
@@ -451,6 +535,7 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             if txt:
                 chosen_payload = _parse_payload(txt)
 
+        touch_sid(sid or "")
         return JSONResponse(chosen_payload or {
             "narration": "No agent reply found.",
             "briefing_md": "",
@@ -462,3 +547,150 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             "narration": "I couldn’t reach the agent service just now. Here’s a quick brief.",
             "briefing_md": f"### {text or 'Info'}\n- The service is temporarily unavailable.\n- Please try again in a moment.",
         }, status_code=200)
+
+# ===== Personalized welcome (Agent-powered) ===================================
+@app.post("/assist/welcome")
+async def assist_welcome(req: Request):
+    """
+    Ask the Agent to produce a personalized welcome using the registrant's name.
+    Returns the same JSON shape as /assist/run:
+      { narration: str, briefing_md: str, image?: {url, alt}? }
+    """
+    sid = req.cookies.get(SESSION_COOKIE)
+    sess = get_session(sid)
+    user_name = (getattr(sess, "name", None) or "Guest").strip()
+
+    # Fallback path if agent missing
+    if not agent_config_ok() or AIProjectClient is None:
+        fallback_narration = (
+            f"Hi {user_name}, welcome to the {EVENT_NAME}. I’m HARCi — "
+            "ask me about the agenda, venue map, or speakers."
+        )
+        fallback_briefing = (
+            f"### Welcome, {user_name}\n"
+            "- Tap a quick chip: **Agenda**, **Venue Map**, **Speakers**, or **Help**.\n"
+            "- Press and hold the mic to talk; release to send.\n"
+            "- We only collect minimal info for this event.\n"
+        )
+        return JSONResponse({"narration": fallback_narration, "briefing_md": fallback_briefing})
+
+    try:
+        project, agent = _get_client_and_agent()
+
+        # Thread per session
+        thread_id = getattr(sess, "agent_thread_id", "") if sess else ""
+        if not thread_id:
+            thread = project.agents.threads.create()
+            thread_id = thread.id
+            if sess:
+                sess.agent_thread_id = thread_id
+
+        # Seed preamble if first run in this session
+        should_seed = not bool(getattr(sess, "agent_ctx_seeded", False)) if sess else True
+        preamble = build_assist_preamble(
+            event_name=EVENT_NAME,
+            event_city=EVENT_CITY,
+            event_date=EVENT_DATE,
+            event_tz=EVENT_TZ,
+            now_local=_now_local_str()
+        ) if should_seed else None
+
+        # Build the agent-directed welcome prompt
+        welcome_prompt = build_welcome_prompt(
+            user_name=user_name,
+            event_name=EVENT_NAME,
+            event_city=EVENT_CITY
+        )
+
+        # Send as a user message so the Agent crafts the JSON
+        project.agents.messages.create(thread_id=thread_id, role="user", content=welcome_prompt)
+
+        run = project.agents.runs.create(
+            thread_id=thread_id,
+            agent_id=agent.id,
+            additional_instructions=preamble
+        )
+        if should_seed and sess:
+            sess.agent_ctx_seeded = True
+
+        # Poll
+        deadline = time.time() + 30.0
+        while getattr(run, "status", None) not in ("completed", "failed") and time.time() < deadline:
+            time.sleep(0.25)
+            run = project.agents.runs.get(thread_id=thread_id, run_id=run.id)
+
+        if getattr(run, "status", None) == "failed":
+            log.error("Agent welcome failed: %s", getattr(run, "last_error", None))
+            raise HTTPException(502, "Welcome run failed")
+
+        # Try direct output references first
+        output_ids = getattr(run, "output_messages", None) or []
+        if output_ids:
+            get_by_id = getattr(project.agents.messages, "get", None)
+            if callable(get_by_id):
+                for mid in output_ids:
+                    try:
+                        m = project.agents.messages.get(thread_id=thread_id, message_id=mid)
+                    except Exception:
+                        continue
+                    role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
+                    if role_name != "agent":
+                        continue
+                    txt = _extract_text(m)
+                    if txt:
+                        touch_sid(sid or "")
+                        return JSONResponse(_parse_payload(txt))
+
+        # Else scan recent messages
+        list_kwargs = {"thread_id": thread_id, "limit": 20}
+        if ListSortOrder is not None:
+            list_kwargs["order"] = ListSortOrder.DESCENDING
+
+        msgs = project.agents.messages.list(**list_kwargs)
+        for m in msgs:
+            role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
+            if role_name != "agent":
+                continue
+            if getattr(m, "run_id", None) and str(m.run_id) == str(run.id):
+                txt = _extract_text(m)
+                if txt:
+                    touch_sid(sid or "")
+                    return JSONResponse(_parse_payload(txt))
+
+        # Last resort: newest agent message
+        for m in msgs:
+            role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
+            if role_name == "agent":
+                txt = _extract_text(m)
+                if txt:
+                    touch_sid(sid or "")
+                    return JSONResponse(_parse_payload(txt))
+                break
+
+        # Fallback text
+        fallback_narration = (
+            f"Hi {user_name}, welcome to the {EVENT_NAME}. I’m HARCi — "
+            "ask me about the agenda, venue map, or speakers."
+        )
+        fallback_briefing = (
+            f"### Welcome, {user_name}\n"
+            "- Tap a quick chip: **Agenda**, **Venue Map**, **Speakers**, or **Help**.\n"
+            "- Press and hold the mic to talk; release to send.\n"
+            "- We only collect minimal info for this event.\n"
+        )
+        touch_sid(sid or "")
+        return JSONResponse({"narration": fallback_narration, "briefing_md": fallback_briefing})
+
+    except Exception:
+        log.exception("assist_welcome error")
+        fallback_narration = (
+            f"Hi {user_name}, welcome to the {EVENT_NAME}. I’m HARCi — "
+            "ask me about the agenda, venue map, or speakers."
+        )
+        fallback_briefing = (
+            f"### Welcome, {user_name}\n"
+            "- Tap a quick chip: **Agenda**, **Venue Map**, **Speakers**, or **Help**.\n"
+            "- Press and hold the mic to talk; release to send.\n"
+            "- We only collect minimal info for this event.\n"
+        )
+        return JSONResponse({"narration": fallback_narration, "briefing_md": fallback_briefing})

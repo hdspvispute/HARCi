@@ -1,8 +1,6 @@
-// api.js
+// app/static/js/api.js
 (function () {
-  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child)
-    ? window.HARCI_LOG.child('api')
-    : console;
+  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('api') : console;
 
   async function j(url, opts) {
     const r = await fetch(url, opts);
@@ -19,7 +17,7 @@
     try {
       return document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
     } catch {
-      return '';
+      return "";
     }
   }
 
@@ -36,12 +34,22 @@
     async speechToken() { return j('/speech-token'); },
     async relayToken()  { return j('/relay-token'); },
 
-    // Forward AbortController signal to allow cancellation
+    // Core turns
     async assistRun(text, session_id = getSid(), { signal } = {}) {
       return j('/assist/run', {
         method: 'POST',
-        headers: {'content-type':'application/json'},
+        headers: { 'content-type':'application/json' },
         body: JSON.stringify({ text, session_id }),
+        signal
+      });
+    },
+
+    // Welcome turn (preferred): server builds the personalized prompt
+    async assistWelcome(session_id = getSid(), { signal } = {}) {
+      return j('/assist/welcome', {
+        method: 'POST',
+        headers: { 'content-type':'application/json' },
+        body: JSON.stringify({ session_id }),
         signal
       });
     }

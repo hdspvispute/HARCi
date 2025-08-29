@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="{{ cfg.brandRed or '#E60027' }}">
   <link rel="manifest" href="{{ url_for('static', path='manifest.webmanifest') }}">
-  <title>{% block title %}HARCi{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.css') }}?v=13" />
+  <title>
+    {% block title %}
+      HARCi Concierge
+    {% endblock %}
+  </title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=15" />
+
   <style>
     :root { --brand-red: {{ cfg.brandRed or '#E60027' }}; }
   </style>
@@ -15,10 +20,14 @@
 </head>
 <body class="min-h-full bg-neutral-900 text-neutral-100">
   <!-- Header -->
-  <header class="w-full border-b border-white/10 bg-neutral-950/60 backdrop-blur">
-    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center gap-3">
-      <div class="w-8 h-8 rounded bg-[var(--brand-red)]"></div>
-      <div class="text-lg font-semibold tracking-wide">HARCi – Hitachi AI Concierge</div>
+  <header class="h-16 w-full border-b border-white/10 bg-neutral-950/60 backdrop-blur" style="--hdr: 64px;">
+  <div class="mx-auto h-full max-w-6xl px-4 flex items-center justify-between">
+<img src="{{ url_for('static', path='assets/hitachi_logo_wh.png') }}" alt="Hitachi Logo" class="h-8 w-auto drop-shadow-lg">
+      <div class="flex flex-col">
+        <div class="text-lg font-semibold tracking-wide">
+          {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
+        </div>
+      </div>
       {% block header_right %}{% endblock %}
     </div>
   </header>
@@ -41,6 +50,9 @@
 
   <!-- UI bindings LAST so everything above is available -->
   <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=13"></script>
+
+  <!-- Safety net: updates any leftover placeholders to cfg.event.name at runtime -->
+  <script src="/static/js/event_name.js?v=14"></script>
 
   {% block extra_scripts %}{% endblock %}
 </body>

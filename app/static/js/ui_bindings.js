@@ -1,27 +1,31 @@
+// app/static/js/ui_bindings.js
 (() => {
   'use strict';
-  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('ui') : console;
 
+  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('ui') : console;
   const $  = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // --- UI helpers (idempotent) ------------------------------------------------
+  // ---- UI helpers ------------------------------------------------------------
   window.UI = window.UI || {};
   UI.setStatus = UI.setStatus || (s => {
     UI.status = s;
     try {
-      const el = document.getElementById('statusText') || document.getElementById('status');
-      if (el) el.textContent = s;
+      const el  = document.getElementById('statusText') || document.getElementById('status');
+      const dot = document.getElementById('statusDot');
+      if (el)  el.textContent = s;
+      if (dot) {
+        if (/Listening/i.test(s)) dot.style.background = 'var(--brand-red)';
+        else if (/Thinking|Starting|Processing|Ending/i.test(s)) dot.style.background = '#F59E0B'; // amber
+        else dot.style.background = '#10B981'; // green
+      }
     } catch {}
   });
   UI.setMicEnabled = UI.setMicEnabled || (on => {
     try { const b = document.getElementById('btnHoldMic'); if (b) b.disabled = !on; } catch {}
   });
 
-  // Legacy shim
-  window.setStatus = window.setStatus || (s => UI.setStatus(s));
-
-  // --- Soft WebAudio unlock (fallback when avatar module not ready) -----------
+  // ---- Audio helpers ---------------------------------------------------------
   async function softAudioUnlock() {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -39,8 +43,6 @@
       LOG.warn('[ui] soft audio unlock failed', e);
     }
   }
-
-  // --- Wait until avatar is available (or time out) ---------------------------
   async function waitForAvatar(ms = 2000) {
     const start = Date.now();
     while (!window.HARCI_AVATAR && Date.now() - start < ms) {
@@ -48,8 +50,6 @@
     }
     return !!window.HARCI_AVATAR;
   }
-
-  // --- Speech helper (works with or without lifecycle patch) ------------------
   function estimateMs(text) {
     const t = (text || '').trim();
     if (!t) return 1200;
@@ -58,7 +58,6 @@
   }
   function speakNow(text, opts) {
     if (window.speakSafe) return window.speakSafe(text, opts);
-
     UI.setStatus('Speaking…');
     let done = () => UI.setStatus('Ready');
     try {
@@ -74,7 +73,7 @@
     }
   }
 
-  // --- sanitize markdown-lite -------------------------------------------------
+  // ---- Sanitize markdown-lite ------------------------------------------------
   function sanitize(md){
     let s = String(md || '');
     s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -88,7 +87,7 @@
     return s;
   }
 
-  // --- Config bootstrap -------------------------------------------------------
+  // ---- Config ---------------------------------------------------------------
   window.bootstrapConfig = async () => {
     if (window.HARCI_CONFIG) return window.HARCI_CONFIG;
     try { window.HARCI_CONFIG = await window.API.config(); }
@@ -96,7 +95,7 @@
     return window.HARCI_CONFIG;
   };
 
-  // --- Small renderer ---------------------------------------------------------
+  // ---- Renderer --------------------------------------------------------------
   function applyResponse(res){
     const brief = $('#briefing');
     const imgP  = $('#imagePanel');
@@ -114,13 +113,13 @@
     }
   }
 
-  // --- ask() ------------------------------------------------------------------
+  // ---- ask() ----------------------------------------------------------------
   window.ask = async (text) => {
     const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
     return window.API.assistRun(text, sid);
   };
 
-  // --- Flow control: only-latest + cancellation -------------------------------
+  // ---- Flow gating -----------------------------------------------------------
   let turnSeq = 0;
   let inflight = null;
 
@@ -136,14 +135,20 @@
     } catch {}
   }
 
-  // --- Transition page --------------------------------------------------------
+  function setChipsEnabled(on){ $$('#quickChips [data-prompt]').forEach(c => c.disabled = !on); }
+  function setTypedEnabled(on){
+    const i = $('#txtAsk'), b = $('#btnAsk');
+    if (i) i.disabled = !on;
+    if (b) b.disabled = !on;
+  }
+
+  // ---- Transition ------------------------------------------------------------
   function onTransitionPage() {
     const btn = $('#btnUnlock');
     if (!btn) return;
     btn.addEventListener('click', async () => {
       try {
         await window.bootstrapConfig();
-        // Prefer avatar unlock if available; otherwise fallback
         if (await waitForAvatar(500)) {
           try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch {}
         } else {
@@ -154,7 +159,7 @@
     }, { once: true });
   }
 
-  // --- Register page ----------------------------------------------------------
+  // ---- Register --------------------------------------------------------------
   async function onRegisterPage(){
     const f = $('#regForm');
     if (!f) return;
@@ -162,7 +167,7 @@
       ev.preventDefault();
       const fd = new FormData(f);
       try {
-        const r = await API.register(fd);
+        const r = await window.API.register(fd); // fixed: use window.API
         if (r?.next) location.href = r.next; else location.href = '/transition';
       } catch (e) {
         LOG.error('[ui] register error', e);
@@ -172,13 +177,17 @@
     });
   }
 
-  // --- Guide page -------------------------------------------------------------
+  // ---- Guide ----------------------------------------------------------------
   async function onGuidePage(){
     await window.bootstrapConfig();
 
-    const video = $('#remoteVideo');
-    const audio = $('#remoteAudio');
-    LOG.info('[ui] guide: video/audio elements', { video: !!video, audio: !!audio });
+    const audio      = $('#remoteAudio');
+    const sessionBtn = $('#btnSessionToggle') || $('#btnStartSession'); // one toggle button
+    const holdBtn    = $('#btnHoldMic');
+    const askForm    = $('#askForm');
+    const askInput   = $('#txtAsk');
+    const chips      = $$('#quickChips [data-prompt]');
+
     UI.setStatus('Tap start');
 
     function primeAudioEl() {
@@ -190,43 +199,116 @@
       } catch {}
     }
 
-    const startBtn = $('#btnStartSession') || document.body;
-    startBtn.addEventListener('click', async () => {
+    // Use Ask input as live caption
+    const setCaption = (t) => { if (askInput) askInput.value = t ?? ''; };
+
+    // Initially lock user inputs until welcome begins
+    setChipsEnabled(false);
+    UI.setMicEnabled(false);
+    setTypedEnabled(false);
+
+    let welcomed = false;
+    let sessionActive = false;
+
+    async function runAgentWelcome() {
+      if (welcomed) return;
+      welcomed = true;
+
+      UI.setStatus('Thinking…');
+      const welcomeAC = new AbortController();
       try {
-        UI.setStatus('Starting…');
-
-        // Ensure an audio unlock before creating/starting WebRTC
-        if (await waitForAvatar(800)) {
-          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
+        let res = null;
+        if (typeof window.API.assistWelcome === 'function') {
+          res = await window.API.assistWelcome(undefined, { signal: welcomeAC.signal });
         } else {
-          await softAudioUnlock();
+          // Fallback to avoid 400: send a safe non-empty seed
+          res = await window.API.assistRun('Welcome me', undefined, { signal: welcomeAC.signal });
         }
-        primeAudioEl();
 
-        // Wait again, then start the avatar
-        if (!await waitForAvatar(1500)) {
-          throw new Error('Avatar runtime not ready');
+        if (res) {
+          applyResponse(res);
+
+          // Enable controls just before narration
+          setChipsEnabled(true);
+          UI.setMicEnabled(true);
+          setTypedEnabled(true);
+
+          if (res.narration) {
+            await speakNow(res.narration, { turn: 'welcome' });
+          }
         }
-        await window.HARCI_AVATAR.startSession();
         UI.setStatus('Ready');
-
-        speakNow('Welcome to the event! I am your HARCi avatar guide. I can answer questions about the agenda, venue, speakers, and help you navigate the event. Just tap a quick chip or hold the mic to talk to me.');
-      } catch (e) {
-        LOG.error('[ui] avatar start error', e);
-        UI.setStatus('Retrying…');
+      } catch (err) {
+        // Fallback local welcome so UX still flows
+        setChipsEnabled(true);
+        UI.setMicEnabled(true);
+        setTypedEnabled(true);
+        await speakNow('Welcome! I’m HARCi. Ask me about the agenda, venue map, or speakers — or press and hold the mic to talk.');
+        UI.setStatus('Ready');
       }
-    }, { once: true });
+    }
 
-    // Quick chips --------------------------------------------------------------
-    const chips = $$('#quickChips [data-prompt]');
+    async function startSessionFlow(){
+      if (sessionBtn) sessionBtn.disabled = true;
+      UI.setStatus('Starting…');
 
+      if (await waitForAvatar(800)) {
+        try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
+      } else {
+        await softAudioUnlock();
+      }
+      primeAudioEl();
+
+      if (!await waitForAvatar(3000)) {
+        LOG.warn('[ui] avatar not ready yet; continuing (startSession will retry internally)');
+      }
+      await window.HARCI_AVATAR.startSession();
+
+      sessionActive = true;
+      if (sessionBtn) { sessionBtn.textContent = 'End session'; sessionBtn.disabled = false; }
+
+      await runAgentWelcome();
+
+      
+    }
+
+    async function endSessionFlow(){
+      if (sessionBtn) sessionBtn.disabled = true;
+      UI.setStatus('Ending…');
+      cancelPending('end');
+
+      try {
+        const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
+        await window.API.sessionEnd(sid);
+      } catch {}
+
+      setChipsEnabled(false);
+      UI.setMicEnabled(false);
+      setTypedEnabled(false);
+
+      sessionActive = false;
+      if (sessionBtn) { sessionBtn.textContent = 'Start session'; sessionBtn.disabled = false; }
+      location.href = '/ended';
+    }
+
+    sessionBtn?.addEventListener('click', async () => {
+      try {
+        if (!sessionActive) await startSessionFlow();
+        else await endSessionFlow();
+      } catch (e) {
+        LOG.error('[ui] session toggle error', e);
+        UI.setStatus('Retrying…');
+        if (sessionBtn) sessionBtn.disabled = false;
+      }
+    });
+
+    // ---- Prompt runner (chips / typed / mic) ---------------------------------
     async function runPrompt(p){
       const myTurn = ++turnSeq;
       cancelPending('chip');
-      chips.forEach(c=> c.disabled = true);
-      UI.setStatus('Thinking…'); UI.setMicEnabled(false);
+      setChipsEnabled(false);
+      UI.setStatus('Thinking…'); UI.setMicEnabled(false); setTypedEnabled(false);
 
-      const cap = $('#caption'); if (cap) cap.textContent = '';
       const brief = $('#briefing'); if (brief) brief.innerHTML = '';
 
       const ac = new AbortController(); inflight = ac;
@@ -234,35 +316,36 @@
       try {
         res = await window.API.assistRun(p, undefined, { signal: ac.signal });
       } catch (e) {
-        if (e.name !== 'AbortError') { LOG.error('[ui] chip error', e); UI.setStatus('Error'); }
-        chips.forEach(c=> c.disabled = false); UI.setMicEnabled(true);
+        if (e.name !== 'AbortError') UI.setStatus('Error');
+        setChipsEnabled(true); UI.setMicEnabled(true); setTypedEnabled(true);
         return;
       } finally {
         inflight = null;
       }
 
-      if (myTurn !== turnSeq || !res) { chips.forEach(c=> c.disabled = false); UI.setMicEnabled(true); return; }
+      if (myTurn !== turnSeq || !res) { setChipsEnabled(true); UI.setMicEnabled(true); setTypedEnabled(true); return; }
 
       applyResponse(res);
       speakNow(res.narration || 'Here is the information.', { turn: myTurn });
 
-      chips.forEach(c=> c.disabled = false); UI.setMicEnabled(true);
+      setChipsEnabled(true); UI.setMicEnabled(true); setTypedEnabled(true);
     }
+
+    // Quick chips
     chips.forEach(btn => btn.addEventListener('click', ()=> runPrompt(btn.dataset.prompt)));
 
-    // Mic press & hold (pointer-only, dedup releases) --------------------------
-    const hold = $('#btnHoldMic');
+    // ---- Mic press & hold ----------------------------------------------------
     let isHolding = false;
     let holdToken = 0;
 
     if (window.HARCI_STT && typeof window.HARCI_STT.on === 'function') {
       window.HARCI_STT.on('partial', ({ text }) => {
         if (!isHolding) return;
-        const cap = $('#caption'); if (cap) cap.textContent = text || '…';
+        setCaption(text || '…');
       });
       window.HARCI_STT.on('final', ({ text }) => {
         if (!isHolding) return;
-        const cap = $('#caption'); if (cap) cap.textContent = text || '';
+        setCaption(text || '');
       });
     }
 
@@ -275,12 +358,12 @@
       cancelPending('ptt');
       try { await (window.HARCI_AVATAR?.ensureAudioUnlocked?.() ?? softAudioUnlock()); } catch {}
       try { window.EARCON?.start?.(); } catch {}
-      const cap = $('#caption'); if (cap) cap.textContent = 'Listening…';
+      setCaption('Listening…');
 
       UI.setStatus('Listening'); UI.setMicEnabled(false);
       try {
         await window.HARCI_STT.beginHold();
-        hold?.classList.add('ring-2','ring-white/50');
+        holdBtn?.classList.add('ring-2','ring-white/50');
       } catch (err) {
         LOG.warn('[ui] beginHold failed', err);
         isHolding = false;
@@ -294,7 +377,7 @@
       const myToken = holdToken;
       isHolding = false;
 
-      hold?.classList.remove('ring-2','ring-white/50');
+      holdBtn?.classList.remove('ring-2','ring-white/50');
       try { window.EARCON?.stop?.(); } catch {}
       let text = '';
       try {
@@ -308,37 +391,51 @@
       UI.setStatus('Processing…');
 
       if (!text) {
-        const cap = $('#caption'); if (cap) cap.textContent = '';
+        setCaption('');
         UI.setStatus('Ready'); UI.setMicEnabled(true);
         return;
       }
 
-      const cap = $('#caption'); if (cap) cap.textContent = text;
+      setCaption(text);
       await runPrompt(text);
       UI.setStatus('Ready'); UI.setMicEnabled(true);
     };
 
-    if (hold) {
-      hold.addEventListener('pointerdown', press);
-      hold.addEventListener('pointerup', release);
-      hold.addEventListener('pointercancel', release);
-      hold.addEventListener('pointerleave', release);
+    if (holdBtn) {
+      holdBtn.addEventListener('pointerdown', press);
+      holdBtn.addEventListener('pointerup', release);
+      holdBtn.addEventListener('pointercancel', release);
+      holdBtn.addEventListener('pointerleave', release);
     }
 
-    // End session --------------------------------------------------------------
-    $('#btnEnd')?.addEventListener('click', async ()=> {
-      try {
-        const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
-        await API.sessionEnd(sid);
-      } catch {}
-      location.href = '/ended';
+    // Keyboard accessibility for mic (space to hold)
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+        if (!e.repeat) holdBtn?.dispatchEvent(new PointerEvent('pointerdown'));
+        e.preventDefault();
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+        holdBtn?.dispatchEvent(new PointerEvent('pointerup'));
+        e.preventDefault();
+      }
+    });
+
+    // Typed questions
+    askForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = (askInput?.value || '').trim();
+      if (!text) return;
+      askInput.value = '';
+      await runPrompt(text);
     });
   }
 
-  // --- Route by presence of elements -----------------------------------------
+  // ---- Route by presence -----------------------------------------------------
   if (document.getElementById('regForm')) onRegisterPage();
   if (document.getElementById('unlockCard') || document.getElementById('btnUnlock')) onTransitionPage();
   if (document.getElementById('remoteVideo')) onGuidePage();
-
-  LOG.info('[ui] wired', window.HARCI_CONFIG || {});
 })();
