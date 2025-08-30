@@ -9,7 +9,7 @@
   <title>{% block title %}HARCi Concierge{% endblock %}</title>
 
   <!-- Tailwind-built CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=15" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=16" />
   <style>:root{ --brand-red: {{ cfg.brandRed or '#E60027' }}; }</style>
 
   <!-- Speech SDK (global; needed on Guide) -->
@@ -32,23 +32,22 @@
 </head>
 
 <body class="bg-neutral-900 text-neutral-100 overflow-hidden" style="height: var(--app-h);">
- <!-- Header (fixed, never scrolls) -->
-<header class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur">
-  <div class="mx-auto h-full w-screen px-4 md:px-6 lg:px-8 flex items-center justify-between">
-    <img src="{{ url_for('static', path='assets/hitachi_logo_wh.png') }}" alt="Hitachi Logo"
-         class="h-8 w-auto drop-shadow-lg select-none" draggable="false">
-    <div class="text-lg font-semibold tracking-wide">
-      {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
+  <!-- Header (fixed; never scrolls) -->
+  <header class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur">
+    <div class="mx-auto h-full w-screen px-4 md:px-6 lg:px-8 flex items-center justify-between">
+      <img src="{{ url_for('static', path='assets/hitachi_logo_wh.png') }}" alt="Hitachi Logo"
+           class="h-8 w-auto drop-shadow-lg select-none" draggable="false">
+      <div class="text-lg font-semibold tracking-wide">
+        {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
+      </div>
+      <div></div>
     </div>
-    <div></div>
-  </div>
-</header>
+  </header>
 
-<!-- Page content area (no page scroll). We’ll place the Guide viewport here. -->
-<main id="page-root" class="pt-16 h-[calc(100dvh-4rem)] w-screen overflow-hidden">
-  {% block content %}{% endblock %}
-</main>
-
+  <!-- Page content area (no page scroll). Guide viewport lives here. -->
+  <main id="page-root" class="pt-16 h-[calc(100dvh-4rem)] w-screen overflow-hidden">
+    {% block content %}{% endblock %}
+  </main>
 
   <!-- Global scripts -->
   <script src="{{ url_for('static', path='js/logger.js') }}?v=13" defer></script>
@@ -58,7 +57,7 @@
   <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=13" defer></script>
   <script src="{{ url_for('static', path='js/stt.js') }}?v=13" defer></script>
   <script src="{{ url_for('static', path='js/earcon.js') }}?v=13" defer></script>
-  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=14" defer></script>
   <script src="/static/js/event_name.js?v=14" defer></script>
 
   {% block extra_scripts %}{% endblock %}

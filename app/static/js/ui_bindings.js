@@ -8,6 +8,8 @@
 
   // ---- UI helpers ------------------------------------------------------------
   window.UI = window.UI || {};
+
+  // Auto-lock controls while busy (Thinking/Starting/Processing/Preparing/Ending)
   UI.setStatus = UI.setStatus || (s => {
     UI.status = s;
     try {
@@ -16,14 +18,41 @@
       if (el)  el.textContent = s;
       if (dot) {
         if (/Listening/i.test(s)) dot.style.background = 'var(--brand-red)';
-        else if (/Thinking|Starting|Processing|Ending/i.test(s)) dot.style.background = '#F59E0B'; // amber
-        else dot.style.background = '#10B981'; // green
+        else if (/Thinking|Starting|Processing|Preparing|Ending/i.test(s)) dot.style.background = '#F59E0B';
+        else dot.style.background = '#10B981';
+      }
+
+      // Only auto-toggle when a session is active
+      if (window.__harci_sessionActive) {
+        const isBusy = /Thinking|Starting|Processing|Preparing|Ending/i.test(s);
+        if (isBusy) {
+          setChipsEnabled(false);
+          UI.setMicEnabled(false);
+          setTypedEnabled(false);
+        } else if (/Ready/i.test(s)) {
+          setChipsEnabled(true);
+          UI.setMicEnabled(true);
+          setTypedEnabled(true);
+        }
       }
     } catch {}
   });
+
   UI.setMicEnabled = UI.setMicEnabled || (on => {
     try { const b = document.getElementById('btnHoldMic'); if (b) b.disabled = !on; } catch {}
   });
+
+  // Helpers that work for BOTH mobile (footer) and desktop (panel) IDs
+  function getAskInput(){ return $('#txtAsk') || $('#txtAskDesk'); }
+  function getAskBtn(){ return $('#btnAsk') || $('#btnAskDesk'); }
+  function setChipsEnabled(on){
+    $$('#quickChips [data-prompt], #quickChipsDesk [data-prompt]').forEach(c => c.disabled = !on);
+  }
+  function setTypedEnabled(on){
+    const i = getAskInput(), b = getAskBtn();
+    if (i) i.disabled = !on;
+    if (b) b.disabled = !on;
+  }
 
   // ---- Audio helpers ---------------------------------------------------------
   async function softAudioUnlock() {
@@ -122,6 +151,7 @@
   // ---- Flow gating -----------------------------------------------------------
   let turnSeq = 0;
   let inflight = null;
+  let sessionActive = false;
 
   function cancelPending(reason = 'user-preempt') {
     try { if (inflight) inflight.abort(); } catch {}
@@ -133,13 +163,6 @@
         window.HARCI_SPEECH?.stop?.(reason);
       }
     } catch {}
-  }
-
-  function setChipsEnabled(on){ $$('#quickChips [data-prompt]').forEach(c => c.disabled = !on); }
-  function setTypedEnabled(on){
-    const i = $('#txtAsk'), b = $('#btnAsk');
-    if (i) i.disabled = !on;
-    if (b) b.disabled = !on;
   }
 
   // ---- Transition ------------------------------------------------------------
@@ -167,7 +190,7 @@
       ev.preventDefault();
       const fd = new FormData(f);
       try {
-        const r = await window.API.register(fd); // fixed: use window.API
+        const r = await window.API.register(fd);
         if (r?.next) location.href = r.next; else location.href = '/transition';
       } catch (e) {
         LOG.error('[ui] register error', e);
@@ -182,11 +205,8 @@
     await window.bootstrapConfig();
 
     const audio      = $('#remoteAudio');
-    const sessionBtn = $('#btnSessionToggle') || $('#btnStartSession'); // one toggle button
+    const sessionBtn = $('#btnSessionToggle') || $('#btnStartSession');
     const holdBtn    = $('#btnHoldMic');
-    const askForm    = $('#askForm');
-    const askInput   = $('#txtAsk');
-    const chips      = $$('#quickChips [data-prompt]');
 
     UI.setStatus('Tap start');
 
@@ -199,16 +219,12 @@
       } catch {}
     }
 
-    // Use Ask input as live caption
-    const setCaption = (t) => { if (askInput) askInput.value = t ?? ''; };
-
-    // Initially lock user inputs until welcome begins
+    // Lock everything until session starts
     setChipsEnabled(false);
     UI.setMicEnabled(false);
     setTypedEnabled(false);
 
     let welcomed = false;
-    let sessionActive = false;
 
     async function runAgentWelcome() {
       if (welcomed) return;
@@ -224,25 +240,12 @@
           // Fallback to avoid 400: send a safe non-empty seed
           res = await window.API.assistRun('Welcome me', undefined, { signal: welcomeAC.signal });
         }
-
         if (res) {
           applyResponse(res);
-
-          // Enable controls just before narration
-          setChipsEnabled(true);
-          UI.setMicEnabled(true);
-          setTypedEnabled(true);
-
-          if (res.narration) {
-            await speakNow(res.narration, { turn: 'welcome' });
-          }
+          if (res.narration) { await speakNow(res.narration, { turn: 'welcome' }); }
         }
         UI.setStatus('Ready');
       } catch (err) {
-        // Fallback local welcome so UX still flows
-        setChipsEnabled(true);
-        UI.setMicEnabled(true);
-        setTypedEnabled(true);
         await speakNow('Welcome! I’m HARCi. Ask me about the agenda, venue map, or speakers — or press and hold the mic to talk.');
         UI.setStatus('Ready');
       }
@@ -265,9 +268,16 @@
       await window.HARCI_AVATAR.startSession();
 
       sessionActive = true;
+      window.__harci_sessionActive = true;
+
+      // Enable controls AFTER session is up
+      setChipsEnabled(true);
+      UI.setMicEnabled(true);
+      setTypedEnabled(true);
+
       if (sessionBtn) { sessionBtn.textContent = 'End session'; sessionBtn.disabled = false; }
 
-      // Fire-and-forget welcome so the End button is visible during narration
+      // Optional welcome
       runAgentWelcome().catch(e => LOG.warn('[ui] welcome failed', e));
     }
 
@@ -281,11 +291,14 @@
         await window.API.sessionEnd(sid);
       } catch {}
 
+      // Disable again
       setChipsEnabled(false);
       UI.setMicEnabled(false);
       setTypedEnabled(false);
 
+      window.__harci_sessionActive = false;
       sessionActive = false;
+
       if (sessionBtn) { sessionBtn.textContent = 'Start session'; sessionBtn.disabled = false; }
       location.href = '/ended';
     }
@@ -303,10 +316,16 @@
 
     // ---- Prompt runner (chips / typed / mic) ---------------------------------
     async function runPrompt(p){
+      if (!sessionActive) { UI.setStatus('Start session to interact'); return; }
+
       const myTurn = ++turnSeq;
       cancelPending('chip');
+
+      // Busy: lock controls while we fetch + narrate
       setChipsEnabled(false);
-      UI.setStatus('Thinking…'); UI.setMicEnabled(false); setTypedEnabled(false);
+      UI.setMicEnabled(false);
+      setTypedEnabled(false);
+      UI.setStatus('Thinking…');
 
       const brief = $('#briefing'); if (brief) brief.innerHTML = '';
 
@@ -322,16 +341,25 @@
         inflight = null;
       }
 
-      if (myTurn !== turnSeq || !res) { setChipsEnabled(true); UI.setMicEnabled(true); setTypedEnabled(true); return; }
+      if (myTurn !== turnSeq || !res) {
+        setChipsEnabled(true); UI.setMicEnabled(true); setTypedEnabled(true);
+        return;
+      }
 
       applyResponse(res);
-      speakNow(res.narration || 'Here is the information.', { turn: myTurn });
+      await speakNow(res.narration || 'Here is the information.', { turn: myTurn });
 
+      // Ready: unlock
       setChipsEnabled(true); UI.setMicEnabled(true); setTypedEnabled(true);
+      UI.setStatus('Ready');
     }
 
-    // Quick chips
-    chips.forEach(btn => btn.addEventListener('click', ()=> runPrompt(btn.dataset.prompt)));
+    // Chips (mobile + desktop)
+    const chips = $$('#quickChips [data-prompt], #quickChipsDesk [data-prompt]');
+    chips.forEach(btn => btn.addEventListener('click', ()=> {
+      if (!sessionActive) { UI.setStatus('Start session to interact'); return; }
+      runPrompt(btn.dataset.prompt);
+    }));
 
     // ---- Mic press & hold (robust mobile) -----------------------------------
     let isHolding = false;
@@ -340,18 +368,17 @@
     if (window.HARCI_STT && typeof window.HARCI_STT.on === 'function') {
       window.HARCI_STT.on('partial', ({ text }) => {
         if (!isHolding) return;
-        setCaption(text || '…');
+        const i = getAskInput(); if (i) i.value = text || '…';
       });
       window.HARCI_STT.on('final', ({ text }) => {
         if (!isHolding) return;
-        setCaption(text || '');
+        const i = getAskInput(); if (i) i.value = text || '';
       });
     }
 
-    // Strengthen the button’s semantics and disable long-press UI affordances
     if (holdBtn) {
       try { holdBtn.setAttribute('type', 'button'); } catch {}
-      holdBtn.classList.add('select-none', 'touch-none'); // Tailwind utilities
+      holdBtn.classList.add('select-none', 'touch-none');
       try { holdBtn.style.webkitTapHighlightColor = 'transparent'; } catch {}
       ['contextmenu','dragstart','selectstart','gesturestart'].forEach(evt =>
         holdBtn.addEventListener(evt, (e) => e.preventDefault(), { passive: false })
@@ -360,6 +387,7 @@
 
     const press = async (e) => {
       e.preventDefault(); e.stopPropagation();
+      if (!sessionActive) { UI.setStatus('Start session to talk'); return; }
       if (isHolding) return;
       isHolding = true;
       holdToken++;
@@ -367,11 +395,10 @@
       cancelPending('ptt');
       try { await (window.HARCI_AVATAR?.ensureAudioUnlocked?.() ?? softAudioUnlock()); } catch {}
       try { window.EARCON?.start?.(); } catch {}
-      setCaption('Listening…');
+      const i = getAskInput(); if (i) i.value = 'Listening…';
 
       UI.setStatus('Listening'); UI.setMicEnabled(false);
       try {
-        // Pointer capture keeps receiving events even if finger leaves the button
         try { holdBtn?.setPointerCapture?.(e.pointerId); } catch {}
         await window.HARCI_STT.beginHold();
         holdBtn?.classList.add('ring-2','ring-white/50');
@@ -405,27 +432,26 @@
       UI.setStatus('Processing…');
 
       if (!text) {
-        setCaption('');
+        const i = getAskInput(); if (i) i.value = '';
         UI.setStatus('Ready'); UI.setMicEnabled(true);
         return;
       }
 
-      setCaption(text);
+      const i = getAskInput(); if (i) i.value = text;
       await runPrompt(text);
       UI.setStatus('Ready'); UI.setMicEnabled(true);
     };
 
     if (holdBtn) {
-      // True push-to-talk on all devices
       holdBtn.addEventListener('pointerdown', press, { passive: false });
       holdBtn.addEventListener('pointerup',   release, { passive: false });
       holdBtn.addEventListener('pointercancel', release, { passive: false });
       holdBtn.addEventListener('pointerleave',  release, { passive: false });
 
-      // Safety: if finger/mouse is released off the button, still stop
+      // Safety: if pointer released off the button, still stop
       window.addEventListener('pointerup', release, { passive: false });
 
-      // Optional: tap-to-toggle fallback on coarse pointers (phones)
+      // Optional tap-to-toggle fallback on coarse pointers
       if (window.matchMedia?.('(pointer: coarse)').matches) {
         let toggled = false;
         holdBtn.addEventListener('click', (e) => {
@@ -436,29 +462,35 @@
       }
     }
 
-    // Keyboard accessibility for mic (space to hold)
+    // Keyboard accessibility for mic (guarded)
     document.addEventListener('keydown', (e) => {
       const tag = (e.target && e.target.tagName) || '';
       if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
-        if (!e.repeat) holdBtn?.dispatchEvent(new PointerEvent('pointerdown'));
+        if (!sessionActive) { UI.setStatus('Start session to talk'); return; }
+        if (!e.repeat) $('#btnHoldMic')?.dispatchEvent(new PointerEvent('pointerdown'));
         e.preventDefault();
       }
     });
     document.addEventListener('keyup', (e) => {
       const tag = (e.target && e.target.tagName) || '';
       if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
-        holdBtn?.dispatchEvent(new PointerEvent('pointerup'));
+        $('#btnHoldMic')?.dispatchEvent(new PointerEvent('pointerup'));
         e.preventDefault();
       }
     });
 
-    // Typed questions
-    askForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = (askInput?.value || '').trim();
-      if (!text) return;
-      askInput.value = '';
-      await runPrompt(text);
+    // Typed questions (mobile + desktop forms)
+    ['#askForm', '#askFormDesk'].forEach(sel => {
+      const form = $(sel);
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!sessionActive) { UI.setStatus('Start session to ask'); return; }
+        const input = getAskInput();
+        const text = (input?.value || '').trim();
+        if (!text) return;
+        input.value = '';
+        await runPrompt(text);
+      });
     });
   }
 

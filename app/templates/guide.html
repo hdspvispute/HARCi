@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="relative h-full w-screen overflow-hidden">
-  <!-- Content area: height = main height - footer height -->
+  <!-- Content area: no page scroll; brief section will scroll -->
   <div class="h-full w-screen overflow-hidden flex flex-col min-h-0">
 
     <!-- Avatar + Briefing -->
@@ -38,55 +38,51 @@
         </div>
       </section>
 
-      <!-- Chips + Ask for md+ (desktop/tablet) -->
+      <!-- Desktop chips + ask (IDs suffixed with Desk) -->
       <section class="hidden md:block md:col-span-12">
         <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-3 mt-3">
-          <div id="quickChips" class="flex gap-2 overflow-x-auto pb-2">
+          <div id="quickChipsDesk" class="flex gap-2 overflow-x-auto pb-2">
             <button class="chip" data-prompt="Agenda">Agenda</button>
-            <button class="chip" data-prompt="Venue Map">Venue Map</button>
+            <button class="chip" data-prompt="Demos">Demos</button>
             <button class="chip" data-prompt="Speakers">Speakers</button>
             <button class="chip" data-prompt="Help">Help</button>
           </div>
 
-          <form id="askForm" class="mt-2 flex items-stretch gap-2">
-            <input id="txtAsk" type="text" placeholder="Type or press-and-hold the mic to speak…" class="input text-sm" />
-            <button id="btnAsk" type="submit" class="btn btn-brand text-sm">Ask</button>
+          <form id="askFormDesk" class="mt-2 flex items-stretch gap-2">
+            <input id="txtAskDesk" type="text"
+                   placeholder="Type or press-and-hold the mic to speak…"
+                   class="input text-sm" />
+            <button id="btnAskDesk" type="submit" class="btn btn-brand text-sm">Ask</button>
           </form>
         </div>
       </section>
     </div>
   </div>
 
-  <!-- Fixed footer -->
-  <footer class="fixed inset-x-0 bottom-0 border-t border-white/10 bg-neutral-950/70 backdrop-blur">
-    <div class="relative h-full">
-      <!-- Mobile-only chips + input inside the footer -->
-      <div class="md:hidden border-t border-white/10 px-4 py-2 space-y-2">
-        <div id="quickChipsMobile" class="flex gap-2 overflow-x-auto pb-1">
-          <button class="chip" data-prompt="Agenda">Agenda</button>
-          <button class="chip" data-prompt="Venue Map">Venue Map</button>
-          <button class="chip" data-prompt="Speakers">Speakers</button>
-          <button class="chip" data-prompt="Help">Help</button>
-        </div>
-        <form id="askForm" class="flex items-stretch gap-2">
-          <input id="txtAsk" type="text" placeholder="Type or press-and-hold the mic to speak…" class="input text-sm" />
-          <button id="btnAsk" type="submit" class="btn btn-brand text-sm">Ask</button>
-        </form>
-      </div>
-      <!-- Core bar (Start left, Mic centered) -->
-      <div class="relative h-20">
+<!-- Fixed footer -->
+<footer class="fixed inset-x-0 bottom-0 border-t border-white/10 bg-neutral-950/70 backdrop-blur">
+  <div class="relative h-full">
+    <!-- Controls frame: margins on all sides + safe-area at bottom -->
+    <div class="absolute" style="inset: 8px 10px calc(env(safe-area-inset-bottom) + 10px) 10px;">
+      <!-- Core bar (fixed height) -->
+      <div class="relative h-20 w-full">
+        <!-- Start/End (lifted by frame) -->
         <button id="btnSessionToggle"
-                class="btn btn-outline absolute left-4 top-1/2 -translate-y-1/2">
+                class="btn btn-outline absolute left-0 top-1/2 -translate-y-1/2 text-sm md:text-base px-3 py-2 md:px-4 md:py-2.5">
           Start session
         </button>
 
+        <!-- Mic centered — smaller on mobile -->
         <button id="btnHoldMic"
                 type="button"
                 aria-label="Hold to talk"
                 oncontextmenu="return false"
                 draggable="false"
-                class="btn-circle select-none touch-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                       rounded-full border-0 flex items-center justify-center shadow-lg select-none touch-none
+                       h-12 w-12 sm:h-14 sm:w-14"
+                style="background: var(--brand-red);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 0 1-14 0m7 7v-2" />
           </svg>
@@ -94,8 +90,49 @@
         </button>
       </div>
 
-      
+      <!-- Mobile-only chips + input: compact typography & padding -->
+      <div class="md:hidden border-t border-white/10 mt-1.5 pt-1.5 space-y-1.5">
+        <div id="quickChips" class="flex gap-1.5 overflow-x-auto pb-1">
+          <button class="chip text-[11px] px-2 py-1" data-prompt="Agenda">Agenda</button>
+          <button class="chip text-[11px] px-2 py-1" data-prompt="Venue Map">Venue Map</button>
+          <button class="chip text-[11px] px-2 py-1" data-prompt="Speakers">Speakers</button>
+          <button class="chip text-[11px] px-2 py-1" data-prompt="Help">Help</button>
+        </div>
+        <form id="askForm" class="flex items-stretch gap-1.5">
+          <input id="txtAsk" type="text"
+                 placeholder="Type or hold mic…"
+                 class="input text-xs px-2 py-2 leading-tight" />
+          <button id="btnAsk" type="submit" class="btn btn-brand text-xs px-3 py-2">Ask</button>
+        </form>
+      </div>
     </div>
-  </footer>
+  </div>
+</footer>
 </div>
+
+<!-- Swap IDs to desktop set on md+ so your JS binds to the visible controls -->
+<script>
+(function () {
+  var mq = window.matchMedia && window.matchMedia('(min-width: 768px)');
+  if (!mq || !mq.matches) return; // mobile keeps canonical IDs in footer
+
+  var d = document;
+  var dChips = d.getElementById('quickChipsDesk');
+  var dForm  = d.getElementById('askFormDesk');
+  var dInput = d.getElementById('txtAskDesk');
+
+  var mChips = d.getElementById('quickChips');
+  var mForm  = d.getElementById('askForm');
+  var mInput = d.getElementById('txtAsk');
+
+  if (dChips && dForm && dInput) {
+    if (mChips) mChips.id = 'quickChipsHidden';
+    if (mForm)  mForm.id  = 'askFormHidden';
+    if (mInput) mInput.id = 'txtAskHidden';
+    dChips.id = 'quickChips';
+    dForm.id  = 'askForm';
+    dInput.id = 'txtAsk';
+  }
+})();
+</script>
 {% endblock %}
