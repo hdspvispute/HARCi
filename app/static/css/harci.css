@@ -5,36 +5,29 @@
 /* ===== Base / Theme ===== */
 @layer base {
   :root {
-    /* Fallback; HTML sets --brand-red inline from cfg.brandRed */
     --brand-red: #E60027;
+    --footer-h: 80px;            /* md+ default */
   }
-  html, body {
-    height: 100%;
+  @media (max-width: 639px) {    /* mobile footer is taller (chips + input) */
+    :root { --footer-h: 160px; }
   }
+  html, body { height: 100%; }
 }
 
 /* ===== Layout Utilities ===== */
 @layer utilities {
-  /* Full-screen shell below header; only briefing scrolls */
   .conversation-shell{
     height: calc(var(--app-h, 100dvh) - var(--hdr, 0px));
     min-height: calc(var(--app-h, 100dvh) - var(--hdr, 0px));
-    overflow: hidden; /* no page scroll */
+    overflow: hidden;
   }
-
-  /* Intended scroll surfaces */
-  .scroll-area{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-gutter: stable both-edges;
-  }
+  .aspect-video { aspect-ratio: 16 / 9; }
+  .no-callout   { -webkit-touch-callout: none; }
 }
 
 /* ===== Components ===== */
 @layer components {
-  .card {
-    @apply rounded-2xl border border-white/10 bg-neutral-900/40;
-  }
+  .card { @apply rounded-2xl border border-white/10 bg-neutral-900/40; }
 
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5
@@ -43,29 +36,18 @@
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  .btn-brand {
-    @apply border-transparent text-white;
-    background: var(--brand-red);
-    /* subtle lift on hover without changing brand hue */
-    filter: saturate(1);
-  }
+  .btn-brand { @apply border-transparent text-white; background: var(--brand-red); }
   .btn-brand:hover { filter: brightness(1.1); }
 
-  .btn-outline {
-    @apply border-white/30 bg-transparent hover:bg-white/10;
-  }
-
-  .btn-plain {
-    @apply bg-transparent border-transparent text-white/70 hover:text-white hover:bg-white/10;
-  }
+  .btn-outline { @apply border-white/30 bg-transparent hover:bg-white/10; }
+  .btn-plain   { @apply bg-transparent border-transparent text-white/70 hover:text-white hover:bg-white/10; }
 
   .btn-circle {
-    @apply w-20 h-20 lg:w-24 lg:h-24 rounded-full border-0
+    @apply h-14 w-14 sm:h-16 sm:w-16 rounded-full border-0
            flex items-center justify-center shadow-lg
            active:scale-[.99] disabled:opacity-50;
     background: var(--brand-red);
   }
-  .btn-circle:hover { filter: brightness(1.1); }
 
   .chip {
     @apply px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm
@@ -73,21 +55,17 @@
   }
 
   .input {
-    @apply w-full rounded-2xl px-3 py-2.5
-           bg-white/5 text-white placeholder-white/50
-           border border-white/10
-           focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)] focus:border-transparent
+    @apply w-full rounded-2xl px-3 py-2.5 bg-white/5 text-white placeholder-white/50
+           border border-white/10 focus:outline-none focus:ring-2
+           focus:ring-[var(--brand-red)] focus:border-transparent
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
 /* ===== States / Effects ===== */
-body.idle #remoteVideo {
-  filter: brightness(.88) saturate(.95);
-}
+body.idle #remoteVideo { filter: brightness(.88) saturate(.95); }
 
-
-/* ===== Markdown-lite / Prose tweaks ===== */
+/* ===== Prose tweaks ===== */
 .prose h1 { @apply text-xl font-bold mt-2 mb-1; }
 .prose h2 { @apply text-lg font-semibold mt-2 mb-1; }
 .prose h3 { @apply text-base font-semibold mt-2 mb-1; }
@@ -95,16 +73,39 @@ body.idle #remoteVideo {
 .prose p  { @apply leading-relaxed; }
 
 /* ===== Media surfaces ===== */
-#remoteVideo {
-  @apply w-full h-full object-cover bg-black;
-}
-#briefImage {
-  @apply w-full object-cover;
-}
+#remoteVideo { @apply w-full h-full object-cover bg-black; }
+#briefImage  { @apply w-full object-cover; }
 
-/* ===== Header chip (status) ===== */
-#statusDot {
-  /* color updated by JS; default ok-state */
-  background: #10B981;
-}
+/* ===== Status dot ===== */
+#statusDot { background: #10B981; }
 
+/* ===== Mic long-press hardening ===== */
+#btnHoldMic { -webkit-touch-callout: none; }
+
+/* ========================================================================== */
+/*        HARD LAYOUT: lock viewport, fixed header/footer, single scroll       */
+/* ========================================================================== */
+
+/* No page scroll anywhere */
+html, body { overflow: hidden; }
+body { height: 100dvh; }
+
+/* Header fixed (assumes h-16 = 4rem set in markup) */
+header { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 4rem; }
+
+/* Main fills device height under header; no scroll in main */
+main { padding-top: 4rem; height: calc(100dvh - 4rem); overflow: hidden; }
+
+/* Footer fixed at bottom; height is responsive via --footer-h */
+footer { position: fixed; left: 0; right: 0; bottom: 0; height: var(--footer-h); z-index: 9999; }
+
+/* The guide content wrapper inside <main> must subtract footer height */
+main > *:first-child { height: calc(100% - var(--footer-h)); overflow: hidden; }
+
+/* Only the briefing SECTION scrolls (not #briefing itself) */
+section.briefing-scroll { overflow: auto; }
+#briefing { overflow: visible; max-height: none; }
+
+/* Footer internals: Start pinned left; mic perfectly centered */
+footer .btn#btnSessionToggle { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); }
+footer #btnHoldMic          { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }

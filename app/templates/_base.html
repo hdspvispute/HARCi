@@ -5,54 +5,61 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="{{ cfg.brandRed or '#E60027' }}">
   <link rel="manifest" href="{{ url_for('static', path='manifest.webmanifest') }}">
-  <title>
-    {% block title %}
-      HARCi Concierge
-    {% endblock %}
-  </title>
+  <link rel="icon" href="{{ url_for('static', path='favicon.ico') }}">
+  <title>{% block title %}HARCi Concierge{% endblock %}</title>
+
+  <!-- Tailwind-built CSS -->
   <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=15" />
+  <style>:root{ --brand-red: {{ cfg.brandRed or '#E60027' }}; }</style>
 
-  <style>
-    :root { --brand-red: {{ cfg.brandRed or '#E60027' }}; }
-  </style>
-  <!-- Speech SDK (available globally; needed on Guide) -->
+  <!-- Speech SDK (global; needed on Guide) -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+  <!-- Set --app-h (device height) and --hdr (header px) -->
+  <script>
+    (function () {
+      const rs = document.documentElement;
+      function setAppH(){ rs.style.setProperty('--app-h', (window.innerHeight||rs.clientHeight||0) + 'px'); }
+      function setHdr(){ const h=document.querySelector('header'); if (h) rs.style.setProperty('--hdr', h.offsetHeight + 'px'); }
+      setAppH(); setHdr();
+      let raf; const reflow=()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ setAppH(); setHdr(); }); };
+      window.addEventListener('resize', reflow, {passive:true});
+      window.addEventListener('orientationchange', reflow, {passive:true});
+      window.addEventListener('load', reflow);
+      document.addEventListener('readystatechange', reflow);
+    })();
+  </script>
 </head>
-<body class="min-h-full bg-neutral-900 text-neutral-100">
-  <!-- Header -->
-  <header class="h-16 w-full border-b border-white/10 bg-neutral-950/60 backdrop-blur" style="--hdr: 64px;">
-  <div class="mx-auto h-full max-w-6xl px-4 flex items-center justify-between">
-<img src="{{ url_for('static', path='assets/hitachi_logo_wh.png') }}" alt="Hitachi Logo" class="h-8 w-auto drop-shadow-lg">
-      <div class="flex flex-col">
-        <div class="text-lg font-semibold tracking-wide">
-          {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
-        </div>
-      </div>
-      {% block header_right %}{% endblock %}
+
+<body class="bg-neutral-900 text-neutral-100 overflow-hidden" style="height: var(--app-h);">
+ <!-- Header (fixed, never scrolls) -->
+<header class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur">
+  <div class="mx-auto h-full w-screen px-4 md:px-6 lg:px-8 flex items-center justify-between">
+    <img src="{{ url_for('static', path='assets/hitachi_logo_wh.png') }}" alt="Hitachi Logo"
+         class="h-8 w-auto drop-shadow-lg select-none" draggable="false">
+    <div class="text-lg font-semibold tracking-wide">
+      {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
     </div>
-  </header>
+    <div></div>
+  </div>
+</header>
 
-  <!-- Page content -->
-  <main class="mx-auto max-w-6xl px-4 py-6">
-    {% block content %}{% endblock %}
-  </main>
+<!-- Page content area (no page scroll). We’ll place the Guide viewport here. -->
+<main id="page-root" class="pt-16 h-[calc(100dvh-4rem)] w-screen overflow-hidden">
+  {% block content %}{% endblock %}
+</main>
 
-  <!-- Global scripts (present on all pages); load foundation first -->
-  <script src="{{ url_for('static', path='js/logger.js') }}?v=13"></script>
-  <script src="{{ url_for('static', path='js/api.js') }}?v=13"></script>
-  <script src="{{ url_for('static', path='js/idle.js') }}?v=13"></script>
-  <script src="{{ url_for('static', path='js/harci_lifecycle_patch.js') }}?v=13"></script>
 
-  <!-- Avatar + STT + Earcon before UI bindings so the UI can call into them -->
-  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=13"></script>
-  <script src="{{ url_for('static', path='js/stt.js') }}?v=13"></script>
-  <script src="{{ url_for('static', path='js/earcon.js') }}?v=13"></script>
-
-  <!-- UI bindings LAST so everything above is available -->
-  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=13"></script>
-
-  <!-- Safety net: updates any leftover placeholders to cfg.event.name at runtime -->
-  <script src="/static/js/event_name.js?v=14"></script>
+  <!-- Global scripts -->
+  <script src="{{ url_for('static', path='js/logger.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/api.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/idle.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/harci_lifecycle_patch.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/avatar_rtc.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/stt.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/earcon.js') }}?v=13" defer></script>
+  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=13" defer></script>
+  <script src="/static/js/event_name.js?v=14" defer></script>
 
   {% block extra_scripts %}{% endblock %}
 </body>

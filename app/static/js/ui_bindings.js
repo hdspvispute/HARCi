@@ -267,9 +267,8 @@
       sessionActive = true;
       if (sessionBtn) { sessionBtn.textContent = 'End session'; sessionBtn.disabled = false; }
 
-      await runAgentWelcome();
-
-      
+      // Fire-and-forget welcome so the End button is visible during narration
+      runAgentWelcome().catch(e => LOG.warn('[ui] welcome failed', e));
     }
 
     async function endSessionFlow(){
@@ -334,7 +333,7 @@
     // Quick chips
     chips.forEach(btn => btn.addEventListener('click', ()=> runPrompt(btn.dataset.prompt)));
 
-    // ---- Mic press & hold ----------------------------------------------------
+    // ---- Mic press & hold (robust mobile) -----------------------------------
     let isHolding = false;
     let holdToken = 0;
 
@@ -349,8 +348,18 @@
       });
     }
 
+    // Strengthen the button’s semantics and disable long-press UI affordances
+    if (holdBtn) {
+      try { holdBtn.setAttribute('type', 'button'); } catch {}
+      holdBtn.classList.add('select-none', 'touch-none'); // Tailwind utilities
+      try { holdBtn.style.webkitTapHighlightColor = 'transparent'; } catch {}
+      ['contextmenu','dragstart','selectstart','gesturestart'].forEach(evt =>
+        holdBtn.addEventListener(evt, (e) => e.preventDefault(), { passive: false })
+      );
+    }
+
     const press = async (e) => {
-      e.preventDefault();
+      e.preventDefault(); e.stopPropagation();
       if (isHolding) return;
       isHolding = true;
       holdToken++;
@@ -362,23 +371,28 @@
 
       UI.setStatus('Listening'); UI.setMicEnabled(false);
       try {
+        // Pointer capture keeps receiving events even if finger leaves the button
+        try { holdBtn?.setPointerCapture?.(e.pointerId); } catch {}
         await window.HARCI_STT.beginHold();
         holdBtn?.classList.add('ring-2','ring-white/50');
       } catch (err) {
         LOG.warn('[ui] beginHold failed', err);
         isHolding = false;
+        try { holdBtn?.releasePointerCapture?.(e.pointerId); } catch {}
         UI.setStatus('Ready'); UI.setMicEnabled(true);
       }
     };
 
     const release = async (e) => {
-      e.preventDefault();
+      e?.preventDefault?.(); e?.stopPropagation?.();
       if (!isHolding) return;
       const myToken = holdToken;
       isHolding = false;
 
+      try { holdBtn?.releasePointerCapture?.(e?.pointerId); } catch {}
       holdBtn?.classList.remove('ring-2','ring-white/50');
       try { window.EARCON?.stop?.(); } catch {}
+
       let text = '';
       try {
         const r = await window.HARCI_STT.endHold();
@@ -402,10 +416,24 @@
     };
 
     if (holdBtn) {
-      holdBtn.addEventListener('pointerdown', press);
-      holdBtn.addEventListener('pointerup', release);
-      holdBtn.addEventListener('pointercancel', release);
-      holdBtn.addEventListener('pointerleave', release);
+      // True push-to-talk on all devices
+      holdBtn.addEventListener('pointerdown', press, { passive: false });
+      holdBtn.addEventListener('pointerup',   release, { passive: false });
+      holdBtn.addEventListener('pointercancel', release, { passive: false });
+      holdBtn.addEventListener('pointerleave',  release, { passive: false });
+
+      // Safety: if finger/mouse is released off the button, still stop
+      window.addEventListener('pointerup', release, { passive: false });
+
+      // Optional: tap-to-toggle fallback on coarse pointers (phones)
+      if (window.matchMedia?.('(pointer: coarse)').matches) {
+        let toggled = false;
+        holdBtn.addEventListener('click', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          toggled ? release(e) : press(e);
+          toggled = !toggled;
+        }, { passive: false });
+      }
     }
 
     // Keyboard accessibility for mic (space to hold)

@@ -2,23 +2,26 @@
 {% block title %}Guide · HARCi{% endblock %}
 
 {% block content %}
-<div class="relative h-full w-screen overflow-hidden">
-  <!-- Content area: height = main height - footer height -->
-  <div class="h-full w-screen overflow-hidden flex flex-col min-h-0">
+<!-- Full viewport below fixed header; reserve space for fixed footer (64px) -->
+<div id="guideViewport"
+     class="h-full w-screen overflow-hidden"
+     style="--footer-h: 64px;">
 
-    <!-- Avatar + Briefing -->
-    <div class="flex-1 min-h-0 px-4 md:px-6 lg:px-8 gap-3 md:gap-4
-                flex flex-col md:grid md:grid-cols-12">
+  <!-- Content area: no scroll; ONLY briefing panel will scroll -->
+  <div class="h-[calc(100%_-_var(--footer-h)_-_env(safe-area-inset-bottom))] min-h-0 w-screen flex flex-col">
 
-      <!-- Avatar (stacked on mobile, left on md+) -->
-      <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-black md:col-span-7 lg:col-span-8 shrink-0">
+    <!-- Avatar + Briefing: stacked on mobile, side-by-side on md+ -->
+    <div class="flex-1 min-h-0 grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4 px-4 md:px-6 lg:px-8">
+
+      <!-- Avatar -->
+      <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-black md:col-span-7 lg:col-span-8">
         <div class="aspect-video md:h-full">
           <video id="remoteVideo" class="h-full w-full object-cover bg-black" playsinline autoplay muted></video>
         </div>
         <audio id="remoteAudio" playsinline></audio>
 
         <!-- Status chip -->
-        <div class="absolute left-3 top-3">
+        <div class="absolute left-3 top-3 flex items-center gap-2">
           <span class="inline-flex items-center rounded-full border border-white/10 bg-neutral-900/70 px-3 py-1 text-[11px]">
             <span id="statusDot" class="mr-2 h-2 w-2 rounded-full"></span>
             <span id="statusText">Tap start</span>
@@ -26,9 +29,8 @@
         </div>
       </section>
 
-      <!-- Briefing (ONLY scroll area) -->
-      <section class="briefing-scroll rounded-2xl border border-white/10 bg-neutral-800/50 p-4
-                      md:col-span-5 lg:col-span-4 min-h-0">
+      <!-- Briefing (THE ONLY scroll area) -->
+      <section class="rounded-2xl border border-white/10 bg-neutral-800/50 p-4 md:col-span-5 lg:col-span-4 min-h-0 overflow-auto">
         <div id="briefing" class="prose prose-invert max-w-none text-sm leading-snug"></div>
 
         <!-- Optional image -->
@@ -37,53 +39,41 @@
           <div class="p-2 text-[11px] text-neutral-300"><span id="imgAlt"></span></div>
         </div>
       </section>
-
-      <!-- Chips + Ask for md+ (desktop/tablet) -->
-      <section class="hidden md:block md:col-span-12">
-        <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-3 mt-3">
-          <div id="quickChips" class="flex gap-2 overflow-x-auto pb-2">
-            <button class="chip" data-prompt="Agenda">Agenda</button>
-            <button class="chip" data-prompt="Venue Map">Venue Map</button>
-            <button class="chip" data-prompt="Speakers">Speakers</button>
-            <button class="chip" data-prompt="Help">Help</button>
-          </div>
-
-          <form id="askForm" class="mt-2 flex items-stretch gap-2">
-            <input id="txtAsk" type="text" placeholder="Type or press-and-hold the mic to speak…" class="input text-sm" />
-            <button id="btnAsk" type="submit" class="btn btn-brand text-sm">Ask</button>
-          </form>
-        </div>
-      </section>
     </div>
-  </div>
 
-  <!-- Fixed footer -->
-  <footer class="fixed inset-x-0 bottom-0 border-t border-white/10 bg-neutral-950/70 backdrop-blur">
-    <div class="relative h-full">
-      <!-- Mobile-only chips + input inside the footer -->
-      <div class="md:hidden border-t border-white/10 px-4 py-2 space-y-2">
-        <div id="quickChipsMobile" class="flex gap-2 overflow-x-auto pb-1">
+    <!-- Chips + Ask (non-scrolling) -->
+    <section class="px-4 md:px-6 lg:px-8 mt-3">
+      <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-3">
+        <div id="quickChips" class="flex gap-2 overflow-x-auto pb-2">
           <button class="chip" data-prompt="Agenda">Agenda</button>
           <button class="chip" data-prompt="Venue Map">Venue Map</button>
           <button class="chip" data-prompt="Speakers">Speakers</button>
           <button class="chip" data-prompt="Help">Help</button>
         </div>
-        <form id="askForm" class="flex items-stretch gap-2">
+
+        <form id="askForm" class="mt-2 flex items-stretch gap-2">
           <input id="txtAsk" type="text" placeholder="Type or press-and-hold the mic to speak…" class="input text-sm" />
           <button id="btnAsk" type="submit" class="btn btn-brand text-sm">Ask</button>
         </form>
       </div>
-      <!-- Core bar (Start left, Mic centered) -->
-      <div class="relative h-20">
+    </section>
+  </div>
+
+  <!-- Fixed footer controls (always visible, bottom of screen) -->
+  <footer class="fixed inset-x-0 bottom-0 z-[9999]">
+    <div class="border-t border-white/10 bg-neutral-950/70 backdrop-blur h-[var(--footer-h)] pt-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)]">
+      <div class="relative h-full">
+        <!-- Start/End toggle pinned left -->
         <button id="btnSessionToggle"
                 class="btn btn-outline absolute left-4 top-1/2 -translate-y-1/2">
           Start session
         </button>
 
+        <!-- Big push-to-talk mic centered -->
         <button id="btnHoldMic"
                 type="button"
                 aria-label="Hold to talk"
-                oncontextmenu="return false"
+                oncontextmenu="return false;"
                 draggable="false"
                 class="btn-circle select-none touch-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
@@ -92,9 +82,10 @@
           </svg>
           <span class="sr-only">Hold to talk</span>
         </button>
-      </div>
 
-      
+        <!-- Right-side placeholder (for future controls) -->
+        <div class="absolute right-4 top-1/2 -translate-y-1/2"></div>
+      </div>
     </div>
   </footer>
 </div>

@@ -1,4 +1,4 @@
-// avatar_rtc.js
+// app/static/js/avatar_rtc.js
 (function () {
   const LOG = (window.HARCI_LOG && window.HARCI_LOG.child)
     ? window.HARCI_LOG.child('avatar')
@@ -29,6 +29,17 @@
     } catch (e) {
       LOG.warn('[avatar] Audio unlock failed (will rely on user gesture):', e);
     }
+  }
+
+  // --- Pronunciation normalization (centralized) -----------------------------
+  function fixPronunciation(s = '') {
+    // Handle possessives first (smart or straight apostrophes)
+    return String(s)
+      .replace(/\bHARCi(?:'|’)[sS]\b/g, 'Harkee’s')
+      .replace(/\bHARC(?:'|’)[sS]\b/g,  'Hark’s')
+      // Plain words (case-insensitive)
+      .replace(/\bHARCi\b/gi, 'Harkee')
+      .replace(/\bHARC\b/gi,  'Hark');
   }
 
   let synth = null;
@@ -148,12 +159,15 @@
     if (!synth) throw new Error('Avatar not started');
     const t = String(text || '').trim();
     if (!t) return;
-    LOG.info('[avatar] speak: attempting:', t);
+
+    const fixed = fixPronunciation(t);
+    LOG.info('[avatar] speak: attempting:', fixed);
+
     // Return a promise so callers can await and manage status
     return new Promise((resolve, reject) => {
       try {
         synth.speakTextAsync(
-          t,
+          fixed,
           () => { LOG.info('[avatar] speak: completed'); resolve(); },
           (err) => { LOG.error('[avatar] speak: error:', err); reject(err); }
         );
