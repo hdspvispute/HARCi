@@ -36,7 +36,6 @@ from dotenv import load_dotenv
 try:
     from .prompts import build_assist_preamble, build_welcome_prompt
 except Exception:
-    # fallback if relative import fails (e.g., when run in certain layouts)
     from prompts import build_assist_preamble, build_welcome_prompt  # type: ignore
 
 load_dotenv(override=False)
@@ -47,7 +46,6 @@ try:
     from azure.ai.projects import AIProjectClient  # type: ignore
     from azure.ai.agents.models import ListSortOrder  # type: ignore
 except Exception:
-    # Keep server bootable even if SDK isn't installed or env not set
     AccessToken = None          # type: ignore
     TokenCredential = None      # type: ignore
     AIProjectClient = None      # type: ignore
@@ -138,7 +136,6 @@ def get_session(sid: Optional[str]) -> Optional[Session]:
     if not sess:
         return None
     if _is_expired(sess):
-        # Lazy purge
         try:
             del SESSIONS[sid]
         except Exception:
@@ -196,7 +193,7 @@ def ui_cfg():
         "avatarStyle": AVATAR_STYLE,
         "speechLang": SPEECH_LANG,
         "speechVoice": SPEECH_VOICE,
-        "event": {  # handy for client hints / UI
+        "event": {
             "tz":   EVENT_TZ,
             "date": EVENT_DATE,
             "city": EVENT_CITY,
@@ -288,11 +285,41 @@ async def api_session_end(body: SidBody):
     return {"ok": True}
 
 # ===== Tokens (Speech + Relay) ===============================================
+
+# NEW: tiny in-process cache for STS tokens per speech resource (region+key)
+_SPEECH_TOKEN_CACHE_LOCK = threading.Lock()
+_SPEECH_TOKEN_CACHE: Dict[str, Dict[str, object]] = {}  # {resource_id: {"token": str, "exp": int, "region": str}}
+
+def _resource_id(region: str, key: str) -> str:
+    head = key[:6] if key else ""
+    return f"{region}:{head}"
+
+def _get_cached_speech_token(region: str, key: str) -> Optional[Dict[str, object]]:
+    rid = _resource_id(region, key)
+    with _SPEECH_TOKEN_CACHE_LOCK:
+        data = _SPEECH_TOKEN_CACHE.get(rid)
+        if not data:
+            return None
+        # Keep 60s safety margin
+        if int(data.get("exp", 0)) - int(time.time()) <= 60:
+            _SPEECH_TOKEN_CACHE.pop(rid, None)
+            return None
+        return data
+
+def _set_cached_speech_token(region: str, key: str, token: str, ttl_sec: int = 8 * 60):
+    rid = _resource_id(region, key)
+    with _SPEECH_TOKEN_CACHE_LOCK:
+        _SPEECH_TOKEN_CACHE[rid] = {"token": token, "exp": int(time.time()) + ttl_sec, "region": region}
+
 @app.get("/speech-token")
 @app.get("/api/speech/token")  # alias
 async def speech_token():
     res = _next_speech_resource()
     region, key = res["region"], res["key"]
+
+    cached = _get_cached_speech_token(region, key)
+    if cached:
+        return {"token": cached["token"], "region": cached["region"], "expiresAt": cached["exp"]}
 
     url = f"https://{region}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
     headers = {
@@ -306,7 +333,8 @@ async def speech_token():
             raise HTTPException(r.status_code, "Failed to issue speech token")
         token = r.text.strip()
 
-    # 9 minutes is the typical TTL; be conservative
+    # Cache ~8 minutes (SDK generally treats tokens as ~9–10 min)
+    _set_cached_speech_token(region, key, token, ttl_sec=8 * 60)
     return {"token": token, "region": region, "expiresAt": int(time.time()) + 8 * 60}
 
 @app.get("/relay-token")
@@ -331,14 +359,6 @@ _AGENT_OBJ = None
 _CREDENTIAL = None  # Optional["TokenCredential"]
 
 def _build_credential():
-    """
-    Single path: DefaultAzureCredential.
-
-    - On local Windows dev, IMDS/MI probes can be slow; we still allow them but
-      prefer env/CLI if present.
-    - In Azure Container Apps or when a Managed Identity is injected
-      (IDENTITY_ENDPOINT/MSI_ENDPOINT), DAC will pick it up.
-    """
     from azure.identity import DefaultAzureCredential
     mi_present = bool(os.getenv("IDENTITY_ENDPOINT") or os.getenv("MSI_ENDPOINT"))
     return DefaultAzureCredential(
@@ -351,7 +371,6 @@ def _build_credential():
     )
 
 def _get_client_and_agent():
-    """Create/cached AIProjectClient + Agent lazily and thread-safely."""
     global _PROJECT_CLIENT, _AGENT_OBJ, _CREDENTIAL
     if not agent_config_ok():
         raise HTTPException(500, "Agent not configured")
@@ -372,7 +391,6 @@ def _get_client_and_agent():
 
 # ===== Helpers for parsing agent replies ======================================
 def _extract_text(msg):
-    """Best-effort to extract a text string from an agent message object."""
     try:
         tms = getattr(msg, "text_messages", None) or []
         if tms:
@@ -388,7 +406,6 @@ def _extract_text(msg):
     return None
 
 def _parse_payload(s: str):
-    """Parse the agent's JSON-ish payload, with markdown fences tolerated."""
     s2 = (s or "").strip()
     if s2.startswith("```"):
         fence = "```json" if s2.lower().startswith("```json") else "```"
@@ -398,7 +415,6 @@ def _parse_payload(s: str):
     try:
         return json.loads(s2)
     except Exception:
-        # Fall back to narration-only
         return {"narration": s, "briefing_md": "", "image": None}
 
 def _now_local_str() -> str:
@@ -410,16 +426,9 @@ def _now_local_str() -> str:
 # ===== Assist endpoint ========================================================
 @app.post("/assist/run")
 async def assist_run(req: Request, body: dict = Body(default={})):
-    """
-    Invoke the Azure Agent with the given text.
-    - One thread per session (context preserved).
-    - Poll run status quickly to reduce latency.
-    - IMPORTANT: do NOT pass unsupported params (e.g., 'after') to messages.list().
-    """
     text = (body.get("text") or "").strip()
     sid  = body.get("session_id") or req.cookies.get(SESSION_COOKIE)
 
-    # Fallback demo path (if agent not configured or SDK missing)
     if not agent_config_ok() or AIProjectClient is None:
         topic = text or "Welcome"
         return JSONResponse({
@@ -436,7 +445,6 @@ async def assist_run(req: Request, body: dict = Body(default={})):
     try:
         project, agent = _get_client_and_agent()
 
-        # Thread per session
         sess = get_session(sid)
         thread_id = getattr(sess, "agent_thread_id", None) or ""
         if not thread_id:
@@ -445,10 +453,8 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             if sess:
                 sess.agent_thread_id = thread_id
 
-        # Decide whether to seed time-aware context for this session
         should_seed = not bool(getattr(sess, "agent_ctx_seeded", False)) if sess else True
 
-        # Build optional per-run preamble (goes into additional_instructions)
         preamble = build_assist_preamble(
             event_name=EVENT_NAME,
             event_city=EVENT_CITY,
@@ -457,20 +463,17 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             now_local=_now_local_str()
         ) if should_seed else None
 
-        # Create the user message (role=user is required)
         project.agents.messages.create(thread_id=thread_id, role="user", content=text)
 
-        # Create the run with our time-aware preamble
         run = project.agents.runs.create(
             thread_id=thread_id,
             agent_id=agent.id,
-            additional_instructions=preamble  # None if not seeding this turn
+            additional_instructions=preamble
         )
         if should_seed and sess:
             sess.agent_ctx_seeded = True
 
-        # Poll the run quickly
-        deadline = time.time() + 30.0  # 30s ceiling
+        deadline = time.time() + 30.0
         while getattr(run, "status", None) not in ("completed", "failed") and time.time() < deadline:
             time.sleep(0.25)
             run = project.agents.runs.get(thread_id=thread_id, run_id=run.id)
@@ -482,7 +485,6 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                 status_code=500
             )
 
-        # ---------- Fast path: run-scoped outputs (if exposed by this SDK build)
         try:
             output_ids = getattr(run, "output_messages", None) or []
         except Exception:
@@ -504,10 +506,9 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                         touch_sid(sid or "")
                         return JSONResponse(_parse_payload(txt))
 
-        # ---------- Fallback: list a small window of recent messages
         list_kwargs = {"thread_id": thread_id, "limit": 20}
         if ListSortOrder is not None:
-            list_kwargs["order"] = ListSortOrder.DESCENDING  # newest first
+            list_kwargs["order"] = ListSortOrder.DESCENDING
 
         msgs = project.agents.messages.list(**list_kwargs)
 
@@ -520,9 +521,8 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                 continue
 
             if newest_agent_any is None:
-                newest_agent_any = m  # first agent msg is newest when DESC
+                newest_agent_any = m
 
-            # Prefer message produced by this run
             mid_run_id = getattr(m, "run_id", None)
             if mid_run_id and str(mid_run_id) == str(run.id):
                 txt = _extract_text(m)
@@ -551,16 +551,10 @@ async def assist_run(req: Request, body: dict = Body(default={})):
 # ===== Personalized welcome (Agent-powered) ===================================
 @app.post("/assist/welcome")
 async def assist_welcome(req: Request):
-    """
-    Ask the Agent to produce a personalized welcome using the registrant's name.
-    Returns the same JSON shape as /assist/run:
-      { narration: str, briefing_md: str, image?: {url, alt}? }
-    """
     sid = req.cookies.get(SESSION_COOKIE)
     sess = get_session(sid)
     user_name = (getattr(sess, "name", None) or "Guest").strip()
 
-    # Fallback path if agent missing
     if not agent_config_ok() or AIProjectClient is None:
         fallback_narration = (
             f"Hi {user_name}, welcome to the {EVENT_NAME}. I’m HARCi — "
@@ -577,7 +571,6 @@ async def assist_welcome(req: Request):
     try:
         project, agent = _get_client_and_agent()
 
-        # Thread per session
         thread_id = getattr(sess, "agent_thread_id", "") if sess else ""
         if not thread_id:
             thread = project.agents.threads.create()
@@ -585,7 +578,6 @@ async def assist_welcome(req: Request):
             if sess:
                 sess.agent_thread_id = thread_id
 
-        # Seed preamble if first run in this session
         should_seed = not bool(getattr(sess, "agent_ctx_seeded", False)) if sess else True
         preamble = build_assist_preamble(
             event_name=EVENT_NAME,
@@ -595,14 +587,12 @@ async def assist_welcome(req: Request):
             now_local=_now_local_str()
         ) if should_seed else None
 
-        # Build the agent-directed welcome prompt
         welcome_prompt = build_welcome_prompt(
             user_name=user_name,
             event_name=EVENT_NAME,
             event_city=EVENT_CITY
         )
 
-        # Send as a user message so the Agent crafts the JSON
         project.agents.messages.create(thread_id=thread_id, role="user", content=welcome_prompt)
 
         run = project.agents.runs.create(
@@ -613,7 +603,6 @@ async def assist_welcome(req: Request):
         if should_seed and sess:
             sess.agent_ctx_seeded = True
 
-        # Poll
         deadline = time.time() + 30.0
         while getattr(run, "status", None) not in ("completed", "failed") and time.time() < deadline:
             time.sleep(0.25)
@@ -623,7 +612,6 @@ async def assist_welcome(req: Request):
             log.error("Agent welcome failed: %s", getattr(run, "last_error", None))
             raise HTTPException(502, "Welcome run failed")
 
-        # Try direct output references first
         output_ids = getattr(run, "output_messages", None) or []
         if output_ids:
             get_by_id = getattr(project.agents.messages, "get", None)
@@ -641,7 +629,6 @@ async def assist_welcome(req: Request):
                         touch_sid(sid or "")
                         return JSONResponse(_parse_payload(txt))
 
-        # Else scan recent messages
         list_kwargs = {"thread_id": thread_id, "limit": 20}
         if ListSortOrder is not None:
             list_kwargs["order"] = ListSortOrder.DESCENDING
@@ -657,7 +644,6 @@ async def assist_welcome(req: Request):
                     touch_sid(sid or "")
                     return JSONResponse(_parse_payload(txt))
 
-        # Last resort: newest agent message
         for m in msgs:
             role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
             if role_name == "agent":
@@ -667,7 +653,6 @@ async def assist_welcome(req: Request):
                     return JSONResponse(_parse_payload(txt))
                 break
 
-        # Fallback text
         fallback_narration = (
             f"Hi {user_name}, welcome to the {EVENT_NAME}. I’m HARCi — "
             "ask me about the agenda, venue map, or speakers."

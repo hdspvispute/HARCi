@@ -13,7 +13,6 @@
   html, body { height: 100%; }
 }
 
-
 /* ===== Layout Utilities ===== */
 @layer utilities {
   .conversation-shell{
@@ -60,10 +59,86 @@
            focus:ring-[var(--brand-red)] focus:border-transparent
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
+
+  /* ========= Strong Inactive/Disabled styles (Tailwind-only) ========= */
+  /* Buttons — general (high contrast difference) */
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    @apply opacity-40 grayscale saturate-0 contrast-75 brightness-75
+           pointer-events-none shadow-none;
+    transform: none; /* neutralize active scale */
+  }
+
+  /* Brand buttons — clearly not tappable when disabled */
+  .btn-brand:disabled,
+  .btn-brand[aria-disabled="true"] {
+    @apply opacity-40 ring-1 ring-white/15 shadow-none;
+  }
+
+  /* Outline/Plain buttons — soften text/borders clearly */
+  .btn-outline:disabled,
+  .btn-outline[aria-disabled="true"],
+  .btn-plain:disabled,
+  .btn-plain[aria-disabled="true"] {
+    @apply text-white/45 border-white/20 bg-white/5;
+  }
+
+  /* Chips — dashed, muted, slightly darker */
+  .chip:disabled,
+  .chip[aria-disabled="true"] {
+    @apply bg-neutral-700/30 border-dashed border-white/25 text-white/55
+           pointer-events-none;
+  }
+
+  /* Inputs — darker well + faint placeholder */
+  .input:disabled,
+  .input[aria-disabled="true"] {
+    @apply bg-neutral-700/20 text-white/60 border-white/15;
+  }
+  .input:disabled::placeholder,
+  .input[aria-disabled="true"]::placeholder { @apply text-white/30; }
+
+  /* Mic button — swap brand red for neutral gray when disabled */
+  #btnHoldMic:disabled,
+  #btnHoldMic[aria-disabled="true"] {
+    @apply bg-neutral-700 ring-2 ring-white/20 border border-dashed border-white/25
+           opacity-70 grayscale pointer-events-none;
+  }
+  #btnHoldMic:disabled svg,
+  #btnHoldMic[aria-disabled="true"] svg { @apply opacity-80; }
+
+  /* =========================
+     Global UI state visuals
+     ========================= */
+  /* Pre-session or ended */
+  body.ui-inactive footer,
+  body.ui-inactive #quickChips,
+  body.ui-inactive #quickChipsDesk,
+  body.ui-inactive #askForm,
+  body.ui-inactive #askFormDesk,
+  body.ui-inactive #btnHoldMic {
+    @apply opacity-50 grayscale contrast-75;
+  }
+
+  /* Thinking/Starting/Processing… */
+  body.ui-busy footer,
+  body.ui-busy #quickChips,
+  body.ui-busy #quickChipsDesk,
+  body.ui-busy #askForm,
+  body.ui-busy #askFormDesk,
+  body.ui-busy #btnHoldMic {
+    @apply opacity-45 grayscale contrast-75 pointer-events-none;
+  }
 }
 
 /* ===== States / Effects ===== */
 body.idle #remoteVideo { filter: brightness(.88) saturate(.95); }
+
+/* Optional: dim chip row when any chip is disabled (busy vibe) */
+#quickChips:has(button:disabled),
+#quickChipsDesk:has(button:disabled) {
+  filter: grayscale(100%) brightness(.9);
+}
 
 /* ===== Prose tweaks ===== */
 .prose h1 { @apply text-xl font-bold mt-2 mb-1; }
@@ -109,4 +184,8 @@ footer .btn#btnSessionToggle {
   position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
 }
 footer #btnHoldMic {
-  position: a
+  position: absolute; /* fixed: was 'a' */
+}
+
+/* Optional: hint on the video too while busy */
+body.ui-busy #remoteVideo { filter: brightness(.85) saturate(.95); }

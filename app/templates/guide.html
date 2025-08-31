@@ -2,82 +2,84 @@
 {% block title %}Guide · HARCi{% endblock %}
 
 {% block content %}
-<div class="relative h-full w-screen overflow-hidden">
-  <!-- Content area: no page scroll; brief section will scroll -->
-  <div class="h-full w-screen overflow-hidden flex flex-col min-h-0">
+<!-- Viewport for Guide: height = 100dvh - header - footer -->
+<div id="guide-viewport"
+     class="px-4 md:px-6 lg:px-8"
+     style="height: calc(100dvh - var(--hdr, 64px) - var(--ftr, 80px));">
 
-    <!-- Avatar + Briefing -->
-    <div class="flex-1 min-h-0 px-4 md:px-6 lg:px-8 gap-3 md:gap-4
-                flex flex-col md:grid md:grid-cols-12">
+  <!-- Fill the viewport; only briefing is scrollable -->
+  <div class="h-full min-h-0 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4">
 
-      <!-- Avatar (stacked on mobile, left on md+) -->
-      <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-black md:col-span-7 lg:col-span-8 shrink-0">
-        <div class="aspect-video md:h-full">
-          <video id="remoteVideo" class="h-full w-full object-cover bg-black" playsinline autoplay muted></video>
+    <!-- Avatar (stacked on mobile, left on md+) -->
+    <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-black
+                    shrink-0 md:col-span-7 lg:col-span-8">
+      <div class="aspect-video md:h-full">
+        <video id="remoteVideo" class="h-full w-full object-cover bg-black" playsinline autoplay muted></video>
+      </div>
+      <audio id="remoteAudio" playsinline autoplay></audio>
+
+
+      <!-- Status chip -->
+      <div class="absolute left-3 top-3">
+        <span class="inline-flex items-center rounded-full border border-white/10 bg-neutral-900/70 px-3 py-1 text-[11px]">
+          <span id="statusDot" class="mr-2 h-2 w-2 rounded-full"></span>
+          <span id="statusText">Tap start</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- Briefing (ONLY scroll area; grows to fill remaining height) -->
+    <section class="rounded-2xl border border-white/10 bg-neutral-800/50 p-4
+                    flex-1 min-h-0 overflow-auto overscroll-contain
+                    md:col-span-5 lg:col-span-4">
+      <div id="briefing" class="prose prose-invert max-w-none text-sm leading-snug">
+        <h2 class="text-base font-semibold mb-1">Getting started</h2>
+        <ul class="mt-1">
+          <li>Click <strong>Start session</strong> (bottom left).</li>
+          <li>Hold the <strong>mic</strong> to speak, then release to send.</li>
+        </ul>
+        <p class="mt-2 text-neutral-300">
+          You can also tap a quick chip or type in the Ask box.
+        </p>
+      </div>
+
+      <!-- Optional image -->
+      <div id="imagePanel" class="hidden mt-3 overflow-hidden rounded-xl border border-white/10 bg-neutral-900/40">
+        <img id="briefImage" alt="" class="w-full object-cover" />
+        <div class="p-2 text-[11px] text-neutral-300"><span id="imgAlt"></span></div>
+      </div>
+    </section>
+
+    <!-- Desktop chips + ask -->
+    <section class="hidden md:block md:col-span-12">
+      <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-3 mt-3">
+        <div id="quickChipsDesk" class="flex gap-2 overflow-x-auto pb-2">
+          <button class="chip" data-prompt="Agenda">Agenda</button>
+          <button class="chip" data-prompt="Demos">Demos</button>
+          <button class="chip" data-prompt="Speakers">Speakers</button>
+          <button class="chip" data-prompt="Help">Help</button>
         </div>
-        <audio id="remoteAudio" playsinline></audio>
-
-        <!-- Status chip -->
-        <div class="absolute left-3 top-3">
-          <span class="inline-flex items-center rounded-full border border-white/10 bg-neutral-900/70 px-3 py-1 text-[11px]">
-            <span id="statusDot" class="mr-2 h-2 w-2 rounded-full"></span>
-            <span id="statusText">Tap start</span>
-          </span>
-        </div>
-      </section>
-
-      <!-- Briefing (ONLY scroll area) -->
-      <section class="briefing-scroll rounded-2xl border border-white/10 bg-neutral-800/50 p-4
-                      md:col-span-5 lg:col-span-4 min-h-0">
-        <div id="briefing" class="prose prose-invert max-w-none text-sm leading-snug"></div>
-
-        <!-- Optional image -->
-        <div id="imagePanel" class="hidden mt-3 overflow-hidden rounded-xl border border-white/10 bg-neutral-900/40">
-          <img id="briefImage" alt="" class="w-full object-cover" />
-          <div class="p-2 text-[11px] text-neutral-300"><span id="imgAlt"></span></div>
-        </div>
-      </section>
-
-      <!-- Desktop chips + ask (IDs suffixed with Desk) -->
-      <section class="hidden md:block md:col-span-12">
-        <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-3 mt-3">
-          <div id="quickChipsDesk" class="flex gap-2 overflow-x-auto pb-2">
-            <button class="chip" data-prompt="Agenda">Agenda</button>
-            <button class="chip" data-prompt="Demos">Demos</button>
-            <button class="chip" data-prompt="Speakers">Speakers</button>
-            <button class="chip" data-prompt="Help">Help</button>
-          </div>
-
-          <form id="askFormDesk" class="mt-2 flex items-stretch gap-2">
-            <input id="txtAskDesk" type="text"
-                   placeholder="Type or press-and-hold the mic to speak…"
-                   class="input text-sm" />
-            <button id="btnAskDesk" type="submit" class="btn btn-brand text-sm">Ask</button>
-          </form>
-        </div>
-      </section>
-    </div>
+        <form id="askFormDesk" class="mt-2 flex items-stretch gap-2">
+          <input id="txtAskDesk" type="text" placeholder="Type or press-and-hold the mic to speak…" class="input text-sm" />
+          <button id="btnAskDesk" type="submit" class="btn btn-brand text-sm">Ask</button>
+        </form>
+      </div>
+    </section>
   </div>
+</div>
 
 <!-- Fixed footer -->
 <footer class="fixed inset-x-0 bottom-0 border-t border-white/10 bg-neutral-950/70 backdrop-blur">
   <div class="relative h-full">
-    <!-- Controls frame: margins on all sides + safe-area at bottom -->
     <div class="absolute" style="inset: 8px 10px calc(env(safe-area-inset-bottom) + 10px) 10px;">
-      <!-- Core bar (fixed height) -->
       <div class="relative h-20 w-full">
-        <!-- Start/End (lifted by frame) -->
         <button id="btnSessionToggle"
                 class="btn btn-outline absolute left-0 top-1/2 -translate-y-1/2 text-sm md:text-base px-3 py-2 md:px-4 md:py-2.5">
           Start session
         </button>
 
-        <!-- Mic centered — smaller on mobile -->
-        <button id="btnHoldMic"
-                type="button"
-                aria-label="Hold to talk"
-                oncontextmenu="return false"
-                draggable="false"
+        <button id="btnHoldMic" type="button" aria-label="Hold to talk"
+                oncontextmenu="return false" draggable="false"
                 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
                        rounded-full border-0 flex items-center justify-center shadow-lg select-none touch-none
                        h-12 w-12 sm:h-14 sm:w-14"
@@ -90,7 +92,7 @@
         </button>
       </div>
 
-      <!-- Mobile-only chips + input: compact typography & padding -->
+      <!-- Mobile-only chips + input -->
       <div class="md:hidden border-t border-white/10 mt-1.5 pt-1.5 space-y-1.5">
         <div id="quickChips" class="flex gap-1.5 overflow-x-auto pb-1">
           <button class="chip text-[11px] px-2 py-1" data-prompt="Agenda">Agenda</button>
@@ -99,18 +101,32 @@
           <button class="chip text-[11px] px-2 py-1" data-prompt="Help">Help</button>
         </div>
         <form id="askForm" class="flex items-stretch gap-1.5">
-          <input id="txtAsk" type="text"
-                 placeholder="Type or hold mic…"
-                 class="input text-xs px-2 py-2 leading-tight" />
+          <input id="txtAsk" type="text" placeholder="Type or hold mic…" class="input text-xs px-2 py-2 leading-tight" />
           <button id="btnAsk" type="submit" class="btn btn-brand text-xs px-3 py-2">Ask</button>
         </form>
       </div>
     </div>
   </div>
 </footer>
-</div>
 
-<!-- Swap IDs to desktop set on md+ so your JS binds to the visible controls -->
+<!-- JS: compute --hdr and --ftr so the viewport height is exact -->
+<script>
+(function () {
+  const rs = document.documentElement;
+  const header = document.querySelector('header');
+  const footer = document.querySelector('footer');
+
+  function setHdr(){ if (header) rs.style.setProperty('--hdr', header.offsetHeight + 'px'); }
+  function setFtr(){ if (footer) rs.style.setProperty('--ftr', footer.offsetHeight + 'px'); }
+
+  setHdr(); setFtr();
+  if (header && 'ResizeObserver' in window) new ResizeObserver(setHdr).observe(header);
+  if (footer && 'ResizeObserver' in window) new ResizeObserver(setFtr).observe(footer);
+  window.addEventListener('resize', () => { setHdr(); setFtr(); }, { passive: true });
+})();
+</script>
+
+<!-- Swap IDs to desktop set on md+ so JS binds to visible controls -->
 <script>
 (function () {
   var mq = window.matchMedia && window.matchMedia('(min-width: 768px)');

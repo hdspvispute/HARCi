@@ -4,6 +4,18 @@
     ? window.HARCI_LOG.child('avatar')
     : console;
 
+  // Cached DOM refs (set on session start / first ontrack)
+  let $video = null;
+  let $audio = null;
+
+  // WebRTC + Synth state
+  let synth = null;
+  let pc = null;
+  let sessionActive = false;
+
+  // Output mute flag (applies to elements + receiver tracks)
+  let outputMuted = false;
+
   async function fetchCfgAndTokens() {
     const [cfg, st, rt] = await Promise.all([
       fetch('/api/config').then(r => r.json()),
@@ -42,15 +54,39 @@
       .replace(/\bHARC\b/gi,  'Hark');
   }
 
-  let synth = null;
-  let pc = null;
-  let sessionActive = false;
+  // --- Output mute helper ----------------------------------------------------
+  function applyOutputMuteToElements(on) {
+    try {
+      if ($audio) $audio.muted = on;
+      if ($video) $video.muted = on;
+    } catch {}
+  }
+  function applyOutputMuteToReceivers(on) {
+    try {
+      if (pc && typeof pc.getReceivers === 'function') {
+        pc.getReceivers().forEach(r => {
+          if (r.track && r.track.kind === 'audio') {
+            // Disabling the receiver track ensures no audio energy is rendered at all.
+            r.track.enabled = !on;
+          }
+        });
+      }
+    } catch (e) {
+      LOG.debug?.('[avatar] receiver mute not applied', e);
+    }
+  }
+  function setOutputMuted(on) {
+    outputMuted = !!on;
+    applyOutputMuteToElements(outputMuted);
+    applyOutputMuteToReceivers(outputMuted);
+  }
 
+  // --- Session lifecycle -----------------------------------------------------
   async function startSession() {
     if (sessionActive) return;
     sessionActive = true;
 
-    const startBtn = document.getElementById('btnStartSession');
+    const startBtn = document.getElementById('btnStartSession') || document.getElementById('btnSessionToggle');
     if (startBtn) startBtn.disabled = true;
 
     try {
@@ -72,7 +108,7 @@
       if (rt?.Urls?.length) {
         avcfg.remoteIceServers = [{ urls: rt.Urls, username: rt.Username, credential: rt.Password }];
       } else {
-        LOG.warn('[avatar] /relay-token is empty — TURN is required for reliable A/V');
+        LOG.warn('[avatar] /relay-token is empty — TURN is recommended for reliable A/V');
       }
 
       synth = new S.AvatarSynthesizer(sc, avcfg);
@@ -85,24 +121,32 @@
       synth.visemeReceived     = (s, e) => LOG.info('[avatar] viseme', e?.visemeId);
       synth.bookmarkReached    = (s, e) => LOG.info('[avatar] bookmark', e?.text);
 
-      const video = document.getElementById('remoteVideo');
-      const audio = document.getElementById('remoteAudio');
-      if (!video || !audio) throw new Error('Missing #remoteVideo/#remoteAudio');
+      $video = document.getElementById('remoteVideo');
+      $audio = document.getElementById('remoteAudio');
+      if (!$video || !$audio) throw new Error('Missing #remoteVideo/#remoteAudio');
 
-      // PeerConnection (force relay when provided)
-      const iceServers = (avcfg.remoteIceServers ?? []).length
+      // Build ICE config dynamically:
+      // - If we have TURN credentials from /relay-token, prefer relay.
+      // - Else fall back to default policy.
+      const haveTurn = Array.isArray(avcfg.remoteIceServers) && avcfg.remoteIceServers.length > 0;
+      const iceServers = haveTurn
         ? avcfg.remoteIceServers
         : [{ urls: ['stun:stun.l.google.com:19302'] }];
 
-      pc = new RTCPeerConnection({ iceServers, iceTransportPolicy: 'relay' });
+      const pcConfig = {
+        iceServers,
+        iceTransportPolicy: haveTurn ? 'relay' : 'all'
+      };
+
+      pc = new RTCPeerConnection(pcConfig);
 
       // TURN presence logging
       try {
         const cfgPC = pc.getConfiguration ? pc.getConfiguration() : { iceServers: [] };
         const servers = cfgPC.iceServers || [];
-        const haveTurn = servers.some(s => /(turn:|turns:)/i.test(String(s.urls || s.url || '')));
-        console.info('[HARCi] TURN available:', haveTurn, 'policy=', cfgPC.iceTransportPolicy || 'default');
-        if (!haveTurn && (cfgPC.iceTransportPolicy === 'relay')) {
+        const hasTurn = servers.some(s => /(turn:|turns:)/i.test(String(s.urls || s.url || '')));
+        console.info('[HARCi] TURN available:', hasTurn, 'policy=', cfgPC.iceTransportPolicy || 'default');
+        if (!hasTurn && (cfgPC.iceTransportPolicy === 'relay')) {
           console.warn('[HARCi] policy=relay but no TURN servers present; expect connection failures if relay required.');
         }
       } catch (e) { console.debug('[HARCi] TURN check skipped', e); }
@@ -117,19 +161,24 @@
       pc.ontrack = (ev) => {
         const stream = ev.streams?.[0];
         if (!stream) return;
-        if (ev.track.kind === 'video') {
-          video.srcObject = stream;
-          video.muted = true;
-          video.playsInline = true;
-          video.play?.().catch(()=>{});
+
+        if (ev.track.kind === 'video' && $video) {
+          $video.srcObject = stream;
+          $video.muted = outputMuted;      // honor current mute state
+          $video.playsInline = true;
+          $video.play?.().catch(()=>{});
         }
-        if (ev.track.kind === 'audio') {
-          audio.srcObject = stream;
-          audio.muted = false;
-          audio.volume = 1.0;
-          audio.playsInline = true;
-          audio.play?.().catch(()=>{});
+
+        if (ev.track.kind === 'audio' && $audio) {
+          $audio.srcObject = stream;
+          $audio.muted = outputMuted;      // honor current mute state
+          $audio.volume = 1.0;
+          $audio.playsInline = true;
+          $audio.play?.().catch(()=>{});
         }
+
+        // Ensure receiver tracks reflect current mute state
+        setTimeout(() => applyOutputMuteToReceivers(outputMuted), 0);
       };
 
       // Start the avatar WebRTC connection (API variants across SDKs)
@@ -188,13 +237,20 @@
     synth = null;
     pc = null;
     sessionActive = false;
+    // Reset mute state so next session starts clean
+    outputMuted = false;
+    $video = null;
+    $audio = null;
   }
 
+  // Public API
   window.HARCI_AVATAR = {
     startSession,
     speak,
     stopSpeaking,
     end,
     ensureAudioUnlocked: unlockAudioPlayback,
+    // 🔥 used by UI to gate output during STT
+    setOutputMuted,
   };
 })();
