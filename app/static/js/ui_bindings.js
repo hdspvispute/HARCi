@@ -9,23 +9,32 @@
   // ---- UI helpers ------------------------------------------------------------
   window.UI = window.UI || {};
 
-  // Visual state helpers (toggle body classes to drive CSS dimming)
   function setVisualState(state /* 'inactive' | 'busy' | 'ready' */) {
     const b = document.body;
     if (!b) return;
     b.classList.toggle('ui-inactive', state === 'inactive');
     b.classList.toggle('ui-busy',     state === 'busy');
     b.classList.toggle('ui-ready',    state === 'ready');
+    updateBusyBar(state);
   }
 
-  // Mic warmup via STT (keeps a hidden stream alive)
+  // Slim progress bar in header
+  function updateBusyBar(stateOrStatus) {
+    const bar = document.getElementById('busyBar');
+    if (!bar) return;
+    const s = String(stateOrStatus || '').toLowerCase();
+    const isBusy =
+      s.includes('busy') ||
+      /starting|thinking|processing|preparing|ending/.test(s);
+    bar.style.width = isBusy ? '100%' : '0';
+  }
+
   async function primeMic() {
     try { await window.HARCI_STT?.warmup?.(); } catch (e) {
       LOG.warn('[ui] stt warmup failed', e);
     }
   }
 
-  // Central enable/disable helpers
   function getAskInput(){ return $('#txtAsk') || $('#txtAskDesk'); }
   function getAskBtn(){ return $('#btnAsk') || $('#btnAskDesk'); }
 
@@ -43,7 +52,6 @@
     setTypedEnabled(on);
   }
 
-  // Auto-lock controls while busy (Thinking/Starting/Processing/Preparing/Ending)
   UI.setStatus = UI.setStatus || (s => {
     UI.status = s;
     try {
@@ -55,18 +63,12 @@
         else if (/Thinking|Starting|Processing|Preparing|Ending/i.test(s)) dot.style.background = '#F59E0B';
         else dot.style.background = '#10B981';
       }
+      updateBusyBar(s);
 
-      // Only auto-toggle when a session is active
       if (window.__harci_sessionActive) {
         const isBusy = /Thinking|Starting|Processing|Preparing|Ending/i.test(s);
-        if (isBusy) {
-          setAllEnabled(false);
-          setVisualState('busy');
-        } else if (/Ready/i.test(s)) {
-          setAllEnabled(true);
-          setVisualState('ready');
-        }
-        // NOTE: Speaking/Listening do NOT auto-toggle; we control explicitly.
+        if (isBusy) { setAllEnabled(false); setVisualState('busy'); }
+        else if (/Ready/i.test(s)) { setAllEnabled(true); setVisualState('ready'); }
       }
     } catch {}
   });
@@ -123,7 +125,6 @@
     }
   }
 
-  // Hard-mute/unmute avatar output
   function muteAvatarOutput(on) {
     try {
       if (typeof window.HARCI_AVATAR?.setOutputMuted === 'function') {
@@ -166,7 +167,11 @@
     const img   = $('#briefImage');
     const alt   = $('#imgAlt');
     const md = (res && (res.briefing_md || res.briefing || '')) || '';
-    if (brief) brief.innerHTML = sanitize(md);
+    if (brief) {
+      brief.innerHTML = sanitize(md);
+      // scroll the briefing container to top to reveal new content
+      try { brief.closest('section.briefing-scroll')?.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    }
     const im = res?.image;
     if (im && im.url && imgP && img) {
       img.src = im.url; img.alt = im.alt || '';
@@ -200,7 +205,7 @@
     } catch {}
   }
 
-  // ---- Transition ------------------------------------------------------------
+  // ---- Pages ----------------------------------------------------------------
   function onTransitionPage() {
     const btn = $('#btnUnlock');
     if (!btn) return;
@@ -208,7 +213,7 @@
       try {
         await window.bootstrapConfig();
         if (await waitForAvatar(500)) {
-          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch {}
+          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
         } else {
           await softAudioUnlock();
         }
@@ -217,7 +222,6 @@
     }, { once: true });
   }
 
-  // ---- Register --------------------------------------------------------------
   async function onRegisterPage(){
     const f = $('#regForm');
     if (!f) return;
@@ -235,15 +239,17 @@
     });
   }
 
-  // ---- Guide ----------------------------------------------------------------
   async function onGuidePage(){
     await window.bootstrapConfig();
 
     const audio      = $('#remoteAudio');
-    const sessionBtn = $('#btnSessionToggle') || $('#btnStartSession');
-    const holdBtn    = $('#btnHoldMic'); // << single declaration
+    const holdBtn    = $('#btnHoldMic');
+    const endBtn     = $('#btnEndSession');
 
-    UI.setStatus('Tap start');
+    // Initial status
+    UI.setStatus('Starting…');
+    setAllEnabled(false);
+    setVisualState('busy');
 
     function primeAudioEl() {
       try {
@@ -254,76 +260,74 @@
       } catch {}
     }
 
-    // Ensure mic is visible even when disabled pre-session
+    // Ensure mic visible even if disabled during startup
     if (holdBtn) {
       holdBtn.classList.remove('hidden');
       holdBtn.style.visibility = 'visible';
       holdBtn.style.opacity = '';
     }
 
-    // Pre-session: visible but disabled + visual state
-    setAllEnabled(false);
-    setVisualState('inactive');
-
-    let welcomed = false;
-
-    async function runAgentWelcome() {
-      if (welcomed) return;
-      welcomed = true;
-
-      // Allow interaction during welcome
-      UI.setStatus('Thinking…');
-      const welcomeAC = new AbortController();
+    // Auto-start session
+    (async () => {
       try {
-        let res = null;
-        if (typeof window.API.assistWelcome === 'function') {
-          res = await window.API.assistWelcome(undefined, { signal: welcomeAC.signal });
+        if (await waitForAvatar(800)) {
+          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
         } else {
-          res = await window.API.assistRun('Welcome me', undefined, { signal: welcomeAC.signal });
+          await softAudioUnlock();
         }
-        if (res) {
-          applyResponse(res);
-          if (res.narration) { await speakNow(res.narration, { turn: 'welcome' }); }
+        primeAudioEl();
+        await primeMic();
+        if (!await waitForAvatar(3000)) {
+          LOG.warn('[ui] avatar not ready yet; continuing (startSession will retry internally)');
         }
+        await window.HARCI_AVATAR.startSession();
+
+        sessionActive = true;
+        window.__harci_sessionActive = true;
+
+        // Optional: let backend know (fallback if API.sessionStart missing)
+        try {
+          const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
+          if (window.API.sessionStart) {
+            await window.API.sessionStart(sid);
+          } else {
+            await fetch('/api/session/start', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ sid })
+            }).catch(()=>{});
+          }
+        } catch {}
+
+        // End session button appears now
+        if (endBtn) { endBtn.classList.remove('hidden'); endBtn.disabled = false; }
+
+        setAllEnabled(true);
+        setVisualState('ready');
         UI.setStatus('Ready');
+
+        // Optional welcome (keeps inputs enabled)
+        try {
+          const res = await window.API.assistWelcome?.();
+          if (res) {
+            applyResponse(res);
+            if (res.narration) await speakNow(res.narration, { turn: 'welcome' });
+          }
+        } catch (e) {
+          LOG.warn('[ui] welcome failed', e);
+        }
       } catch (err) {
-        await speakNow('Welcome! I’m HARCi. Ask me about the agenda, venue map, or speakers — or press and hold the mic to talk.');
-        UI.setStatus('Ready');
+        LOG.error('[ui] auto-start failed', err);
+        setAllEnabled(false);
+        setVisualState('inactive');
+        UI.setStatus('Failed to start');
       }
-    }
+    })();
 
-    async function startSessionFlow(){
-      if (sessionBtn) sessionBtn.disabled = true;
-      UI.setStatus('Starting…');
-      setVisualState('busy');
-
-      if (await waitForAvatar(800)) {
-        try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
-      } else {
-        await softAudioUnlock();
-      }
-      primeAudioEl();
-
-      await primeMic();
-
-      if (!await waitForAvatar(3000)) {
-        LOG.warn('[ui] avatar not ready yet; continuing (startSession will retry internally)');
-      }
-      await window.HARCI_AVATAR.startSession();
-
-      sessionActive = true;
-      window.__harci_sessionActive = true;
-
-      setAllEnabled(true);
-      setVisualState('ready');
-
-      if (sessionBtn) { sessionBtn.textContent = 'End session'; sessionBtn.disabled = false; }
-
-      runAgentWelcome().catch(e => LOG.warn('[ui] welcome failed', e));
-    }
-
-    async function endSessionFlow(){
-      if (sessionBtn) sessionBtn.disabled = true;
+    // End session (header button)
+    endBtn?.addEventListener('click', async () => {
+      if (!sessionActive) return;
+      endBtn.disabled = true;
       UI.setStatus('Ending…');
       setVisualState('busy');
       cancelPending('end');
@@ -341,29 +345,16 @@
       window.__harci_sessionActive = false;
       sessionActive = false;
 
-      if (sessionBtn) { sessionBtn.textContent = 'Start session'; sessionBtn.disabled = false; }
       location.href = '/ended';
-    }
-
-    sessionBtn?.addEventListener('click', async () => {
-      try {
-        if (!sessionActive) await startSessionFlow();
-        else await endSessionFlow();
-      } catch (e) {
-        LOG.error('[ui] session toggle error', e);
-        UI.setStatus('Retrying…');
-        if (sessionBtn) sessionBtn.disabled = false;
-      }
     });
 
-    // ---- Prompt runner (chips / typed / mic) ---------------------------------
+    // ---- Prompt runner -------------------------------------------------------
     async function runPrompt(p){
-      if (!sessionActive) { UI.setStatus('Start session to interact'); return; }
+      if (!sessionActive) { UI.setStatus('Starting…'); return; }
 
       const myTurn = ++turnSeq;
       cancelPending('chip');
 
-      // Busy (Thinking): lock everything + grey UI
       setAllEnabled(false);
       setVisualState('busy');
       UI.setStatus('Thinking…');
@@ -393,9 +384,8 @@
         return;
       }
 
-      // Got reply — show it and IMMEDIATELY re-enable (let user barge-in)
       applyResponse(res);
-      UI.setStatus('Speaking…');  // not treated as busy in setStatus
+      UI.setStatus('Speaking…');
       setAllEnabled(true);
       setVisualState('ready');
 
@@ -409,11 +399,11 @@
     // Chips (mobile + desktop)
     const chips = $$('#quickChips [data-prompt], #quickChipsDesk [data-prompt]');
     chips.forEach(btn => btn.addEventListener('click', ()=> {
-      if (!sessionActive) { UI.setStatus('Start session to interact'); return; }
+      if (!sessionActive) { UI.setStatus('Starting…'); return; }
       runPrompt(btn.dataset.prompt);
     }));
 
-    // ---- Mic press & hold (robust) ------------------------------------------
+    // ---- Mic press & hold (pure PTT) ----------------------------------------
     let isHolding = false;
     let holdToken = 0;
 
@@ -439,7 +429,7 @@
 
     const press = async (e) => {
       e.preventDefault(); e.stopPropagation();
-      if (!sessionActive) { UI.setStatus('Start session to talk'); return; }
+      if (!sessionActive) { UI.setStatus('Starting…'); return; }
       if (isHolding) return;
       isHolding = true;
       holdToken++;
@@ -449,7 +439,6 @@
       try { window.EARCON?.start?.(); } catch {}
       const i = getAskInput(); if (i) i.value = 'Listening…';
 
-      // Hard-mute avatar while listening to avoid bleed
       muteAvatarOutput(true);
 
       UI.setStatus('Listening'); UI.setMicEnabled(false);
@@ -495,35 +484,26 @@
       }
 
       const i = getAskInput(); if (i) i.value = text;
-      UI.setStatus('Processing…'); // runPrompt will flip busy/ready classes
+      UI.setStatus('Processing…');
       await runPrompt(text);
     };
 
     if (holdBtn) {
-      holdBtn.addEventListener('pointerdown', press, { passive: false });
+      // Pointer events cover mouse, pen, and touch on iOS/Android these days
+      holdBtn.addEventListener('pointerdown', press,   { passive: false });
       holdBtn.addEventListener('pointerup',   release, { passive: false });
       holdBtn.addEventListener('pointercancel', release, { passive: false });
       holdBtn.addEventListener('pointerleave',  release, { passive: false });
-
-      // Safety: if pointer released off the button, still stop
       window.addEventListener('pointerup', release, { passive: false });
 
-      // Optional tap-to-toggle fallback on coarse pointers
-      if (window.matchMedia?.('(pointer: coarse)').matches) {
-        let toggled = false;
-        holdBtn.addEventListener('click', (e) => {
-          e.preventDefault(); e.stopPropagation();
-          toggled ? release(e) : press(e);
-          toggled = !toggled;
-        }, { passive: false });
-      }
+      // No tap-to-toggle fallback; pure press-and-hold for clarity
     }
 
-    // Keyboard accessibility for mic (guarded)
+    // Keyboard mic (spacebar PTT outside inputs)
     document.addEventListener('keydown', (e) => {
       const tag = (e.target && e.target.tagName) || '';
       if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
-        if (!sessionActive) { UI.setStatus('Start session to talk'); return; }
+        if (!sessionActive) { UI.setStatus('Starting…'); return; }
         if (!e.repeat) $('#btnHoldMic')?.dispatchEvent(new PointerEvent('pointerdown'));
         e.preventDefault();
       }
@@ -536,12 +516,12 @@
       }
     });
 
-    // Typed questions (mobile + desktop forms)
+    // Typed questions
     ['#askForm', '#askFormDesk'].forEach(sel => {
       const form = $(sel);
       form?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!sessionActive) { UI.setStatus('Start session to ask'); return; }
+        if (!sessionActive) { UI.setStatus('Starting…'); return; }
         const input = getAskInput();
         const text = (input?.value || '').trim();
         if (!text) return;

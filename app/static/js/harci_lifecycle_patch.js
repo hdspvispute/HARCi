@@ -1,66 +1,71 @@
-// harci_lifecycle_patch.js
+// app/static/js/harci_lifecycle_patch.js
 (function () {
   const g = window; if (!g) return;
 
-  g.UI = g.UI || {};
-  g.UI.setStatus = g.UI.setStatus || (s => {
-    g.UI.status = s;
+  // --- tiny helpers used only here -------------------------------------------
+  const $  = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+  function setChipsEnabled(on){
     try {
-      const el = document.getElementById('statusText') || document.getElementById('status');
-      if (el) el.textContent = s;
+      $$('#quickChips [data-prompt], #quickChipsDesk [data-prompt]')
+        .forEach(c => { c.disabled = !on; });
     } catch {}
-  });
-
-  // Central speech controller
-  const SPEECH = {
-    speaking: false,
-    ticket: 0,     // increments per play or preemption
-
-    stop(reason = 'user') {
-      // Invalidate any pending speakSafe timeouts from earlier speech
-      this.ticket++;
-      try { g.HARCI_AVATAR?.stopSpeaking?.(); } catch {}
-      this.speaking = false;
-
-      // Don't clobber UI during chip/PTT thinking phases
-      if (reason !== 'chip' && reason !== 'ptt') {
-        g.UI.setStatus('Ready');
-      }
-    }
-  };
-  g.HARCI_SPEECH = SPEECH;
-
-  function estimateMs(text) {
-    const t = (text||'').trim();
-    if (!t) return 1200;
-    const w = t.split(/\s+/).length;
-    return Math.min(25_000, Math.max(1200, Math.round((w / 2.5) * 1000))); // ~2.5 wps
+  }
+  function setTypedEnabled(on){
+    try {
+      const i = $('#txtAsk') || $('#txtAskDesk');
+      const b = $('#btnAsk') || $('#btnAskDesk');
+      if (i) i.disabled = !on;
+      if (b) b.disabled = !on;
+    } catch {}
+  }
+  function setMicEnabled(on){
+    try { const b = $('#btnHoldMic'); if (b) b.disabled = !on; } catch {}
+  }
+  function setAllEnabled(on){
+    setChipsEnabled(on);
+    setTypedEnabled(on);
+    setMicEnabled(on);
   }
 
-  // Non-blocking speak with safety timeout + ticketing
-  g.speakSafe = async function speakSafe(text, opts = {}) {
-    const my = ++SPEECH.ticket;
-    SPEECH.speaking = true;
-    g.UI.setStatus('Speaking…');
+  // public UI namespace (lifecycle-safe default)
+  g.UI = g.UI || {};
 
-    let timeout = null;
-    const done = () => {
-      // If a newer speech started (ticket changed), don't touch the UI
-      if (my !== SPEECH.ticket) return;
-      SPEECH.speaking = false;
-      g.UI.setStatus('Ready');
-      if (timeout) clearTimeout(timeout);
-    };
+  // Allow other files to call this too if they need just the mic toggle
+  g.UI.setMicEnabled = g.UI.setMicEnabled || setMicEnabled;
 
+  // Unified status setter used by early-loading scripts (Avatar, STT) before ui_bindings.js
+  g.UI.setStatus = function setStatus(s) {
+    g.UI.status = s;
     try {
-      const ms = estimateMs(text);
-      timeout = setTimeout(done, ms + 1500);
+      const el  = document.getElementById('statusText') || document.getElementById('status');
+      const dot = document.getElementById('statusDot');
+      if (el)  el.textContent = s || '';
 
-      const maybePromise = g.HARCI_AVATAR?.speak?.(text);
-      if (maybePromise && typeof maybePromise.then === 'function') {
-        await maybePromise.catch(()=>{});
+      // dot color
+      if (dot) {
+        if (/Listening/i.test(s)) dot.style.background = 'var(--brand-red)';
+        else if (/Thinking|Starting|Processing|Preparing|Ending/i.test(s)) dot.style.background = '#F59E0B';
+        else dot.style.background = '#10B981';
+      }
+
+      // gate interactivity only after a session is active
+      if (g.__harci_sessionActive) {
+        const isBusy =
+          /Thinking|Starting|Processing|Preparing|Ending/i.test(s) &&
+          !/Ready/i.test(s);
+
+        if (isBusy) {
+          document.body.classList.add('ui-busy');
+          document.body.classList.remove('ui-ready','ui-inactive');
+          setAllEnabled(false);
+        } else if (/Ready/i.test(s)) {
+          document.body.classList.add('ui-ready');
+          document.body.classList.remove('ui-busy','ui-inactive');
+          setAllEnabled(true);
+        }
       }
     } catch {}
-    finally { done(); }
   };
 })();

@@ -57,6 +57,14 @@
 
     async register(fd) { return j('/api/register', { method: 'POST', body: fd }); },
 
+    async sessionStart(sid = getSid()) {
+      return j('/api/session/start', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sid })
+      });
+    },
+
     async sessionEnd(sid = getSid()) {
       // keepalive so it still posts during navigation away
       return j('/api/session/end', {

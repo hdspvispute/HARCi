@@ -2,16 +2,22 @@
 {% block title %}Session Ended · HARCi{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-xl text-center">
-  <div class="rounded-2xl border border-white/10 bg-neutral-800/50 p-8">
+<!-- Center the card within the fixed-header viewport -->
+<div class="h-[calc(100dvh-4rem)] w-screen flex items-center justify-center px-4 sm:px-0 overflow-hidden">
+  <section class="w-full max-w-xl rounded-2xl border border-white/10 bg-neutral-900/40 shadow-lg p-8 text-center overflow-auto">
     <h2 class="text-xl font-semibold mb-2">Session ended</h2>
-    <p class="text-neutral-300 mb-6">Thanks for visiting the HARC AI Launch. You can start a fresh conversation anytime.</p>
-    <a href="/transition" class="btn btn-brand w-full">
+    <p class="text-neutral-300 mb-6">
+      Thanks for visiting <span data-event-name>{{ (cfg.event and cfg.event.name) or 'the event' }}</span>.
+      You can start a fresh conversation anytime.
+    </p>
+
+    <a href="/transition" class="btn btn-brand w-full no-select no-callout tap-manipulation">
       Talk to HARCi again
     </a>
+
     <p class="text-xs text-neutral-400 mt-4">
       Returning guests will be taken directly to the assistant if your session is still active on this device.
     </p>
-  </div>
-</section>
+  </section>
+</div>
 {% endblock %}

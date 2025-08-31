@@ -1,3 +1,4 @@
+// app/static/js/stt.js
 (() => {
   const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('stt') : console;
 
@@ -111,6 +112,9 @@
       const S = window.SpeechSDK;
       if (!S) throw new Error('SpeechSDK missing');
 
+      // Ensure mic is warm (no-op if already active)
+      await warmMicStream();
+
       // If a previous recognizer leaked, clean it safely.
       if (recognizer) {
         LOG.warn('[stt] recognizer existed on beginHold; cleaning up');
@@ -118,20 +122,23 @@
       }
 
       const { token, region } = await getAuth();
+      if (!token || !region) throw new Error('Speech token/region missing');
+
       const speechConfig = S.SpeechConfig.fromAuthorizationToken(token, region);
 
       const cfg = (window.HARCI_CONFIG || {});
       speechConfig.speechRecognitionLanguage = cfg.speechLang || 'en-US';
 
-      // Loosen silence windows a bit so first/last words aren’t clipped.
+      // Make results feel more natural and avoid clipping first/last words
       try {
-        speechConfig.setProperty(S.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, '2000'); // was 1500
-        speechConfig.setProperty(S.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '800');      // was 500
+        speechConfig.setProperty(S.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, '2000');
+        speechConfig.setProperty(S.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '800');
+        speechConfig.setProperty(S.PropertyId.SpeechServiceConnection_KeepConnectionAlive, 'true');
+        // Normalize numbers, casing, etc. (safe noop if not supported)
+        speechConfig.setProperty(S.PropertyId.SpeechServiceResponse_PostProcessingOption, 'TrueText');
       } catch {}
 
-      // We keep a hidden getUserMedia stream open to "warm" the mic, but the SDK
-      // remains on the default microphone for maximum compatibility.
-      // (If you later want to feed a custom stream, switch to PushAudioInputStream.)
+      // Default mic input (we only keep a separate warm stream alive)
       const audioConfig = S.AudioConfig.fromDefaultMicrophoneInput();
 
       recognizer = new S.SpeechRecognizer(speechConfig, audioConfig);

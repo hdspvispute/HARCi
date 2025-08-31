@@ -6,25 +6,39 @@
 @layer base {
   :root {
     --brand-red: #E60027;
-    --footer-h: 96px;           /* desktop/tablet default */
+
+    /* Taller mobile footer to fit big mic + chips comfortably */
+    --footer-h: 160px;
+
+    /* iOS safe areas (used by sticky footer spacing) */
+    --sai-b: env(safe-area-inset-bottom);
+    --sai-t: env(safe-area-inset-top);
   }
-  /* Mobile footer taller (chips + input) */
-  @media (max-width: 767px) { :root { --footer-h: 200px; } } /* was 160px */
+  @media (min-width: 768px) { :root { --footer-h: 120px; } }
+
   html, body { height: 100%; }
+  /* Kill the blue tap highlight on iOS/Android */
+  html { -webkit-tap-highlight-color: transparent; }
 }
 
-/* ===== Layout Utilities ===== */
+/* ===== Utilities ===== */
 @layer utilities {
+  .aspect-video { aspect-ratio: 16 / 9; }
+  .no-callout   { -webkit-touch-callout: none; }
+  .no-select    { -webkit-user-select: none; user-select: none; }
+  .tap-manipulation { touch-action: manipulation; } /* prevents double-tap zoom */
   .conversation-shell{
     height: calc(var(--app-h, 100dvh) - var(--hdr, 0px));
     min-height: calc(var(--app-h, 100dvh) - var(--hdr, 0px));
     overflow: hidden;
   }
-  .aspect-video { aspect-ratio: 16 / 9; }
-  .no-callout   { -webkit-touch-callout: none; }
+
+  /* Hide scrollbars for horizontal chip rows */
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
-/* ===== Components ===== */
+/* ===== Components (polished) ===== */
 @layer components {
   .card { @apply rounded-2xl border border-white/10 bg-neutral-900/40; }
 
@@ -32,25 +46,37 @@
     @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5
            border border-white/10 bg-white/5 text-white hover:bg-white/10
            transition duration-200 active:scale-[.99]
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           disabled:opacity-50 disabled:cursor-not-allowed
+           no-select no-callout tap-manipulation;
+    line-height: 1; /* crisply centers icons + labels */
   }
 
   .btn-brand { @apply border-transparent text-white; background: var(--brand-red); }
-  .btn-brand:hover { filter: brightness(1.1); }
+  .btn-brand:hover { filter: brightness(1.08); }
 
   .btn-outline { @apply border-white/30 bg-transparent hover:bg-white/10; }
   .btn-plain   { @apply bg-transparent border-transparent text-white/70 hover:text-white hover:bg-white/10; }
 
-  .btn-circle {
-    @apply h-14 w-14 sm:h-16 sm:w-16 rounded-full border-0
-           flex items-center justify-center shadow-lg
-           active:scale-[.99] disabled:opacity-50;
+  /* Large rectangular mic: readable, tappable, premium */
+  .btn-mic-rect {
+    @apply rounded-xl h-12 w-[min(100%,32rem)] md:h-14 md:w-[22rem]
+           text-sm md:text-base font-semibold shadow-lg
+           no-select no-callout tap-manipulation;
     background: var(--brand-red);
   }
+  /* Pressed micro-state (JS toggles .is-pressed during hold) */
+  /* Do not clobber transforms on generic rectangular buttons */
+.btn-mic-rect.is-pressed { filter: brightness(0.98); }
+
+/* The footer mic is absolutely centered; preserve its translate(-50%,-50%) */
+#btnHoldMic.is-pressed {
+  transform: translate(-50%, -50%) scale(0.995) translateY(1px);
+}
 
   .chip {
     @apply px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm
-           hover:bg-white/10 whitespace-nowrap;
+           hover:bg-white/10 whitespace-nowrap
+           no-select no-callout tap-manipulation;
   }
 
   .input {
@@ -60,85 +86,74 @@
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* ========= Strong Inactive/Disabled styles (Tailwind-only) ========= */
-  /* Buttons — general (high contrast difference) */
-  .btn:disabled,
-  .btn[aria-disabled="true"] {
-    @apply opacity-40 grayscale saturate-0 contrast-75 brightness-75
-           pointer-events-none shadow-none;
-    transform: none; /* neutralize active scale */
-  }
+  /* ========= Strong Inactive/Disabled visuals ========= */
+.btn:disabled,
+.btn[aria-disabled="true"],
+.btn-mic-rect:disabled,
+.btn-mic-rect[aria-disabled="true"] {
+  @apply opacity-40 grayscale saturate-0 contrast-75 brightness-75 pointer-events-none;
+  /* IMPORTANT: do NOT reset transform; mic uses translate(-50%,-50%) to stay centered */
+  box-shadow: none;
+}
 
-  /* Brand buttons — clearly not tappable when disabled */
-  .btn-brand:disabled,
-  .btn-brand[aria-disabled="true"] {
-    @apply opacity-40 ring-1 ring-white/15 shadow-none;
-  }
+/* Keep distinct variants */
+.btn-brand:disabled,
+.btn-brand[aria-disabled="true"] {
+  @apply ring-1 ring-white/15;
+}
+.btn-outline:disabled,
+.btn-outline[aria-disabled="true"],
+.btn-plain:disabled,
+.btn-plain[aria-disabled="true"] {
+  @apply text-white/45 border-white/20 bg-white/5;
+}
+.chip:disabled,
+.chip[aria-disabled="true"] {
+  @apply bg-neutral-700/30 border-dashed border-white/25 text-white/55 pointer-events-none;
+}
+.input:disabled,
+.input[aria-disabled="true"] { @apply bg-neutral-700/20 text-white/60 border-white/15; }
+.input:disabled::placeholder,
+.input[aria-disabled="true"]::placeholder { @apply text-white/30; }
 
-  /* Outline/Plain buttons — soften text/borders clearly */
-  .btn-outline:disabled,
-  .btn-outline[aria-disabled="true"],
-  .btn-plain:disabled,
-  .btn-plain[aria-disabled="true"] {
-    @apply text-white/45 border-white/20 bg-white/5;
-  }
-
-  /* Chips — dashed, muted, slightly darker */
-  .chip:disabled,
-  .chip[aria-disabled="true"] {
-    @apply bg-neutral-700/30 border-dashed border-white/25 text-white/55
-           pointer-events-none;
-  }
-
-  /* Inputs — darker well + faint placeholder */
-  .input:disabled,
-  .input[aria-disabled="true"] {
-    @apply bg-neutral-700/20 text-white/60 border-white/15;
-  }
-  .input:disabled::placeholder,
-  .input[aria-disabled="true"]::placeholder { @apply text-white/30; }
-
-  /* Mic button — swap brand red for neutral gray when disabled */
-  #btnHoldMic:disabled,
-  #btnHoldMic[aria-disabled="true"] {
-    @apply bg-neutral-700 ring-2 ring-white/20 border border-dashed border-white/25
-           opacity-70 grayscale pointer-events-none;
-  }
-  #btnHoldMic:disabled svg,
-  #btnHoldMic[aria-disabled="true"] svg { @apply opacity-80; }
-
-  /* =========================
-     Global UI state visuals
-     ========================= */
-  /* Pre-session or ended */
+  /* ===== Global UI state overlays (body classes set by JS) ===== */
   body.ui-inactive footer,
-  body.ui-inactive #quickChips,
-  body.ui-inactive #quickChipsDesk,
-  body.ui-inactive #askForm,
-  body.ui-inactive #askFormDesk,
+  body.ui-inactive #quickChips, body.ui-inactive #quickChipsDesk,
+  body.ui-inactive #askForm,    body.ui-inactive #askFormDesk,
   body.ui-inactive #btnHoldMic {
     @apply opacity-50 grayscale contrast-75;
   }
 
-  /* Thinking/Starting/Processing… */
   body.ui-busy footer,
-  body.ui-busy #quickChips,
-  body.ui-busy #quickChipsDesk,
-  body.ui-busy #askForm,
-  body.ui-busy #askFormDesk,
+  body.ui-busy #quickChips, body.ui-busy #quickChipsDesk,
+  body.ui-busy #askForm,    body.ui-busy #askFormDesk,
   body.ui-busy #btnHoldMic {
     @apply opacity-45 grayscale contrast-75 pointer-events-none;
+  }
+
+  /* Subtle busy scrim so the whole app reads “working” (without hiding content) */
+  body.ui-busy::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.14) 100%);
+    pointer-events: none;
+    z-index: 40; /* under header(50) and footer(9999) */
+  }
+
+  /* ===== Chip scrollers with fade edges ===== */
+  .chip-scroll {
+    @apply overflow-x-auto scrollbar-none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent);
+            mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent);
   }
 }
 
 /* ===== States / Effects ===== */
 body.idle #remoteVideo { filter: brightness(.88) saturate(.95); }
 
-/* Optional: dim chip row when any chip is disabled (busy vibe) */
+/* Dim chip row when any chip is disabled (reinforce “busy”) */
 #quickChips:has(button:disabled),
-#quickChipsDesk:has(button:disabled) {
-  filter: grayscale(100%) brightness(.9);
-}
+#quickChipsDesk:has(button:disabled) { filter: grayscale(100%) brightness(.9); }
 
 /* ===== Prose tweaks ===== */
 .prose h1 { @apply text-xl font-bold mt-2 mb-1; }
@@ -158,34 +173,25 @@ body.idle #remoteVideo { filter: brightness(.88) saturate(.95); }
 /* ========================================================================== */
 /*        HARD LAYOUT: lock viewport, fixed header/footer, single scroll       */
 /* ========================================================================== */
-
-/* No page scroll anywhere */
 html, body { overflow: hidden; }
-body { height: 100dvh; }
+body       { height: 100dvh; }
 
-/* Header fixed (assumes h-16 = 4rem set in markup) */
-header { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 4rem; }
+/* Header fixed (assumes 4rem) */
+header     { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 4rem; padding-top: max(0px, var(--sai-t)); }
 
-/* Main fills device height under header; no scroll in main */
-main { padding-top: 4rem; height: calc(100dvh - 4rem); overflow: hidden; }
+/* Main fills under header; only the briefing section scrolls */
+main       { padding-top: 4rem; height: calc(100dvh - 4rem); overflow: hidden; }
 
-/* Footer fixed at bottom; height responsive via --footer-h */
-footer { position: fixed; left: 0; right: 0; bottom: 0; height: var(--footer-h); z-index: 9999; }
+/* Footer fixed; include safe-area inset for notched phones */
+footer     { position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--footer-h) + var(--sai-b)); z-index: 9999; }
+footer .footer-inner { padding-bottom: max(0.25rem, var(--sai-b)); } /* give a little breathing room */
 
-/* The guide content wrapper inside <main> must subtract footer height */
+/* Subtract footer height from the main content wrapper */
 main > *:first-child { height: calc(100% - var(--footer-h)); overflow: hidden; }
 
-/* Only the briefing SECTION scrolls (not #briefing itself) */
-section.briefing-scroll { overflow: auto; }
+/* Only the briefing SECTION scrolls */
+section.briefing-scroll { overflow: auto; -webkit-overflow-scrolling: touch; }
 #briefing { overflow: visible; max-height: none; }
 
-/* Footer internals: Start pinned left; mic centered – actual lifting is done by the frame inset in HTML */
-footer .btn#btnSessionToggle {
-  position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-}
-footer #btnHoldMic {
-  position: absolute; /* fixed: was 'a' */
-}
-
-/* Optional: hint on the video too while busy */
+/* Optional: also hint on the video while busy */
 body.ui-busy #remoteVideo { filter: brightness(.85) saturate(.95); }
