@@ -29,6 +29,9 @@
   var reconnecting = false;
   var iceFailTimer = null;
 
+  // Audio unlock state (set only after a user gesture)
+  var audioUnlocked = false;
+
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
@@ -49,21 +52,30 @@
     return { cfg: cfg, st: st, rt: rt };
   }
 
+  /**
+   * Try to unlock audio playback. MUST be called from a user gesture.
+   * Returns true if an AudioContext was created & resumed.
+   */
   async function unlockAudioPlayback() {
     try {
       var Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
+      if (!Ctx) { LOG.warn('[avatar] WebAudio not available'); return false; }
       var ctx = new Ctx();
       await ctx.resume();
+      // brief silent blip to satisfy autoplay policies
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
       gain.gain.value = 0;
       osc.connect(gain).connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.02);
-      LOG.info('[avatar] Audio unlocked');
+      audioUnlocked = true;
+      window.__harci_audio_ok = true;
+      LOG.info('[avatar] Audio unlocked (user gesture)');
+      return true;
     } catch (e) {
-      LOG.warn('[avatar] Audio unlock failed (will rely on user gesture):', e);
+      LOG.warn('[avatar] Audio unlock failed (likely not a gesture):', e);
+      return false;
     }
   }
 
@@ -92,7 +104,6 @@
       if (pc && typeof pc.getReceivers === 'function') {
         pc.getReceivers().forEach(function (r) {
           if (r && r.track && r.track.kind === 'audio') {
-            // Disabling the receiver's audio track prevents any audio energy rendering.
             r.track.enabled = !on;
           }
         });
@@ -138,7 +149,6 @@
       LOG.info('[avatar] pc.iceConnectionState =>', st);
       if (iceFailTimer) { clearTimeout(iceFailTimer); iceFailTimer = null; }
       if (st === 'disconnected') {
-        // transient disconnects are common; wait before deciding to reconnect
         iceFailTimer = setTimeout(function () { scheduleReconnect('ice-disconnected'); }, 3000);
       } else if (st === 'failed') {
         scheduleReconnect('ice-failed');
@@ -147,7 +157,6 @@
   }
 
   async function startAvatarOnPc(_pc, S, avcfg) {
-    // Receive-only (explicit)
     try { _pc.addTransceiver('audio', { direction: 'recvonly' }); } catch (e) {}
     try { _pc.addTransceiver('video', { direction: 'recvonly' }); } catch (e) {}
 
@@ -169,7 +178,10 @@
         $audio.muted = outputMuted;
         $audio.volume = 1.0;
         $audio.playsInline = true;
-        if ($audio.play) $audio.play().catch(function () {});
+        // If user hasn’t enabled audio yet, this may reject — harmless.
+        if ($audio.play) $audio.play().catch(function (err) {
+          LOG.debug('[avatar] audio play blocked (awaiting user gesture)', err && err.name);
+        });
       }
 
       // Ensure receiver tracks reflect current mute state
@@ -196,21 +208,14 @@
     LOG.warn('[avatar] scheduling reconnect due to', reason);
 
     try {
-      // Tear down current PC (leave synth alive; restart onto a new PC)
       if (pc) {
         try { pc.ontrack = null; pc.onconnectionstatechange = null; pc.oniceconnectionstatechange = null; } catch (e) {}
         try { pc.close(); } catch (e) {}
       }
       pc = null;
 
-      // Try to refresh relay token (it can expire)
-      try {
-        lastRelay = await fetchJson('/relay-token');
-      } catch (e) {
-        // keep previous (could be empty)
-      }
+      try { lastRelay = await fetchJson('/relay-token'); } catch (e) {}
 
-      // First attempt: prefer TURN if available
       var confA = buildPcConfig(lastRelay);
       var pcCfg = confA.cfg;
       pc = new RTCPeerConnection(pcCfg);
@@ -219,8 +224,6 @@
         await startAvatarOnPc(pc, window.SpeechSDK, (synth && synth.__avcfg) || null);
       } catch (e1) {
         LOG.warn('[avatar] reconnect attempt with policy=', pcCfg.iceTransportPolicy, 'failed:', e1);
-
-        // Fallback attempt: try 'all' (stun) if relay path failed
         try { pc.close(); } catch (e) {}
         pc = null;
 
@@ -251,7 +254,8 @@
       var S = window.SpeechSDK;
       if (!S) throw new Error('SpeechSDK not loaded');
 
-      await unlockAudioPlayback();
+      // IMPORTANT: Do NOT auto-call unlockAudioPlayback here.
+      // It must be invoked from a user gesture. UI calls ensureAudioUnlocked().
 
       var bundle = await fetchCfgAndTokens();
       var cfg = bundle.cfg || {};
@@ -263,7 +267,7 @@
       sc.speechSynthesisVoiceName = cfg.speechVoice || 'en-US-JennyNeural';
 
       // Optional: video profile for the avatar
-      var vf    = new S.AvatarVideoFormat('h264', 1500000, 640, 360); // (no numeric separator)
+      var vf    = new S.AvatarVideoFormat('h264', 1500000, 640, 360);
       var avcfg = new S.AvatarConfig(cfg.avatarId || 'lisa', cfg.avatarStyle || 'casual-sitting', vf);
 
       if (rt && rt.Urls && rt.Urls.length) {
@@ -273,7 +277,6 @@
       }
 
       synth = new S.AvatarSynthesizer(sc, avcfg);
-      // Keep a ref for reconnect flows
       synth.__avcfg = avcfg;
 
       // Visibility into lifecycle
@@ -326,7 +329,6 @@
     var fixed = fixPronunciation(t);
     LOG.info('[avatar] speak: attempting:', fixed);
 
-    // Return a promise so callers can await and manage status
     return new Promise(function (resolve, reject) {
       try {
         synth.speakTextAsync(
@@ -353,7 +355,6 @@
     sessionActive = false;
     reconnecting = false;
     if (iceFailTimer) { clearTimeout(iceFailTimer); iceFailTimer = null; }
-    // Reset mute state so next session starts clean
     outputMuted = false;
     $video = null;
     $audio = null;
@@ -365,7 +366,14 @@
     speak:        speak,
     stopSpeaking: stopSpeaking,
     end:          end,
-    ensureAudioUnlocked: unlockAudioPlayback,
+    ensureAudioUnlocked: unlockAudioPlayback, // call from a user gesture
     setOutputMuted: setOutputMuted
   };
+
+  // Fallback: if the page receives *any* first pointer gesture, try to unlock once.
+  // (Safe no-op if UI already did it.)
+  window.addEventListener('pointerdown', function once() {
+    if (!audioUnlocked) unlockAudioPlayback();
+    window.removeEventListener('pointerdown', once, { capture: false });
+  }, { passive: true });
 })();

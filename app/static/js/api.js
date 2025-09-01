@@ -54,9 +54,7 @@
   // --- public API ------------------------------------------------------------
   const API = {
     async config() { return withRetry(() => j('/api/config')); },
-
     async register(fd) { return j('/api/register', { method: 'POST', body: fd }); },
-
     async sessionStart(sid = getSid()) {
       return j('/api/session/start', {
         method: 'POST',
@@ -64,7 +62,6 @@
         body: JSON.stringify({ sid })
       });
     },
-
     async sessionEnd(sid = getSid()) {
       // keepalive so it still posts during navigation away
       return j('/api/session/end', {
@@ -74,19 +71,16 @@
         keepalive: true
       });
     },
-
     async speechToken() {
       const raw = await withRetry(() => j('/speech-token'));
       const norm = normalizeSpeechToken(raw);
       if (!norm?.token) LOG.warn('[api] speech-token missing token field', raw);
       return norm;
     },
-
     async relayToken() {
       // Shape varies by backend; pass through and let avatar_rtc.js handle it.
       return withRetry(() => j('/relay-token'));
     },
-
     // Core turns
     async assistRun(text, session_id = getSid(), { signal } = {}) {
       return j('/assist/run', {
@@ -96,7 +90,6 @@
         signal
       });
     },
-
     // Welcome turn (server builds the personalized prompt)
     async assistWelcome(session_id = getSid(), { signal } = {}) {
       return j('/assist/welcome', {

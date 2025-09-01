@@ -95,6 +95,7 @@
       LOG.warn('[ui] soft audio unlock failed', e);
     }
   }
+
   async function waitForAvatar(ms = 2000) {
     const start = Date.now();
     while (!window.HARCI_AVATAR && Date.now() - start < ms) {
@@ -102,12 +103,14 @@
     }
     return !!window.HARCI_AVATAR;
   }
+
   function estimateMs(text) {
     const t = (text || '').trim();
     if (!t) return 1200;
     const w = t.split(/\s+/).length;
     return Math.min(25_000, Math.max(1200, Math.round((w / 2.5) * 1000)));
   }
+
   function speakNow(text, opts) {
     if (window.speakSafe) return window.speakSafe(text, opts);
     UI.setStatus('Speaking…');
@@ -169,7 +172,6 @@
     const md = (res && (res.briefing_md || res.briefing || '')) || '';
     if (brief) {
       brief.innerHTML = sanitize(md);
-      // scroll the briefing container to top to reveal new content
       try { brief.closest('section.briefing-scroll')?.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
     }
     const im = res?.image;
@@ -206,23 +208,7 @@
   }
 
   // ---- Pages ----------------------------------------------------------------
-  function onTransitionPage() {
-    const btn = $('#btnUnlock');
-    if (!btn) return;
-    btn.addEventListener('click', async () => {
-      try {
-        await window.bootstrapConfig();
-        if (await waitForAvatar(500)) {
-          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
-        } else {
-          await softAudioUnlock();
-        }
-      } catch {}
-      location.href = '/guide';
-    }, { once: true });
-  }
-
-  async function onRegisterPage(){
+  function onRegisterPage(){
     const f = $('#regForm');
     if (!f) return;
     f.addEventListener('submit', async (ev) => {
@@ -230,7 +216,7 @@
       const fd = new FormData(f);
       try {
         const r = await window.API.register(fd);
-        if (r?.next) location.href = r.next; else location.href = '/transition';
+        if (r?.next) location.href = r.next; else location.href = '/guide';
       } catch (e) {
         LOG.error('[ui] register error', e);
         const er = $('#regError');
@@ -270,10 +256,9 @@
     // Auto-start session
     (async () => {
       try {
-        if (await waitForAvatar(800)) {
+        // Only attempt unlock at startup if user already tapped Enable
+        if (window.__audio_unlocked && await waitForAvatar(800)) {
           try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
-        } else {
-          await softAudioUnlock();
         }
         primeAudioEl();
         await primeMic();
@@ -285,7 +270,7 @@
         sessionActive = true;
         window.__harci_sessionActive = true;
 
-        // Optional: let backend know (fallback if API.sessionStart missing)
+        // Optional: let backend know
         try {
           const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
           if (window.API.sessionStart) {
@@ -489,14 +474,11 @@
     };
 
     if (holdBtn) {
-      // Pointer events cover mouse, pen, and touch on iOS/Android these days
       holdBtn.addEventListener('pointerdown', press,   { passive: false });
       holdBtn.addEventListener('pointerup',   release, { passive: false });
       holdBtn.addEventListener('pointercancel', release, { passive: false });
       holdBtn.addEventListener('pointerleave',  release, { passive: false });
       window.addEventListener('pointerup', release, { passive: false });
-
-      // No tap-to-toggle fallback; pure press-and-hold for clarity
     }
 
     // Keyboard mic (spacebar PTT outside inputs)
@@ -533,6 +515,5 @@
 
   // ---- Route by presence -----------------------------------------------------
   if (document.getElementById('regForm')) onRegisterPage();
-  if (document.getElementById('unlockCard') || document.getElementById('btnUnlock')) onTransitionPage();
   if (document.getElementById('remoteVideo')) onGuidePage();
 })();

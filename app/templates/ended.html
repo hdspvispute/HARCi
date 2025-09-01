@@ -1,6 +1,5 @@
 {% extends "_base.html" %}
 {% block title %}Session Ended · HARCi{% endblock %}
-
 {% block content %}
 <!-- Center the card within the fixed-header viewport -->
 <div class="h-[calc(100dvh-4rem)] w-screen flex items-center justify-center px-4 sm:px-0 overflow-hidden">
@@ -10,11 +9,9 @@
       Thanks for visiting <span data-event-name>{{ (cfg.event and cfg.event.name) or 'the event' }}</span>.
       You can start a fresh conversation anytime.
     </p>
-
-    <a href="/transition" class="btn btn-brand w-full no-select no-callout tap-manipulation">
+    <a href="/guide" class="btn btn-brand w-full no-select no-callout tap-manipulation">
       Talk to HARCi again
     </a>
-
     <p class="text-xs text-neutral-400 mt-4">
       Returning guests will be taken directly to the assistant if your session is still active on this device.
     </p>

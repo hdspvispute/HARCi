@@ -53,10 +53,8 @@ except Exception:
 
 # ===== Env ====================================================================
 HITACHI_RED      = os.getenv("HITACHI_RED", "#E60027")
-
 PROJECT_ENDPOINT = os.getenv("PROJECT_ENDPOINT")   # https://<acct>.services.ai.azure.com/api/projects/<project>
 AGENT_ID         = os.getenv("AGENT_ID")
-
 SPEECH_REGION    = os.getenv("SPEECH_REGION")
 SPEECH_KEY       = os.getenv("SPEECH_KEY")
 SPEECH_RESOURCES = (os.getenv("SPEECH_RESOURCES") or "").strip()  # JSON: [{"region":"eastus2","key":"..."}]
@@ -101,6 +99,7 @@ app.add_middleware(
 _APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 _STATIC_DIR = os.path.join(_APP_ROOT, "static")
 _TEMPLATES_DIR = os.path.join(_APP_ROOT, "templates")
+
 app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 templates = Jinja2Templates(directory=_TEMPLATES_DIR)
 
@@ -218,9 +217,10 @@ async def root(request: Request):
 async def page_register(request: Request):
     return templates.TemplateResponse("register.html", {"request": request, "cfg": ui_cfg()})
 
+# Kept for back-compat: if something tries /transition, just go to /guide.
 @app.get("/transition", response_class=HTMLResponse)
-async def page_transition(request: Request):
-    return templates.TemplateResponse("transition.html", {"request": request, "cfg": ui_cfg()})
+async def page_transition(_: Request):
+    return RedirectResponse("/guide")
 
 @app.get("/guide", response_class=HTMLResponse)
 async def page_guide(request: Request):
@@ -247,8 +247,7 @@ async def api_register(name: str = Form(...), company: str = Form(...)):
         expires_at=now + timedelta(seconds=SESSION_TTL_SECS)
     )
 
-    res = JSONResponse({"ok": True, "sid": sid, "next": "/transition"})
-
+    res = JSONResponse({"ok": True, "sid": sid, "next": "/guide"})
     # Persistent cookie (readable by JS because UI reads it; change httponly if you refactor)
     expires_http = (now + timedelta(seconds=SESSION_TTL_SECS)).strftime("%a, %d %b %Y %H:%M:%S GMT")
     res.set_cookie(
@@ -285,8 +284,6 @@ async def api_session_end(body: SidBody):
     return {"ok": True}
 
 # ===== Tokens (Speech + Relay) ===============================================
-
-# NEW: tiny in-process cache for STS tokens per speech resource (region+key)
 _SPEECH_TOKEN_CACHE_LOCK = threading.Lock()
 _SPEECH_TOKEN_CACHE: Dict[str, Dict[str, object]] = {}  # {resource_id: {"token": str, "exp": int, "region": str}}
 
@@ -316,7 +313,6 @@ def _set_cached_speech_token(region: str, key: str, token: str, ttl_sec: int = 8
 async def speech_token():
     res = _next_speech_resource()
     region, key = res["region"], res["key"]
-
     cached = _get_cached_speech_token(region, key)
     if cached:
         return {"token": cached["token"], "region": cached["region"], "expiresAt": cached["exp"]}
@@ -333,7 +329,6 @@ async def speech_token():
             raise HTTPException(r.status_code, "Failed to issue speech token")
         token = r.text.strip()
 
-    # Cache ~8 minutes (SDK generally treats tokens as ~9–10 min)
     _set_cached_speech_token(region, key, token, ttl_sec=8 * 60)
     return {"token": token, "region": region, "expiresAt": int(time.time()) + 8 * 60}
 
@@ -376,10 +371,8 @@ def _get_client_and_agent():
         raise HTTPException(500, "Agent not configured")
     if AIProjectClient is None:
         raise HTTPException(500, "Azure AI SDK not installed")
-
     if _PROJECT_CLIENT and _AGENT_OBJ:
         return _PROJECT_CLIENT, _AGENT_OBJ
-
     with _CLIENT_LOCK:
         if _PROJECT_CLIENT and _AGENT_OBJ:
             return _PROJECT_CLIENT, _AGENT_OBJ
@@ -444,7 +437,6 @@ async def assist_run(req: Request, body: dict = Body(default={})):
 
     try:
         project, agent = _get_client_and_agent()
-
         sess = get_session(sid)
         thread_id = getattr(sess, "agent_thread_id", None) or ""
         if not thread_id:
@@ -454,7 +446,6 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                 sess.agent_thread_id = thread_id
 
         should_seed = not bool(getattr(sess, "agent_ctx_seeded", False)) if sess else True
-
         preamble = build_assist_preamble(
             event_name=EVENT_NAME,
             event_city=EVENT_CITY,
@@ -464,12 +455,12 @@ async def assist_run(req: Request, body: dict = Body(default={})):
         ) if should_seed else None
 
         project.agents.messages.create(thread_id=thread_id, role="user", content=text)
-
         run = project.agents.runs.create(
             thread_id=thread_id,
             agent_id=agent.id,
             additional_instructions=preamble
         )
+
         if should_seed and sess:
             sess.agent_ctx_seeded = True
 
@@ -509,20 +500,16 @@ async def assist_run(req: Request, body: dict = Body(default={})):
         list_kwargs = {"thread_id": thread_id, "limit": 20}
         if ListSortOrder is not None:
             list_kwargs["order"] = ListSortOrder.DESCENDING
-
         msgs = project.agents.messages.list(**list_kwargs)
 
         chosen_payload = None
         newest_agent_any = None
-
         for m in msgs:
             role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
             if role_name != "agent":
                 continue
-
             if newest_agent_any is None:
                 newest_agent_any = m
-
             mid_run_id = getattr(m, "run_id", None)
             if mid_run_id and str(mid_run_id) == str(run.id):
                 txt = _extract_text(m)
@@ -570,7 +557,6 @@ async def assist_welcome(req: Request):
 
     try:
         project, agent = _get_client_and_agent()
-
         thread_id = getattr(sess, "agent_thread_id", "") if sess else ""
         if not thread_id:
             thread = project.agents.threads.create()
@@ -594,12 +580,12 @@ async def assist_welcome(req: Request):
         )
 
         project.agents.messages.create(thread_id=thread_id, role="user", content=welcome_prompt)
-
         run = project.agents.runs.create(
             thread_id=thread_id,
             agent_id=agent.id,
             additional_instructions=preamble
         )
+
         if should_seed and sess:
             sess.agent_ctx_seeded = True
 
@@ -632,8 +618,8 @@ async def assist_welcome(req: Request):
         list_kwargs = {"thread_id": thread_id, "limit": 20}
         if ListSortOrder is not None:
             list_kwargs["order"] = ListSortOrder.DESCENDING
-
         msgs = project.agents.messages.list(**list_kwargs)
+
         for m in msgs:
             role_name = str(getattr(getattr(m, "role", None), "name", "")).lower()
             if role_name != "agent":
@@ -665,7 +651,6 @@ async def assist_welcome(req: Request):
         )
         touch_sid(sid or "")
         return JSONResponse({"narration": fallback_narration, "briefing_md": fallback_briefing})
-
     except Exception:
         log.exception("assist_welcome error")
         fallback_narration = (

@@ -10,55 +10,54 @@
   <title>{% block title %}HARCi Concierge{% endblock %}</title>
 
   <!-- Tailwind-built CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=20" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=25" />
   <style>:root{ --brand-red: {{ cfg.brandRed or '#E60027' }}; }</style>
 
   <!-- Speech SDK (global; needed on Guide) -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
-  <!-- Set --app-h (device height) and --hdr (header px) with VisualViewport awareness -->
+  <!-- Set --app-h (device height), --hdr (header px), and --footer-h (footer px) with VisualViewport awareness -->
   <script>
-    (function () {
-      const rs = document.documentElement;
-      const $hdr = () => document.querySelector('header');
+  (function () {
+    const rs = document.documentElement;
+    const $hdr = () => document.querySelector('header');
+    const $ftr = () => document.querySelector('footer');
 
-      function setHdr() {
-        const h = $hdr();
-        if (h) rs.style.setProperty('--hdr', h.offsetHeight + 'px');
+    function setHdr(){ const h = $hdr(); if (h) rs.style.setProperty('--hdr', h.offsetHeight + 'px'); }
+    function setAppH(){
+      const vv = window.visualViewport;
+      const h = vv ? vv.height : (window.innerHeight || rs.clientHeight || 0);
+      rs.style.setProperty('--app-h', h + 'px');
+    }
+    function setFtr(){
+      const f = $ftr();
+      if (!f) return;
+      // offsetHeight already includes any safe-area padding if present
+      rs.style.setProperty('--footer-h-actual', f.offsetHeight + 'px');
+    }
+
+    let raf;
+    function reflow(){
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => { setAppH(); setHdr(); setFtr(); });
+    }
+
+    reflow();
+    window.addEventListener('resize', reflow, { passive:true });
+    window.addEventListener('orientationchange', reflow, { passive:true });
+    window.addEventListener('load', reflow, { passive:true });
+    document.addEventListener('readystatechange', reflow);
+    try{
+      const vv = window.visualViewport;
+      if (vv){
+        vv.addEventListener('resize', reflow, { passive:true });
+        vv.addEventListener('scroll', reflow, { passive:true });
       }
+    }catch{}
+  })();
+</script>
 
-      function setAppH() {
-        const vv = window.visualViewport;
-        const h = vv ? vv.height : (window.innerHeight || rs.clientHeight || 0);
-        rs.style.setProperty('--app-h', h + 'px');
-      }
 
-      // Coalesce rapid events
-      let raf;
-      function reflow() {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => { setAppH(); setHdr(); });
-      }
-
-      // Initial
-      reflow();
-
-      // Window + document signals
-      window.addEventListener('resize', reflow, { passive: true });
-      window.addEventListener('orientationchange', reflow, { passive: true });
-      window.addEventListener('load', reflow, { passive: true });
-      document.addEventListener('readystatechange', reflow);
-
-      // VisualViewport (mobile URL bar, IME)
-      try {
-        const vv = window.visualViewport;
-        if (vv) {
-          vv.addEventListener('resize', reflow, { passive: true });
-          vv.addEventListener('scroll', reflow,  { passive: true });
-        }
-      } catch {}
-    })();
-  </script>
 </head>
 
 <body class="bg-neutral-900 text-neutral-100 overflow-hidden" style="height: var(--app-h);">
@@ -71,28 +70,22 @@
         class="h-8 w-auto drop-shadow-lg select-none flex-shrink-0"
         draggable="false"
       />
-
-      <!-- Centered event title with ellipsis -->
       <div class="flex-1 min-w-0 text-center">
         <div class="text-sm sm:text-base font-semibold tracking-wide truncate">
           {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
         </div>
       </div>
-
-      <!-- End session pill (hidden on mobile) -->
       <button id="btnEndSession" class="btn btn-outline text-xs hidden md:inline-flex flex-shrink-0" type="button">
         End session
       </button>
     </div>
-
-    <!-- Thin busy bar (hidden by default; JS toggles width) -->
     <div id="busyBar" class="h-2 bg-[var(--brand-red)] w-0 transition-all"></div>
   </header>
 
   <!-- Page content area (no page scroll). Guide viewport lives here. -->
- <main id="page-root" class="pt-16 h-[calc(100dvh-4rem)] w-screen overflow-hidden">
-  {% block content %}{% endblock %}
-</main>
+  <main id="page-root" class="pt-16 h-[calc(100dvh-4rem)] w-screen overflow-hidden">
+    {% block content %}{% endblock %}
+  </main>
 
   <!-- Global scripts (order matters) -->
   <script src="{{ url_for('static', path='js/logger.js') }}?v=13" defer></script>
@@ -103,11 +96,9 @@
   <script src="{{ url_for('static', path='js/stt.js') }}?v=16" defer></script>
   <script src="{{ url_for('static', path='js/earcon.js') }}?v=13" defer></script>
   <script src="{{ url_for('static', path='js/speak_safe.js') }}?v=13" defer></script>
-  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=20" defer></script>
-  <!-- Long-press / text-select / print/share-sheet guard for interactive controls -->
+  <script src="{{ url_for('static', path='js/ui_bindings.js') }}?v=21" defer></script>
   <script src="{{ url_for('static', path='js/touch_guard.js') }}?v=2" defer></script>
   <script src="{{ url_for('static', path='js/event_name.js') }}?v=14" defer></script>
-
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

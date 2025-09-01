@@ -1,13 +1,20 @@
 {% extends "_base.html" %}
 {% block title %}Guide · HARCi{% endblock %}
-
 {% block content %}
+
+<!-- Tiny sound-enable nudge (stays until tapped once) -->
+<div id="audioNudge"
+     style="position:fixed; right:12px; top:calc(4rem + 12px); z-index:60;">
+  <div class="rounded-full border border-white/10 bg-neutral-900/80 shadow-lg px-3 py-2 flex items-center gap-2">
+    <span class="text-[11px] text-neutral-200">Tap to enable sound</span>
+    <button id="btnEnableAudio" type="button" class="btn btn-brand text-[11px] py-1 px-2">Enable</button>
+  </div>
+</div>
+
 <!-- Viewport for Guide (height handled by CSS: main > *:first-child) -->
 <div id="guide-viewport" class="px-4 md:px-6 lg:px-8 h-full min-h-0">
-
   <!-- Fill the viewport; only briefing is scrollable -->
   <div class="h-full min-h-0 flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4">
-
     <!-- Avatar -->
     <section class="relative overflow-hidden rounded-2xl border border-white/10 bg-black
                     shrink-0 md:col-span-7 lg:col-span-8">
@@ -15,7 +22,6 @@
         <video id="remoteVideo" class="h-full w-full object-cover bg-black" playsinline autoplay muted></video>
       </div>
       <audio id="remoteAudio" playsinline></audio>
-
       <!-- Status chip -->
       <div class="absolute left-3 top-3">
         <span class="inline-flex items-center rounded-full border border-white/10 bg-neutral-900/70 px-3 py-1 text-[11px]">
@@ -26,17 +32,16 @@
     </section>
 
     <!-- Briefing (scroll area) -->
-    <section class="rounded-2xl border border-white/10 bg-neutral-800/50 p-4
-                    flex-1 min-h-0 overflow-auto overscroll-contain
-                    md:col-span-5 lg:col-span-4">
-      <div id="briefing" class="prose prose-invert max-w-none text-sm leading-snug">
+<section class="rounded-2xl border border-white/10 bg-neutral-800/50 p-4
+                flex-1 min-h-0 overflow-auto overscroll-contain
+                md:col-span-5 lg:col-span-4 briefing-scroll">
+   <div id="briefing" class="prose prose-invert max-w-none text-sm leading-snug">
         <h2 class="text-base font-semibold mb-1">Getting started</h2>
         <ul class="mt-1">
           <li>Hold <strong>Hold &amp; Speak</strong> to talk, release to send.</li>
           <li>Tap chips or type in the Ask box.</li>
         </ul>
       </div>
-
       <!-- Optional image -->
       <div id="imagePanel" class="hidden mt-3 overflow-hidden rounded-xl border border-white/10 bg-neutral-900/40">
         <img id="briefImage" alt="" class="w-full object-cover" />
@@ -62,46 +67,42 @@
   </div>
 </div>
 
-<!-- Fixed footer -->
+<!-- Fixed footer (no absolute mic; nothing overlaps) -->
 <footer class="fixed inset-x-0 bottom-0 border-t border-white/10 bg-neutral-950/70 backdrop-blur">
-  <div class="relative h-full">
-    <div class="absolute" style="inset: 8px 10px calc(env(safe-area-inset-bottom) + 10px) 10px;">
-
-      <!-- MIC LANE: slightly shorter on small screens; ring can overflow without clipping -->
-      <div class="relative h-20 md:h-24 w-full overflow-visible mt-1.5 mb-2 z-10">
-        <button id="btnHoldMic" type="button" aria-label="Hold to speak"
+  <div class="footer-shell">
+    <!-- MIC LANE -->
+<div class="relative h-20 md:h-24 w-full overflow-visible mt-1.5 mb-2 z-10 mic-lane">    <button id="btnHoldMic" type="button" aria-label="Hold to speak"
                 oncontextmenu="return false" draggable="false"
                 class="btn btn-brand btn-mic-rect select-none touch-none
                        absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 0 1-14 0m7 7v-2" />
-          </svg>
-          <span class="ml-2 font-semibold">Hold &amp; Speak</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 0 1-14 0m7 7v-2" />
+        </svg>
+        <span class="ml-2 font-semibold">Hold &amp; Speak</span>
+      </button>
+    </div>
+
+<!-- Divider -->
+<div class="h-px bg-white/10 mb-2 mic-divider"></div>
+
+   <!-- Mobile-only chips + input -->
+<div class="md:hidden space-y-2 relative z-0 chips-block">
+       <div id="quickChips" class="chip-scroll flex gap-1.5 pb-1">
+        <button class="chip text-[11px] px-2 py-1" data-prompt="Agenda">Agenda</button>
+        <button class="chip text-[11px] px-2 py-1" data-prompt="Venue Map">Venue Map</button>
+        <button class="chip text-[11px] px-2 py-1" data-prompt="Speakers">Speakers</button>
+        <button class="chip text-[11px] px-2 py-1" data-prompt="Help">Help</button>
+      </div>
+      <form id="askForm" class="flex items-stretch gap-1.5">
+        <input id="txtAsk"
+               type="text"
+               placeholder="Type or hold the button…"
+               class="input text-xs px-2 py-2 leading-tight flex-1 min-w-0" />
+        <button id="btnAsk" type="submit" class="btn btn-brand text-xs px-3 py-2 shrink-0">
+          Ask
         </button>
-      </div>
-
-      <!-- Divider placed BELOW the mic so it never crosses the button -->
-      <div class="h-px bg-white/10 mb-2"></div>
-
-      <!-- Mobile-only chips + input -->
-      <div class="md:hidden space-y-2 relative z-0">
-        <div id="quickChips" class="flex gap-1.5 overflow-x-auto pb-1">
-          <button class="chip text-[11px] px-2 py-1" data-prompt="Agenda">Agenda</button>
-          <button class="chip text-[11px] px-2 py-1" data-prompt="Venue Map">Venue Map</button>
-          <button class="chip text-[11px] px-2 py-1" data-prompt="Speakers">Speakers</button>
-          <button class="chip text-[11px] px-2 py-1" data-prompt="Help">Help</button>
-        </div>
-        <form id="askForm" class="flex items-stretch gap-1.5">
-          <input id="txtAsk"
-                 type="text"
-                 placeholder="Type or hold the button…"
-                 class="input text-xs px-2 py-2 leading-tight flex-1 min-w-0" />
-          <button id="btnAsk" type="submit" class="btn btn-brand text-xs px-3 py-2 shrink-0">
-            Ask
-          </button>
-        </form>
-      </div>
+      </form>
     </div>
   </div>
 </footer>
@@ -111,16 +112,13 @@
 (function () {
   var mq = window.matchMedia && window.matchMedia('(min-width: 768px)');
   if (!mq || !mq.matches) return; // mobile keeps canonical IDs in footer
-
   var d = document;
   var dChips = d.getElementById('quickChipsDesk');
   var dForm  = d.getElementById('askFormDesk');
   var dInput = d.getElementById('txtAskDesk');
-
   var mChips = d.getElementById('quickChips');
   var mForm  = d.getElementById('askForm');
   var mInput = d.getElementById('txtAsk');
-
   if (dChips && dForm && dInput) {
     if (mChips) mChips.id = 'quickChipsHidden';
     if (mForm)  mForm.id  = 'askFormHidden';
@@ -131,4 +129,55 @@
   }
 })();
 </script>
+
+<!-- Wiring for the Enable sound nudge -->
+<script>
+(function(){
+  const nudge = document.getElementById('audioNudge');
+  const btn   = document.getElementById('btnEnableAudio');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    try {
+      if (window.HARCI_AVATAR?.ensureAudioUnlocked) {
+        await window.HARCI_AVATAR.ensureAudioUnlocked();
+      } else {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) {
+          const ctx = new AC(); await ctx.resume();
+          const osc = ctx.createOscillator(); const g = ctx.createGain();
+          g.gain.value = 0; osc.connect(g).connect(ctx.destination);
+          osc.start(); osc.stop(ctx.currentTime + 0.02);
+        }
+      }
+      window.__audio_unlocked = true;
+      try { window.HARCI_AVATAR?.setOutputMuted?.(false); } catch {}
+    } catch {}
+    nudge?.classList.add('hidden');
+  }, { once: true });
+})();
+</script>
+<script>
+(function(){
+  function setFooterVar(){
+    const f = document.querySelector('footer');
+    if (!f) return;
+    const h = Math.ceil(f.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--footer-h-actual', h + 'px');
+  }
+  // Do it right after layout, and again on key events
+  requestAnimationFrame(setFooterVar);
+  window.addEventListener('load', setFooterVar, { once: true });
+  ['resize','orientationchange','visualViewportResize'].forEach(evt => {
+    window.addEventListener(evt, setFooterVar);
+  });
+  try {
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', setFooterVar, { passive: true });
+      window.visualViewport.addEventListener('scroll',  setFooterVar, { passive: true });
+    }
+  } catch {}
+})();
+</script>
+
 {% endblock %}

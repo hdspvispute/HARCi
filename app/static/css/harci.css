@@ -4,194 +4,175 @@
 
 /* ===== Base / Theme ===== */
 @layer base {
-  :root {
-    --brand-red: #E60027;
+  :root{
+    --brand-red:#E60027;
 
-    /* Taller mobile footer to fit big mic + chips comfortably */
-    --footer-h: 160px;
+    /* Static fallback; JS will overwrite --footer-h-actual with the real measured height */
+    --footer-h:176px;
+    --footer-h-actual: var(--footer-h);
 
-    /* iOS safe areas (used by sticky footer spacing) */
+    /* iOS safe areas */
     --sai-b: env(safe-area-inset-bottom);
     --sai-t: env(safe-area-inset-top);
   }
-  @media (min-width: 768px) { :root { --footer-h: 120px; } }
+  @media (min-width:768px){ :root{ --footer-h:120px; } }
 
-  html, body { height: 100%; }
-  /* Kill the blue tap highlight on iOS/Android */
-  html { -webkit-tap-highlight-color: transparent; }
+  html,body{ height:100%; }
+  html{ -webkit-tap-highlight-color:transparent; }
 }
 
 /* ===== Utilities ===== */
 @layer utilities {
-  .aspect-video { aspect-ratio: 16 / 9; }
-  .no-callout   { -webkit-touch-callout: none; }
-  .no-select    { -webkit-user-select: none; user-select: none; }
-  .tap-manipulation { touch-action: manipulation; } /* prevents double-tap zoom */
+  .aspect-video{ aspect-ratio:16/9; }
+  .no-callout{ -webkit-touch-callout:none; }
+  .no-select{ -webkit-user-select:none; user-select:none; }
+  .tap-manipulation{ touch-action:manipulation; }
   .conversation-shell{
-    height: calc(var(--app-h, 100dvh) - var(--hdr, 0px));
-    min-height: calc(var(--app-h, 100dvh) - var(--hdr, 0px));
-    overflow: hidden;
+    height:calc(var(--app-h,100dvh) - var(--hdr,0px));
+    min-height:calc(var(--app-h,100dvh) - var(--hdr,0px));
+    overflow:hidden;
   }
-
-  /* Hide scrollbars for horizontal chip rows */
-  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none{ -ms-overflow-style:none; scrollbar-width:none; }
+  .scrollbar-none::-webkit-scrollbar{ display:none; }
 }
 
-/* ===== Components (polished) ===== */
+/* ===== Components ===== */
 @layer components {
-  .card { @apply rounded-2xl border border-white/10 bg-neutral-900/40; }
+  .card{ @apply rounded-2xl border border-white/10 bg-neutral-900/40; }
 
-  .btn {
+  .btn{
     @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5
            border border-white/10 bg-white/5 text-white hover:bg-white/10
            transition duration-200 active:scale-[.99]
            disabled:opacity-50 disabled:cursor-not-allowed
            no-select no-callout tap-manipulation;
-    line-height: 1; /* crisply centers icons + labels */
+    line-height:1;
   }
+  .btn-brand{ @apply border-transparent text-white; background:var(--brand-red); }
+  .btn-brand:hover{ filter:brightness(1.08); }
+  .btn-outline{ @apply border-white/30 bg-transparent hover:bg-white/10; }
+  .btn-plain{ @apply bg-transparent border-transparent text-white/70 hover:text-white hover:bg-white/10; }
 
-  .btn-brand { @apply border-transparent text-white; background: var(--brand-red); }
-  .btn-brand:hover { filter: brightness(1.08); }
-
-  .btn-outline { @apply border-white/30 bg-transparent hover:bg-white/10; }
-  .btn-plain   { @apply bg-transparent border-transparent text-white/70 hover:text-white hover:bg-white/10; }
-
-  /* Large rectangular mic: readable, tappable, premium */
-  .btn-mic-rect {
+  /* Large rectangular mic */
+  .btn-mic-rect{
     @apply rounded-xl h-12 w-[min(100%,32rem)] md:h-14 md:w-[22rem]
            text-sm md:text-base font-semibold shadow-lg
            no-select no-callout tap-manipulation;
-    background: var(--brand-red);
+    background:var(--brand-red);
   }
-  /* Pressed micro-state (JS toggles .is-pressed during hold) */
-  /* Do not clobber transforms on generic rectangular buttons */
-.btn-mic-rect.is-pressed { filter: brightness(0.98); }
+  .btn-mic-rect.is-pressed{ filter:brightness(.98); }
+  #btnHoldMic.is-pressed{ transform:translate(-50%,-50%) scale(.995) translateY(1px); }
 
-/* The footer mic is absolutely centered; preserve its translate(-50%,-50%) */
-#btnHoldMic.is-pressed {
-  transform: translate(-50%, -50%) scale(0.995) translateY(1px);
-}
-
-  .chip {
+  .chip{
     @apply px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm
            hover:bg-white/10 whitespace-nowrap
            no-select no-callout tap-manipulation;
   }
 
-  .input {
+  .input{
     @apply w-full rounded-2xl px-3 py-2.5 bg-white/5 text-white placeholder-white/50
            border border-white/10 focus:outline-none focus:ring-2
            focus:ring-[var(--brand-red)] focus:border-transparent
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* ========= Strong Inactive/Disabled visuals ========= */
-.btn:disabled,
-.btn[aria-disabled="true"],
-.btn-mic-rect:disabled,
-.btn-mic-rect[aria-disabled="true"] {
-  @apply opacity-40 grayscale saturate-0 contrast-75 brightness-75 pointer-events-none;
-  /* IMPORTANT: do NOT reset transform; mic uses translate(-50%,-50%) to stay centered */
-  box-shadow: none;
-}
+  /* Strong disabled visuals */
+  .btn:disabled,.btn[aria-disabled="true"],
+  .btn-mic-rect:disabled,.btn-mic-rect[aria-disabled="true"]{
+    @apply opacity-40 grayscale saturate-0 contrast-75 brightness-75 pointer-events-none;
+    box-shadow:none;
+  }
+  .btn-brand:disabled,.btn-brand[aria-disabled="true"]{ @apply ring-1 ring-white/15; }
+  .chip:disabled,.chip[aria-disabled="true"]{ @apply bg-neutral-700/30 border-dashed border-white/25 text-white/55 pointer-events-none; }
+  .input:disabled,.input[aria-disabled="true"]{ @apply bg-neutral-700/20 text-white/60 border-white/15; }
+  .input:disabled::placeholder,.input[aria-disabled="true"]::placeholder{ @apply text-white/30; }
 
-/* Keep distinct variants */
-.btn-brand:disabled,
-.btn-brand[aria-disabled="true"] {
-  @apply ring-1 ring-white/15;
-}
-.btn-outline:disabled,
-.btn-outline[aria-disabled="true"],
-.btn-plain:disabled,
-.btn-plain[aria-disabled="true"] {
-  @apply text-white/45 border-white/20 bg-white/5;
-}
-.chip:disabled,
-.chip[aria-disabled="true"] {
-  @apply bg-neutral-700/30 border-dashed border-white/25 text-white/55 pointer-events-none;
-}
-.input:disabled,
-.input[aria-disabled="true"] { @apply bg-neutral-700/20 text-white/60 border-white/15; }
-.input:disabled::placeholder,
-.input[aria-disabled="true"]::placeholder { @apply text-white/30; }
-
-  /* ===== Global UI state overlays (body classes set by JS) ===== */
+  /* App state overlays */
   body.ui-inactive footer,
   body.ui-inactive #quickChips, body.ui-inactive #quickChipsDesk,
   body.ui-inactive #askForm,    body.ui-inactive #askFormDesk,
-  body.ui-inactive #btnHoldMic {
-    @apply opacity-50 grayscale contrast-75;
-  }
+  body.ui-inactive #btnHoldMic{ @apply opacity-50 grayscale contrast-75; }
 
   body.ui-busy footer,
   body.ui-busy #quickChips, body.ui-busy #quickChipsDesk,
   body.ui-busy #askForm,    body.ui-busy #askFormDesk,
-  body.ui-busy #btnHoldMic {
-    @apply opacity-45 grayscale contrast-75 pointer-events-none;
+  body.ui-busy #btnHoldMic{ @apply opacity-45 grayscale contrast-75 pointer-events-none; }
+
+  body.ui-busy::after{
+    content:""; position:fixed; inset:0;
+    background:radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0) 0%, rgba(0,0,0,.14) 100%);
+    pointer-events:none; z-index:40;
   }
 
-  /* Subtle busy scrim so the whole app reads “working” (without hiding content) */
-  body.ui-busy::after {
-    content: "";
-    position: fixed; inset: 0;
-    background: radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.14) 100%);
-    pointer-events: none;
-    z-index: 40; /* under header(50) and footer(9999) */
+  /* Mobile footer spacing — uses helper classes we’ll add in the markup */
+  @media (max-width:767px){
+    footer .mic-lane{    margin-bottom:.5rem; } /* mic → divider */
+    footer .mic-divider{ margin-bottom:.5rem; } /* divider → chips */
+    footer .chips-block{ /* nothing; form spacing already handled by space-y-2 */ }
   }
 
-  /* ===== Chip scrollers with fade edges ===== */
-  .chip-scroll {
+  /* Chip scrollers fade edges */
+  .chip-scroll{
     @apply overflow-x-auto scrollbar-none;
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent);
-            mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent);
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent);
+            mask-image:linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent);
   }
 }
 
 /* ===== States / Effects ===== */
-body.idle #remoteVideo { filter: brightness(.88) saturate(.95); }
-
-/* Dim chip row when any chip is disabled (reinforce “busy”) */
+body.idle #remoteVideo{ filter:brightness(.88) saturate(.95); }
 #quickChips:has(button:disabled),
-#quickChipsDesk:has(button:disabled) { filter: grayscale(100%) brightness(.9); }
+#quickChipsDesk:has(button:disabled){ filter:grayscale(100%) brightness(.9); }
 
 /* ===== Prose tweaks ===== */
-.prose h1 { @apply text-xl font-bold mt-2 mb-1; }
-.prose h2 { @apply text-lg font-semibold mt-2 mb-1; }
-.prose h3 { @apply text-base font-semibold mt-2 mb-1; }
-.prose ul { @apply list-disc ml-6; }
-.prose p  { @apply leading-relaxed; }
+.prose h1{ @apply text-xl font-bold mt-2 mb-1; }
+.prose h2{ @apply text-lg font-semibold mt-2 mb-1; }
+.prose h3{ @apply text-base font-semibold mt-2 mb-1; }
+.prose ul{ @apply list-disc ml-6; }
+.prose p { @apply leading-relaxed; }
 
 /* ===== Media surfaces ===== */
-#remoteVideo { @apply w-full h-full object-cover bg-black; }
-#briefImage  { @apply w-full object-cover; }
+#remoteVideo{ @apply w-full h-full object-cover bg-black; }
+#briefImage { @apply w-full object-cover; }
 
 /* ===== Status dot & mic hardening ===== */
-#statusDot { background: #10B981; }
-#btnHoldMic { -webkit-touch-callout: none; }
+#statusDot{ background:#10B981; }
+#btnHoldMic{ -webkit-touch-callout:none; }
 
 /* ========================================================================== */
-/*        HARD LAYOUT: lock viewport, fixed header/footer, single scroll       */
+/*        HARD LAYOUT: fixed header/footer, single scrollable briefing        */
 /* ========================================================================== */
-html, body { overflow: hidden; }
-body       { height: 100dvh; }
+html,body{ overflow:hidden; }
+body{ height:100dvh; }
 
-/* Header fixed (assumes 4rem) */
-header     { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 4rem; padding-top: max(0px, var(--sai-t)); }
+/* Fixed header */
+header{ position:fixed; top:0; left:0; right:0; z-index:50; height:4rem; padding-top:max(0px, var(--sai-t)); }
 
-/* Main fills under header; only the briefing section scrolls */
-main       { padding-top: 4rem; height: calc(100dvh - 4rem); overflow: hidden; }
+/* Page area below header */
+main{ padding-top:4rem; height:calc(100dvh - 4rem); overflow:hidden; }
 
-/* Footer fixed; include safe-area inset for notched phones */
-footer     { position: fixed; left: 0; right: 0; bottom: 0; height: calc(var(--footer-h) + var(--sai-b)); z-index: 9999; }
-footer .footer-inner { padding-bottom: max(0.25rem, var(--sai-b)); } /* give a little breathing room */
+/* Fixed footer (natural height, then JS writes --footer-h-actual for layout calc) */
+footer{
+  position:fixed; left:0; right:0; bottom:0;
+  z-index:9999;
+  /* no explicit height here; content determines height */
+}
 
-/* Subtract footer height from the main content wrapper */
-main > *:first-child { height: calc(100% - var(--footer-h)); overflow: hidden; }
+/* Reserve space for the footer so content never sits underneath it */
+main > #guide-viewport{
+  height: calc(100% - var(--footer-h-actual, var(--footer-h)));
+  overflow: hidden;
+}
 
-/* Only the briefing SECTION scrolls */
-section.briefing-scroll { overflow: auto; -webkit-overflow-scrolling: touch; }
-#briefing { overflow: visible; max-height: none; }
 
-/* Optional: also hint on the video while busy */
-body.ui-busy #remoteVideo { filter: brightness(.85) saturate(.95); }
+/* Only the briefing section scrolls */
+section.briefing-scroll{ overflow:auto; -webkit-overflow-scrolling:touch; }
+#briefing{ overflow:visible; max-height:none; }
+
+/* Subtle busy hint on video */
+body.ui-busy #remoteVideo{ filter:brightness(.85) saturate(.95); }
+
+@media (max-width: 767px){
+  footer .mic-lane    { margin-bottom: .75rem; } /* mic → divider */
+  footer .mic-divider { margin-bottom: .75rem; } /* divider → chips  */
+}
