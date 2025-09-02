@@ -6,14 +6,28 @@
   <meta name="theme-color" content="{{ cfg.brandRed or '#E60027' }}">
   <meta name="format-detection" content="telephone=no, address=no, email=no" />
   <meta name="color-scheme" content="dark light" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <link rel="manifest" href="{{ url_for('static', path='manifest.webmanifest') }}">
   <link rel="icon" href="{{ url_for('static', path='favicon.ico') }}">
+
   <title>{% block title %}HARCi Concierge{% endblock %}</title>
 
   <!-- Tailwind-built CSS -->
   <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=28" />
-  <style>:root{ --brand-red: {{ cfg.brandRed or '#E60027' }}; }</style>
+
+  <!-- Global CSS variables (brand + safe-area fallbacks) -->
+  <style>
+    :root{
+      --brand-red: {{ cfg.brandRed or '#E60027' }};
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @media (prefers-reduced-motion: reduce){
+      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
 
   <!-- Speech SDK (global; needed on Guide) -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
@@ -21,8 +35,9 @@
 
 <body class="bg-neutral-900 text-neutral-100 overflow-hidden">
   <!-- Header (fixed) -->
-  <header class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur relative">
-
+  <header
+    class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur"
+    style="padding-top: var(--safe-top);">
     <div class="mx-auto h-full max-w-screen px-4 md:px-6 lg:px-8 flex items-center gap-3">
 
       <img
@@ -31,23 +46,46 @@
         class="h-8 w-auto drop-shadow-lg select-none flex-shrink-0"
         draggable="false"
       />
+
       <div class="flex-1 min-w-0 text-center">
-        <div class="text-sm sm:text-base font-semibold tracking-wide truncate">
+        <div
+          class="text-sm sm:text-base font-semibold tracking-wide truncate"
+          title="{{ (cfg.event and cfg.event.name) or 'HARCi Event' }}">
           {{ (cfg.event and cfg.event.name) or 'HARCi Event' }}
         </div>
       </div>
-      <button id="btnEndSession" class="btn btn-outline text-xs hidden md:inline-flex flex-shrink-0" type="button">
+
+      <button id="btnEndSession" class="btn btn-outline text-xs hidden md:inline-flex flex-shrink-0" type="button" aria-label="End session">
         End session
       </button>
     </div>
-    <div id="busyBar" class="absolute bottom-0 left-0 right-0 h-2 bg-[var(--brand-red)] w-0 transition-all"></div>
 
+    <!-- Busy/Progress bar (set width via JS) -->
+    <div id="busyBar" class="absolute bottom-0 left-0 right-0 h-2 bg-[var(--brand-red)] w-0 transition-all"></div>
   </header>
 
-  <!-- Page content area (no page scroll). Guide viewport sets its own height in CSS. -->
-  <main id="page-root" class="pt-16 w-screen overflow-hidden">
+  <!-- Page content area (no page scroll). Individual pages manage inner layout heights. -->
+  <main id="page-root"
+        class="w-screen overflow-hidden"
+        style="padding-top: calc(4rem + var(--safe-top));">
     {% block content %}{% endblock %}
   </main>
+
+  <!-- Sticky bottom slot: pages (e.g., Guide) can render their control bar here -->
+  <div id="sticky-bottom-slot"
+       class="sticky bottom-0 inset-x-0 z-40 pointer-events-none"
+       style="padding-bottom: var(--safe-bottom);">
+    <!-- Child content should set pointer-events-auto on its own container -->
+  </div>
+
+  <!-- ARIA live region for screen readers (status text is updated from JS) -->
+  <div id="srStatus" class="sr-only" aria-live="polite"></div>
+
+  <noscript>
+    <div class="fixed inset-x-0 bottom-0 z-[60] bg-red-700 text-white text-center p-3">
+      JavaScript is required to use HARCi.
+    </div>
+  </noscript>
 
   <!-- Global scripts (order matters) -->
   <script src="{{ url_for('static', path='js/logger.js') }}?v=13" defer></script>

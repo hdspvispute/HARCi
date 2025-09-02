@@ -9,6 +9,13 @@
   // ---- UI helpers ------------------------------------------------------------
   window.UI = window.UI || {};
 
+  const STATE_CLASSES = ['state-ready','state-listening','state-thinking','state-speaking'];
+  function setBodyState(next) {
+    const b = document.body; if (!b) return;
+    STATE_CLASSES.forEach(c => b.classList.remove(c));
+    if (next) b.classList.add(`state-${next}`);
+  }
+
   function setVisualState(state /* 'inactive' | 'busy' | 'ready' */) {
     const b = document.body;
     if (!b) return;
@@ -18,21 +25,20 @@
     updateBusyBar(state);
   }
 
-  // Slim progress bar in header
   function updateBusyBar(stateOrStatus) {
     const bar = document.getElementById('busyBar');
     if (!bar) return;
     const s = String(stateOrStatus || '').toLowerCase();
-    const isBusy =
-      s.includes('busy') ||
-      /starting|thinking|processing|preparing|ending/.test(s);
+    const isBusy = s.includes('busy') || /starting|thinking|processing|preparing|ending|speaking/.test(s);
     bar.style.width = isBusy ? '100%' : '0';
   }
 
+  function srAnnounce(text) {
+    try { const sr = document.getElementById('srStatus'); if (sr) sr.textContent = text || ''; } catch {}
+  }
+
   async function primeMic() {
-    try { await window.HARCI_STT?.warmup?.(); } catch (e) {
-      LOG.warn('[ui] stt warmup failed', e);
-    }
+    try { await window.HARCI_STT?.warmup?.(); } catch (e) { LOG.warn('[ui] stt warmup failed', e); }
   }
 
   function getAskInput(){ return $('#txtAsk') || $('#txtAskDesk'); }
@@ -52,26 +58,56 @@
     setTypedEnabled(on);
   }
 
-  UI.setStatus = UI.setStatus || (s => {
-    UI.status = s;
-    try {
-      const el  = document.getElementById('statusText') || document.getElementById('status');
-      const dot = document.getElementById('statusDot');
-      if (el)  el.textContent = s;
-      if (dot) {
-        if (/Listening/i.test(s)) dot.style.background = 'var(--brand-red)';
-        else if (/Thinking|Starting|Processing|Preparing|Ending/i.test(s)) dot.style.background = '#F59E0B';
-        else dot.style.background = '#10B981';
-      }
-      updateBusyBar(s);
+  // NEW: show/hide bottom controls + tips during warmup
+  function setControlsVisible(on) {
+    const footer  = document.querySelector('footer');
+    const tipsBar = document.getElementById('tipsBar');
+    if (footer) {
+      footer.style.visibility = on ? 'visible' : 'hidden';
+      footer.style.pointerEvents = on ? 'auto' : 'none';
+      footer.style.opacity = on ? '1' : '0';
+    }
+    if (tipsBar) {
+      tipsBar.style.visibility = on ? 'visible' : 'hidden';
+      tipsBar.style.pointerEvents = on ? 'auto' : 'none';
+      tipsBar.style.opacity = on ? '1' : '0';
+    }
+  }
 
-      if (window.__harci_sessionActive) {
-        const isBusy = /Thinking|Starting|Processing|Preparing|Ending/i.test(s);
-        if (isBusy) { setAllEnabled(false); setVisualState('busy'); }
-        else if (/Ready/i.test(s)) { setAllEnabled(true); setVisualState('ready'); }
+  // Replace the whole UI.setStatus block with this
+UI.setStatus = UI.setStatus || (s => {
+  UI.status = s;
+  try {
+    const el  = document.getElementById('statusText') || document.getElementById('status');
+    if (el)  el.textContent = s;
+
+    const txt = String(s || '');
+
+    // Drive body color state
+    if (/Listening/i.test(txt))       setBodyState('listening');
+    else if (/Speaking/i.test(txt))   setBodyState('speaking');
+    else if (/Thinking|Starting|Processing|Preparing|Ending/i.test(txt))
+                                      setBodyState('thinking');
+    else                              setBodyState('ready');
+
+    updateBusyBar(s);
+    srAnnounce(txt);
+
+    if (window.__harci_sessionActive) {
+      const isBusy = /Thinking|Starting|Processing|Preparing|Ending|Speaking/i.test(txt);
+      if (isBusy) {
+        setAllEnabled(false);
+        setVisualState('busy');
+      } else if (/Ready/i.test(txt)) {
+        // <- KEY: always reveal + enable on Ready
+        setControlsVisible(true);
+        setAllEnabled(true);
+        setVisualState('ready');
       }
-    } catch {}
-  });
+    }
+  } catch {}
+});
+
 
   UI.setMicEnabled = UI.setMicEnabled || (on => {
     try { const b = document.getElementById('btnHoldMic'); if (b) b.disabled = !on; } catch {}
@@ -88,12 +124,23 @@
       const gain = ctx.createGain();
       gain.gain.value = 0;
       osc.connect(gain).connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.02);
+      osc.start(); osc.stop(ctx.currentTime + 0.02);
       LOG.info('[ui] soft audio unlocked');
     } catch (e) {
       LOG.warn('[ui] soft audio unlock failed', e);
     }
+  }
+
+  async function ensureOutputAudio() {
+    try {
+      if (window.HARCI_AVATAR?.ensureAudioUnlocked) {
+        await window.HARCI_AVATAR.ensureAudioUnlocked();
+      } else {
+        await softAudioUnlock();
+      }
+      window.__audio_unlocked = true;
+      try { window.HARCI_AVATAR?.setOutputMuted?.(false); } catch {}
+    } catch {}
   }
 
   async function waitForAvatar(ms = 2000) {
@@ -231,11 +278,15 @@
     const audio      = $('#remoteAudio');
     const holdBtn    = $('#btnHoldMic');
     const endBtn     = $('#btnEndSession');
+    const nudge      = $('#audioNudge');
 
-    // Initial status
-    UI.setStatus('Starting…');
-    setAllEnabled(false);
+    // Initial: keep everything hidden/disabled until welcome is fetched
+    UI.setStatus('Preparing…');
     setVisualState('busy');
+    setBodyState('thinking');
+    setAllEnabled(false);
+    setControlsVisible(false);          // NEW: hide chips/mic/tips
+    nudge?.classList.add('hidden');     // NEW: hide audio nudge during warmup
 
     function primeAudioEl() {
       try {
@@ -253,13 +304,9 @@
       holdBtn.style.opacity = '';
     }
 
-    // Auto-start session
+    // Auto-start session, then fetch welcome, then speak, THEN set Ready & reveal UI
     (async () => {
       try {
-        // Only attempt unlock at startup if user already tapped Enable
-        if (window.__audio_unlocked && await waitForAvatar(800)) {
-          try { await window.HARCI_AVATAR.ensureAudioUnlocked(); } catch { await softAudioUnlock(); }
-        }
         primeAudioEl();
         await primeMic();
         if (!await waitForAvatar(3000)) {
@@ -270,40 +317,59 @@
         sessionActive = true;
         window.__harci_sessionActive = true;
 
-        // Optional: let backend know
+        // End session button appears now...
+if (endBtn) { endBtn.classList.remove('hidden'); endBtn.disabled = false; }
+
+// Safety fuse: if controls somehow remain hidden, reveal them after 9s
+setTimeout(() => {
+  if (!sessionActive) return;
+  const footer = document.querySelector('footer');
+  const mic    = document.getElementById('btnHoldMic');
+  const hidden = footer && getComputedStyle(footer).visibility === 'hidden';
+  const disabled = mic && mic.disabled;
+  if (hidden || disabled) {
+    setControlsVisible(true);
+    setAllEnabled(true);
+    setVisualState('ready');
+    UI.setStatus('Ready');
+  }
+}, 9000);
+        // Fetch welcome with a timeout
+        let res = null;
+        const ac = new AbortController();
+        const t = setTimeout(() => { try { ac.abort(); } catch {} }, 8000); // 8s hard cap
         try {
-          const sid = document.cookie.replace(/(?:(?:^|.*;\s*)harci_sid\s*=\s*([^;]*).*$)|^.*$/, "$1");
-          if (window.API.sessionStart) {
-            await window.API.sessionStart(sid);
-          } else {
-            await fetch('/api/session/start', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ sid })
-            }).catch(()=>{});
-          }
-        } catch {}
+          res = await window.API.assistWelcome?.({ signal: ac.signal });
+        } catch (e) {
+          LOG.warn('[ui] welcome timed out or failed', e);
+        } finally {
+          clearTimeout(t);
+        }
 
-        // End session button appears now
-        if (endBtn) { endBtn.classList.remove('hidden'); endBtn.disabled = false; }
+        // Render briefing regardless (if any)
+        if (res) applyResponse(res);
 
+        // Ensure output audio before speaking
+        await ensureOutputAudio();
+
+        // Speak welcome if provided
+        if (res?.narration) {
+          await speakNow(res.narration, { turn: 'welcome' });
+        }
+
+        // Now the agent is truly "ready": reveal UI and switch state
+        setControlsVisible(true);
         setAllEnabled(true);
         setVisualState('ready');
         UI.setStatus('Ready');
 
-        // Optional welcome (keeps inputs enabled)
-        try {
-          const res = await window.API.assistWelcome?.();
-          if (res) {
-            applyResponse(res);
-            if (res.narration) await speakNow(res.narration, { turn: 'welcome' });
-          }
-        } catch (e) {
-          LOG.warn('[ui] welcome failed', e);
-        }
+        // If user still needs a nudge later (e.g., muted OS), you can re-show nudge on demand.
+        // nudge?.classList.remove('hidden');
+
       } catch (err) {
         LOG.error('[ui] auto-start failed', err);
         setAllEnabled(false);
+        setControlsVisible(true);   // allow text/mic if we failed welcome
         setVisualState('inactive');
         UI.setStatus('Failed to start');
       }
@@ -357,6 +423,8 @@
         if (e.name !== 'AbortError') UI.setStatus('Error');
         setAllEnabled(true);
         setVisualState('ready');
+        const nudge = document.getElementById('audioNudge');
+        nudge?.classList.add('hidden');
         return;
       } finally {
         clearTimeout(timeoutId);
@@ -381,14 +449,14 @@
       }
     }
 
-    // Chips (mobile + desktop)
+    // Chips
     const chips = $$('#quickChips [data-prompt], #quickChipsDesk [data-prompt]');
     chips.forEach(btn => btn.addEventListener('click', ()=> {
       if (!sessionActive) { UI.setStatus('Starting…'); return; }
       runPrompt(btn.dataset.prompt);
     }));
 
-    // ---- Mic press & hold (pure PTT) ----------------------------------------
+    // ---- Mic press & hold (PTT) ---------------------------------------------
     let isHolding = false;
     let holdToken = 0;
 
@@ -420,7 +488,7 @@
       holdToken++;
 
       cancelPending('ptt');
-      try { await (window.HARCI_AVATAR?.ensureAudioUnlocked?.() ?? softAudioUnlock()); } catch {}
+      try { await ensureOutputAudio(); } catch {}
       try { window.EARCON?.start?.(); } catch {}
       const i = getAskInput(); if (i) i.value = 'Listening…';
 
@@ -430,7 +498,7 @@
       try {
         try { holdBtn?.setPointerCapture?.(e.pointerId); } catch {}
         await window.HARCI_STT.beginHold();
-        holdBtn?.classList.add('ring-2','ring-white/50');
+        holdBtn?.classList.add('mic-pressed');
       } catch (err) {
         LOG.warn('[ui] beginHold failed', err);
         isHolding = false;
@@ -447,7 +515,7 @@
       isHolding = false;
 
       try { holdBtn?.releasePointerCapture?.(e?.pointerId); } catch {}
-      holdBtn?.classList.remove('ring-2','ring-white/50');
+      holdBtn?.classList.remove('mic-pressed');
       try { window.EARCON?.stop?.(); } catch {}
 
       let text = '';

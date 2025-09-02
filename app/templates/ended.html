@@ -1,20 +1,43 @@
 {% extends "_base.html" %}
 {% block title %}Session Ended · HARCi{% endblock %}
 {% block content %}
-<!-- Center the card within the fixed-header viewport -->
-<div class="h-[calc(100dvh-4rem)] w-screen flex items-center justify-center px-4 sm:px-0 overflow-hidden">
+
+<!-- Full-height under fixed header; center the card; respect safe-area -->
+<div
+  class="w-screen h-full grid place-items-center px-4 overflow-hidden"
+  style="padding-bottom: calc(var(--safe-bottom, 0px) + 8px);"
+>
   <section class="w-full max-w-xl rounded-2xl border border-white/10 bg-neutral-900/40 shadow-lg p-8 text-center overflow-auto">
-    <h2 class="text-xl font-semibold mb-2">Session ended</h2>
+    <h2 class="text-xl md:text-2xl font-semibold mb-2">Session ended</h2>
+
     <p class="text-neutral-300 mb-6">
       Thanks for visiting <span data-event-name>{{ (cfg.event and cfg.event.name) or 'the event' }}</span>.
-      You can start a fresh conversation anytime.
+      You can start a new conversation anytime.
     </p>
-    <a href="/guide" class="btn btn-brand w-full no-select no-callout tap-manipulation">
-      Talk to HARCi again
-    </a>
+
+    <!-- CTAs -->
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+     <a href="/guide" class="btn btn-brand w-full sm:flex-1 animate-pulse">Talk to HARCi again</a>
+
+      <!-- Replace /feedback with your form route or external survey link -->
+      <a href="/feedback" class="btn btn-outline w-full sm:flex-1" aria-label="Share feedback about your experience">
+        Share feedback
+      </a>
+    </div>
+
     <p class="text-xs text-neutral-400 mt-4">
-      Returning guests will be taken directly to the assistant if your session is still active on this device.
+      Returning guests may be taken directly to the assistant if your session is still active on this device.
     </p>
+
+    <!-- Lightweight privacy note -->
+    <details class="text-xs text-neutral-400/90 mt-3">
+      <summary class="cursor-pointer select-none hover:text-neutral-200">What happens to my data?</summary>
+      <div class="mt-1">
+        We store only minimal details to personalize your experience (e.g., name and company).
+        They’re cleared at session end or when you choose to start fresh.
+      </div>
+    </details>
   </section>
 </div>
+
 {% endblock %}
