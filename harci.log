@@ -7748,3 +7748,2730 @@ Response headers:
     'azureml-served-by-cluster': 'REDACTED'
     'x-request-time': 'REDACTED'
     'Date': 'Tue, 02 Sep 2025 16:54:01 GMT'
+2025-09-02 22:56:56,998 DEBUG python_multipart.multipart :: Calling on_part_begin with no data
+2025-09-02 22:56:57,001 DEBUG python_multipart.multipart :: Calling on_header_field with data[42:61]
+2025-09-02 22:56:57,002 DEBUG python_multipart.multipart :: Calling on_header_value with data[63:85]
+2025-09-02 22:56:57,003 DEBUG python_multipart.multipart :: Calling on_header_end with no data
+2025-09-02 22:56:57,004 DEBUG python_multipart.multipart :: Calling on_headers_finished with no data
+2025-09-02 22:56:57,005 DEBUG python_multipart.multipart :: Calling on_part_data with data[89:105]
+2025-09-02 22:56:57,006 DEBUG python_multipart.multipart :: Calling on_part_end with no data
+2025-09-02 22:56:57,008 DEBUG python_multipart.multipart :: Calling on_part_begin with no data
+2025-09-02 22:56:57,009 DEBUG python_multipart.multipart :: Calling on_header_field with data[149:168]
+2025-09-02 22:56:57,009 DEBUG python_multipart.multipart :: Calling on_header_value with data[170:195]
+2025-09-02 22:56:57,011 DEBUG python_multipart.multipart :: Calling on_header_end with no data
+2025-09-02 22:56:57,013 DEBUG python_multipart.multipart :: Calling on_headers_finished with no data
+2025-09-02 22:56:57,015 DEBUG python_multipart.multipart :: Calling on_part_data with data[199:223]
+2025-09-02 22:56:57,016 DEBUG python_multipart.multipart :: Calling on_part_end with no data
+2025-09-02 22:56:57,017 DEBUG python_multipart.multipart :: Calling on_end with no data
+2025-09-02 22:56:57,644 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 22:56:57,647 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 22:56:58,837 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.api.cognitive.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 22:56:58,847 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 22:56:58,850 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 22:57:00,225 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.tts.speech.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 22:57:00,444 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D7AFD010>
+2025-09-02 22:57:00,447 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x00000243D792FF50> server_hostname='eastus2.api.cognitive.microsoft.com' timeout=10
+2025-09-02 22:57:00,955 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D7B0B450>
+2025-09-02 22:57:00,957 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'POST']>
+2025-09-02 22:57:00,958 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 22:57:00,960 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'POST']>
+2025-09-02 22:57:00,961 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 22:57:00,964 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'POST']>
+2025-09-02 22:57:01,231 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Length', b'772'), (b'Content-Type', b'application/jwt'), (b'x-envoy-upstream-service-time', b'1'), (b'apim-request-id', b'3d1b2f22-331a-49bf-afb9-ed1b38444fb4'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'x-content-type-options', b'nosniff'), (b'x-ms-region', b'East US 2'), (b'Date', b'Tue, 02 Sep 2025 17:27:00 GMT')])
+2025-09-02 22:57:01,240 INFO httpx :: HTTP Request: POST https://eastus2.api.cognitive.microsoft.com/sts/v1.0/issueToken "HTTP/1.1 200 OK"
+2025-09-02 22:57:01,242 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'POST']>
+2025-09-02 22:57:01,245 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 22:57:01,248 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 22:57:01,251 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 22:57:01,256 DEBUG httpcore.connection :: close.started
+2025-09-02 22:57:01,259 DEBUG httpcore.connection :: close.complete
+2025-09-02 22:57:01,595 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D7297A10>
+2025-09-02 22:57:01,595 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x00000243D7B3AE70> server_hostname='eastus2.tts.speech.microsoft.com' timeout=10
+2025-09-02 22:57:01,840 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D7B1AC50>
+2025-09-02 22:57:01,842 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'GET']>
+2025-09-02 22:57:01,845 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 22:57:01,846 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'GET']>
+2025-09-02 22:57:01,847 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 22:57:01,849 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'GET']>
+2025-09-02 22:57:02,145 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Tue, 02 Sep 2025 17:27:02 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'212'), (b'Connection', b'keep-alive'), (b'x-envoy-upstream-service-time', b'104'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains')])
+2025-09-02 22:57:02,167 INFO httpx :: HTTP Request: GET https://eastus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1 "HTTP/1.1 200 OK"
+2025-09-02 22:57:02,174 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'GET']>
+2025-09-02 22:57:02,174 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 22:57:02,174 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 22:57:02,184 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 22:57:02,184 DEBUG httpcore.connection :: close.started
+2025-09-02 22:57:02,184 DEBUG httpcore.connection :: close.complete
+2025-09-02 22:57:07,676 INFO azure.identity._credentials.environment :: No environment configuration found.
+2025-09-02 22:57:07,679 DEBUG azure.identity._internal.decorators :: EnvironmentCredential.get_token_info failed: EnvironmentCredential authentication unavailable. Environment variables are not fully configured.
+Visit https://aka.ms/azsdk/python/identity/environmentcredential/troubleshoot to troubleshoot this issue.
+Traceback (most recent call last):
+  File "C:\Users\pvispute\Documents\AI\harci-app\harci_event_10\.venv\Lib\site-packages\azure\identity\_internal\decorators.py", line 23, in wrapper
+    token = fn(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pvispute\Documents\AI\harci-app\harci_event_10\.venv\Lib\site-packages\azure\identity\_credentials\environment.py", line 181, in get_token_info
+    raise CredentialUnavailableError(message=message)
+azure.identity._exceptions.CredentialUnavailableError: EnvironmentCredential authentication unavailable. Environment variables are not fully configured.
+Visit https://aka.ms/azsdk/python/identity/environmentcredential/troubleshoot to troubleshoot this issue.
+2025-09-02 22:57:07,685 DEBUG azure.identity._credentials.azure_cli :: Executing subprocess with the following arguments ['C:\\Program Files\\Microsoft SDKs\\Azure\\CLI2\\wbin\\az.cmd', 'account', 'get-access-token', '--output', 'json', '--resource', 'https://ai.azure.com']
+2025-09-02 22:57:12,144 DEBUG azure.identity._internal.decorators :: AzureCliCredential.get_token_info succeeded
+2025-09-02 22:57:12,147 DEBUG azure.identity._internal.decorators :: [Authenticated account] Client ID: 04b07795-8ddb-461a-bbee-02f9e1bf7b46. Tenant ID: 18791e17-6159-4f52-a8d4-de814ca8284a. User Principal Name: prafulla.vispute@hitachids.com. Object ID (user): b15038fb-642f-47c8-939a-2ac1ab483adf
+2025-09-02 22:57:12,149 INFO azure.identity._credentials.chained :: DefaultAzureCredential acquired a token from AzureCliCredential
+2025-09-02 22:57:12,151 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/assistants/asst_Eh6bcCYKdNfMEIhQ6jh4KRbn?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '0cff22fe-8822-11f0-954c-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:12,164 DEBUG urllib3.connectionpool :: Starting new HTTPS connection (1): pvispute-azure-agent-resource.services.ai.azure.com:443
+2025-09-02 22:57:14,644 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/assistants/asst_Eh6bcCYKdNfMEIhQ6jh4KRbn?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:14,855 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:13 GMT'
+2025-09-02 22:57:14,863 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '2'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '11474162-8822-11f0-b3c2-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:57:15,570 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads?api-version=v1 HTTP/1.1" 200 137
+2025-09-02 22:57:15,572 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Content-Length': '137'
+    'Content-Type': 'application/json'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:14 GMT'
+2025-09-02 22:57:15,579 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '652'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '11b46724-8822-11f0-bc18-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:57:16,265 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:16,270 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:15 GMT'
+2025-09-02 22:57:16,279 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '814'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '121f4da9-8822-11f0-b7ed-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:57:17,729 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:17,962 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:16 GMT'
+2025-09-02 22:57:18,220 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '13478ac2-8822-11f0-ad84-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:18,911 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:19,132 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:17 GMT'
+2025-09-02 22:57:19,387 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '13f9a583-8822-11f0-a045-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:19,934 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:20,192 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:18 GMT'
+2025-09-02 22:57:20,447 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '149b3344-8822-11f0-b918-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:21,040 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:21,320 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:20 GMT'
+2025-09-02 22:57:21,575 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '15475779-8822-11f0-aa56-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:22,217 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_qtGZwAnvWmWsDRNqoMCvR33s?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:22,424 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:21 GMT'
+2025-09-02 22:57:22,428 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '15c98b55-8822-11f0-85c6-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:22,942 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 22:57:22,944 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:22 GMT'
+2025-09-02 22:57:34,826 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '50'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '1d2d4b43-8822-11f0-8894-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:57:35,488 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:35,493 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:34 GMT'
+2025-09-02 22:57:35,496 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '1d93a70f-8822-11f0-bf0a-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:57:36,412 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:36,792 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:35 GMT'
+2025-09-02 22:57:37,061 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_sE0NrFzAIcGlHlX0RulDLWWp?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '1e825625-8822-11f0-a928-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:39,705 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_sE0NrFzAIcGlHlX0RulDLWWp?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:57:40,134 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:38 GMT'
+2025-09-02 22:57:40,138 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '2057fe8c-8822-11f0-bc9c-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:57:41,393 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 22:57:41,397 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:27:40 GMT'
+2025-09-02 22:58:19,072 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 22:58:19,075 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 22:58:20,053 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.tts.speech.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 22:58:20,398 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D5D841D0>
+2025-09-02 22:58:20,402 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x00000243D807A9F0> server_hostname='eastus2.tts.speech.microsoft.com' timeout=10
+2025-09-02 22:58:20,619 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D5D84410>
+2025-09-02 22:58:20,623 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'GET']>
+2025-09-02 22:58:20,623 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 22:58:20,623 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'GET']>
+2025-09-02 22:58:20,629 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 22:58:20,630 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'GET']>
+2025-09-02 22:58:20,867 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Tue, 02 Sep 2025 17:28:20 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'212'), (b'Connection', b'keep-alive'), (b'x-envoy-upstream-service-time', b'33'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains')])
+2025-09-02 22:58:20,867 INFO httpx :: HTTP Request: GET https://eastus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1 "HTTP/1.1 200 OK"
+2025-09-02 22:58:20,867 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'GET']>
+2025-09-02 22:58:20,867 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 22:58:20,873 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 22:58:20,878 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 22:58:20,882 DEBUG httpcore.connection :: close.started
+2025-09-02 22:58:20,885 DEBUG httpcore.connection :: close.complete
+2025-09-02 22:58:25,251 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '652'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '3b3b9c94-8822-11f0-a0aa-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:58:25,838 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:25,840 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:25 GMT'
+2025-09-02 22:58:25,843 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '3b95fb3a-8822-11f0-822d-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:58:26,572 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:26,778 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:26 GMT'
+2025-09-02 22:58:27,032 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_agdq3oFMMoJFB2kh0znDnHR0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '3c4b4911-8822-11f0-ab19-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:27,774 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_agdq3oFMMoJFB2kh0znDnHR0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:27,981 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:27 GMT'
+2025-09-02 22:58:28,237 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_agdq3oFMMoJFB2kh0znDnHR0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '3d033e6d-8822-11f0-80ab-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:29,081 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_agdq3oFMMoJFB2kh0znDnHR0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:29,288 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:28 GMT'
+2025-09-02 22:58:29,545 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_agdq3oFMMoJFB2kh0znDnHR0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '3dcaa03e-8822-11f0-89ea-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:30,096 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_agdq3oFMMoJFB2kh0znDnHR0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:30,302 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:29 GMT'
+2025-09-02 22:58:30,305 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '3e3ea046-8822-11f0-a2d2-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:30,710 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 22:58:30,712 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:30 GMT'
+2025-09-02 22:58:39,507 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '52'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '43bafeca-8822-11f0-be21-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:58:40,100 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:40,103 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:39 GMT'
+2025-09-02 22:58:40,109 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '44169594-8822-11f0-b89b-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 22:58:41,067 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:41,280 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:40 GMT'
+2025-09-02 22:58:41,536 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '44f07a87-8822-11f0-a8ba-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:42,051 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:42,274 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:41 GMT'
+2025-09-02 22:58:42,532 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '45884c78-8822-11f0-b5b2-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:43,341 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:43,548 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:43 GMT'
+2025-09-02 22:58:43,802 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '464a458a-8822-11f0-8b8a-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:44,195 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:44,401 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:44 GMT'
+2025-09-02 22:58:44,658 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '46ccf2b2-8822-11f0-af5e-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:45,081 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/runs/run_u4cohHD2s79oUwnBrPPK2AjH?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 22:58:45,287 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:44 GMT'
+2025-09-02 22:58:45,292 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '472d8545-8822-11f0-9dda-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 22:58:45,725 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_6WwSghV9wRAYXo9aUOtvOlB5/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 22:58:45,730 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:28:45 GMT'
+2025-09-02 23:00:26,141 DEBUG python_multipart.multipart :: Calling on_part_begin with no data
+2025-09-02 23:00:26,141 DEBUG python_multipart.multipart :: Calling on_header_field with data[42:61]
+2025-09-02 23:00:26,143 DEBUG python_multipart.multipart :: Calling on_header_value with data[63:85]
+2025-09-02 23:00:26,144 DEBUG python_multipart.multipart :: Calling on_header_end with no data
+2025-09-02 23:00:26,145 DEBUG python_multipart.multipart :: Calling on_headers_finished with no data
+2025-09-02 23:00:26,146 DEBUG python_multipart.multipart :: Calling on_part_data with data[89:113]
+2025-09-02 23:00:26,146 DEBUG python_multipart.multipart :: Calling on_part_end with no data
+2025-09-02 23:00:26,146 DEBUG python_multipart.multipart :: Calling on_part_begin with no data
+2025-09-02 23:00:26,146 DEBUG python_multipart.multipart :: Calling on_header_field with data[157:176]
+2025-09-02 23:00:26,151 DEBUG python_multipart.multipart :: Calling on_header_value with data[178:203]
+2025-09-02 23:00:26,151 DEBUG python_multipart.multipart :: Calling on_header_end with no data
+2025-09-02 23:00:26,151 DEBUG python_multipart.multipart :: Calling on_headers_finished with no data
+2025-09-02 23:00:26,154 DEBUG python_multipart.multipart :: Calling on_part_data with data[207:226]
+2025-09-02 23:00:26,154 DEBUG python_multipart.multipart :: Calling on_part_end with no data
+2025-09-02 23:00:26,156 DEBUG python_multipart.multipart :: Calling on_end with no data
+2025-09-02 23:00:26,534 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 23:00:26,536 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 23:00:27,457 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.tts.speech.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 23:00:27,711 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D7B598D0>
+2025-09-02 23:00:27,711 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x00000243D807AA80> server_hostname='eastus2.tts.speech.microsoft.com' timeout=10
+2025-09-02 23:00:27,941 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x00000243D813AB90>
+2025-09-02 23:00:27,944 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'GET']>
+2025-09-02 23:00:27,945 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 23:00:27,945 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'GET']>
+2025-09-02 23:00:27,945 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 23:00:27,950 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'GET']>
+2025-09-02 23:00:28,182 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Tue, 02 Sep 2025 17:30:28 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'212'), (b'Connection', b'keep-alive'), (b'x-envoy-upstream-service-time', b'29'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains')])
+2025-09-02 23:00:28,182 INFO httpx :: HTTP Request: GET https://eastus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1 "HTTP/1.1 200 OK"
+2025-09-02 23:00:28,182 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'GET']>
+2025-09-02 23:00:28,182 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 23:00:28,182 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 23:00:28,182 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 23:00:28,193 DEBUG httpcore.connection :: close.started
+2025-09-02 23:00:28,195 DEBUG httpcore.connection :: close.complete
+2025-09-02 23:00:31,728 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '2'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '869e5a54-8822-11f0-b47a-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:00:32,218 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads?api-version=v1 HTTP/1.1" 200 137
+2025-09-02 23:00:32,219 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Content-Length': '137'
+    'Content-Type': 'application/json'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:31 GMT'
+2025-09-02 23:00:32,225 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '660'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '86ea44a4-8822-11f0-bfbd-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:00:32,764 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:32,766 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:32 GMT'
+2025-09-02 23:00:32,778 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '814'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '873ec7c4-8822-11f0-84b4-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:00:33,507 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:33,765 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:32 GMT'
+2025-09-02 23:00:34,021 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_upYiadOwIQ43JQJdXJqizfOO?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '87fc542e-8822-11f0-a3d8-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:34,517 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_upYiadOwIQ43JQJdXJqizfOO?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:34,725 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:33 GMT'
+2025-09-02 23:00:34,981 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_upYiadOwIQ43JQJdXJqizfOO?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '888eccfb-8822-11f0-99e8-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:36,238 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_upYiadOwIQ43JQJdXJqizfOO?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:36,448 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:35 GMT'
+2025-09-02 23:00:36,703 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_upYiadOwIQ43JQJdXJqizfOO?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '8995910b-8822-11f0-b081-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:37,201 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_upYiadOwIQ43JQJdXJqizfOO?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:37,409 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:36 GMT'
+2025-09-02 23:00:37,414 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '8a0226e4-8822-11f0-a62f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:38,202 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:00:38,206 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:37 GMT'
+2025-09-02 23:00:44,330 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '50'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '8e2160cb-8822-11f0-9c64-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:00:45,240 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:45,243 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:44 GMT'
+2025-09-02 23:00:45,247 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '8ead1137-8822-11f0-b6ae-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:00:45,848 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:46,057 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:45 GMT'
+2025-09-02 23:00:46,310 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '8f4f8560-8822-11f0-b25d-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:46,762 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:46,970 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:46 GMT'
+2025-09-02 23:00:47,224 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '8fdaf5ee-8822-11f0-a1c8-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:47,739 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:47,945 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:47 GMT'
+2025-09-02 23:00:48,202 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '907027ad-8822-11f0-a5b7-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:49,101 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:49,319 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:48 GMT'
+2025-09-02 23:00:49,575 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '9141a62b-8822-11f0-bd0f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:50,035 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_ST4pbED11Rt1oW5nXgPdn7wr?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:50,242 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:49 GMT'
+2025-09-02 23:00:50,247 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '91a8462e-8822-11f0-bb4f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:00:50,712 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:00:50,716 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:50 GMT'
+2025-09-02 23:00:58,909 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '58'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '96d1e9ec-8822-11f0-8a56-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:00:59,429 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:00:59,432 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:58 GMT'
+2025-09-02 23:00:59,436 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '97225596-8822-11f0-934f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:01:00,005 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:00,212 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:30:59 GMT'
+2025-09-02 23:01:00,468 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_q2vCBVf2AUkpJFEFwTzxuMwT?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '97bff075-8822-11f0-b6fc-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:01:01,355 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_q2vCBVf2AUkpJFEFwTzxuMwT?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:01,563 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:00 GMT'
+2025-09-02 23:01:01,816 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_q2vCBVf2AUkpJFEFwTzxuMwT?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '988d86a7-8822-11f0-9e6b-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:01:02,279 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_q2vCBVf2AUkpJFEFwTzxuMwT?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:02,487 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:01 GMT'
+2025-09-02 23:01:02,488 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '98f428eb-8822-11f0-8e7f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:01:02,910 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:01:02,914 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:02 GMT'
+2025-09-02 23:01:11,540 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '65'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '9e593af1-8822-11f0-a790-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:01:12,009 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:12,013 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:11 GMT'
+2025-09-02 23:01:12,016 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '9ea1eedf-8822-11f0-94a5-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:01:12,645 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:12,851 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:11 GMT'
+2025-09-02 23:01:13,107 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_tiBf6fr88VW3bVv8SKTk8ekN?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '9f487258-8822-11f0-89a4-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:01:13,591 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_tiBf6fr88VW3bVv8SKTk8ekN?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:13,798 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:12 GMT'
+2025-09-02 23:01:14,052 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_tiBf6fr88VW3bVv8SKTk8ekN?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': '9fd89050-8822-11f0-9192-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:01:14,536 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/runs/run_tiBf6fr88VW3bVv8SKTk8ekN?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:01:14,744 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:13 GMT'
+2025-09-02 23:01:14,749 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'a042b641-8822-11f0-a3a7-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:01:15,193 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_VDvA6hyK1XJre2wtvKYaBBuX/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:01:15,399 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:31:14 GMT'
+2025-09-02 23:09:22,218 DEBUG python_multipart.multipart :: Calling on_part_begin with no data
+2025-09-02 23:09:22,218 DEBUG python_multipart.multipart :: Calling on_header_field with data[42:61]
+2025-09-02 23:09:22,218 DEBUG python_multipart.multipart :: Calling on_header_value with data[63:85]
+2025-09-02 23:09:22,222 DEBUG python_multipart.multipart :: Calling on_header_end with no data
+2025-09-02 23:09:22,222 DEBUG python_multipart.multipart :: Calling on_headers_finished with no data
+2025-09-02 23:09:22,228 DEBUG python_multipart.multipart :: Calling on_part_data with data[89:96]
+2025-09-02 23:09:22,228 DEBUG python_multipart.multipart :: Calling on_part_end with no data
+2025-09-02 23:09:22,233 DEBUG python_multipart.multipart :: Calling on_part_begin with no data
+2025-09-02 23:09:22,233 DEBUG python_multipart.multipart :: Calling on_header_field with data[140:159]
+2025-09-02 23:09:22,233 DEBUG python_multipart.multipart :: Calling on_header_value with data[161:186]
+2025-09-02 23:09:22,238 DEBUG python_multipart.multipart :: Calling on_header_end with no data
+2025-09-02 23:09:22,241 DEBUG python_multipart.multipart :: Calling on_headers_finished with no data
+2025-09-02 23:09:22,242 DEBUG python_multipart.multipart :: Calling on_part_data with data[190:199]
+2025-09-02 23:09:22,245 DEBUG python_multipart.multipart :: Calling on_part_end with no data
+2025-09-02 23:09:22,248 DEBUG python_multipart.multipart :: Calling on_end with no data
+2025-09-02 23:09:22,592 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 23:09:22,592 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 23:09:23,841 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.api.cognitive.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 23:09:23,848 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 23:09:23,851 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 23:09:25,015 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.tts.speech.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 23:09:25,230 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x0000025ACEF99E90>
+2025-09-02 23:09:25,230 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x0000025ACEF7A690> server_hostname='eastus2.api.cognitive.microsoft.com' timeout=10
+2025-09-02 23:09:25,276 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x0000025ACF001350>
+2025-09-02 23:09:25,282 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x0000025ACEF7A9F0> server_hostname='eastus2.tts.speech.microsoft.com' timeout=10
+2025-09-02 23:09:25,500 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x0000025ACEF99AD0>
+2025-09-02 23:09:25,502 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'GET']>
+2025-09-02 23:09:25,506 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 23:09:25,508 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'GET']>
+2025-09-02 23:09:25,511 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 23:09:25,515 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'GET']>
+2025-09-02 23:09:25,655 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x0000025ACEF5BD90>
+2025-09-02 23:09:25,665 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'POST']>
+2025-09-02 23:09:25,671 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 23:09:25,674 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'POST']>
+2025-09-02 23:09:25,675 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 23:09:25,677 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'POST']>
+2025-09-02 23:09:25,753 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Tue, 02 Sep 2025 17:39:25 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'212'), (b'Connection', b'keep-alive'), (b'x-envoy-upstream-service-time', b'44'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains')])
+2025-09-02 23:09:25,758 INFO httpx :: HTTP Request: GET https://eastus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1 "HTTP/1.1 200 OK"
+2025-09-02 23:09:25,761 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'GET']>
+2025-09-02 23:09:25,764 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 23:09:25,767 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 23:09:25,770 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 23:09:25,774 DEBUG httpcore.connection :: close.started
+2025-09-02 23:09:25,776 DEBUG httpcore.connection :: close.complete
+2025-09-02 23:09:25,882 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Content-Length', b'772'), (b'Content-Type', b'application/jwt'), (b'x-envoy-upstream-service-time', b'1'), (b'apim-request-id', b'7a85a574-1b28-40d2-be5b-5e30ba56b1cc'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains; preload'), (b'x-content-type-options', b'nosniff'), (b'x-ms-region', b'East US 2'), (b'Date', b'Tue, 02 Sep 2025 17:39:25 GMT')])
+2025-09-02 23:09:25,884 INFO httpx :: HTTP Request: POST https://eastus2.api.cognitive.microsoft.com/sts/v1.0/issueToken "HTTP/1.1 200 OK"
+2025-09-02 23:09:25,885 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'POST']>
+2025-09-02 23:09:25,888 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 23:09:25,889 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 23:09:25,890 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 23:09:25,892 DEBUG httpcore.connection :: close.started
+2025-09-02 23:09:25,895 DEBUG httpcore.connection :: close.complete
+2025-09-02 23:09:30,559 INFO azure.identity._credentials.environment :: No environment configuration found.
+2025-09-02 23:09:30,562 DEBUG azure.identity._internal.decorators :: EnvironmentCredential.get_token_info failed: EnvironmentCredential authentication unavailable. Environment variables are not fully configured.
+Visit https://aka.ms/azsdk/python/identity/environmentcredential/troubleshoot to troubleshoot this issue.
+Traceback (most recent call last):
+  File "C:\Users\pvispute\Documents\AI\harci-app\harci_event_10\.venv\Lib\site-packages\azure\identity\_internal\decorators.py", line 23, in wrapper
+    token = fn(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pvispute\Documents\AI\harci-app\harci_event_10\.venv\Lib\site-packages\azure\identity\_credentials\environment.py", line 181, in get_token_info
+    raise CredentialUnavailableError(message=message)
+azure.identity._exceptions.CredentialUnavailableError: EnvironmentCredential authentication unavailable. Environment variables are not fully configured.
+Visit https://aka.ms/azsdk/python/identity/environmentcredential/troubleshoot to troubleshoot this issue.
+2025-09-02 23:09:30,568 DEBUG azure.identity._credentials.azure_cli :: Executing subprocess with the following arguments ['C:\\Program Files\\Microsoft SDKs\\Azure\\CLI2\\wbin\\az.cmd', 'account', 'get-access-token', '--output', 'json', '--resource', 'https://ai.azure.com']
+2025-09-02 23:09:32,917 DEBUG azure.identity._internal.decorators :: AzureCliCredential.get_token_info succeeded
+2025-09-02 23:09:32,922 DEBUG azure.identity._internal.decorators :: [Authenticated account] Client ID: 04b07795-8ddb-461a-bbee-02f9e1bf7b46. Tenant ID: 18791e17-6159-4f52-a8d4-de814ca8284a. User Principal Name: prafulla.vispute@hitachids.com. Object ID (user): b15038fb-642f-47c8-939a-2ac1ab483adf
+2025-09-02 23:09:32,927 INFO azure.identity._credentials.chained :: DefaultAzureCredential acquired a token from AzureCliCredential
+2025-09-02 23:09:32,933 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/assistants/asst_Eh6bcCYKdNfMEIhQ6jh4KRbn?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'c7ca0d5b-8823-11f0-b5d4-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:32,983 DEBUG urllib3.connectionpool :: Starting new HTTPS connection (1): pvispute-azure-agent-resource.services.ai.azure.com:443
+2025-09-02 23:09:36,318 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/assistants/asst_Eh6bcCYKdNfMEIhQ6jh4KRbn?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:36,531 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:35 GMT'
+2025-09-02 23:09:36,544 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '2'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'cb5a8776-8823-11f0-9c01-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:09:37,311 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads?api-version=v1 HTTP/1.1" 200 137
+2025-09-02 23:09:37,314 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Content-Length': '137'
+    'Content-Type': 'application/json'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:36 GMT'
+2025-09-02 23:09:37,322 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '643'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'cbd18761-8823-11f0-8d31-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:09:37,859 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:37,862 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:37 GMT'
+2025-09-02 23:09:37,869 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '814'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'cc24e1f0-8823-11f0-81f6-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:09:38,574 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:38,783 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:37 GMT'
+2025-09-02 23:09:39,044 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ccd81019-8823-11f0-8a64-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:39,529 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:39,732 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:38 GMT'
+2025-09-02 23:09:39,987 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'cd6825a6-8823-11f0-9719-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:40,462 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:40,665 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:39 GMT'
+2025-09-02 23:09:40,920 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'cdf69701-8823-11f0-b748-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:41,362 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:41,605 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:40 GMT'
+2025-09-02 23:09:41,859 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ce85c7e0-8823-11f0-9716-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:42,341 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_o1KVgJmE4c7V1GQIQUjX35om?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:42,544 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:41 GMT'
+2025-09-02 23:09:42,548 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ceeeeada-8823-11f0-a013-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:43,391 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:09:43,395 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:42 GMT'
+2025-09-02 23:09:45,386 DEBUG httpx :: load_ssl_context verify=True cert=None trust_env=True http2=False
+2025-09-02 23:09:45,388 DEBUG httpx :: load_verify_locations cafile='C:\\Users\\pvispute\\Documents\\AI\\harci-app\\harci_event_10\\.venv\\Lib\\site-packages\\certifi\\cacert.pem'
+2025-09-02 23:09:46,381 DEBUG httpcore.connection :: connect_tcp.started host='eastus2.tts.speech.microsoft.com' port=443 local_address=None timeout=10 socket_options=None
+2025-09-02 23:09:46,643 DEBUG httpcore.connection :: connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x0000025ACF001190>
+2025-09-02 23:09:46,644 DEBUG httpcore.connection :: start_tls.started ssl_context=<ssl.SSLContext object at 0x0000025ACF4C2570> server_hostname='eastus2.tts.speech.microsoft.com' timeout=10
+2025-09-02 23:09:46,869 DEBUG httpcore.connection :: start_tls.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x0000025ACF5BD8D0>
+2025-09-02 23:09:46,869 DEBUG httpcore.http11 :: send_request_headers.started request=<Request [b'GET']>
+2025-09-02 23:09:46,875 DEBUG httpcore.http11 :: send_request_headers.complete
+2025-09-02 23:09:46,875 DEBUG httpcore.http11 :: send_request_body.started request=<Request [b'GET']>
+2025-09-02 23:09:46,880 DEBUG httpcore.http11 :: send_request_body.complete
+2025-09-02 23:09:46,884 DEBUG httpcore.http11 :: receive_response_headers.started request=<Request [b'GET']>
+2025-09-02 23:09:47,122 DEBUG httpcore.http11 :: receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Tue, 02 Sep 2025 17:39:47 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'212'), (b'Connection', b'keep-alive'), (b'x-envoy-upstream-service-time', b'20'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubDomains')])
+2025-09-02 23:09:47,124 INFO httpx :: HTTP Request: GET https://eastus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1 "HTTP/1.1 200 OK"
+2025-09-02 23:09:47,126 DEBUG httpcore.http11 :: receive_response_body.started request=<Request [b'GET']>
+2025-09-02 23:09:47,128 DEBUG httpcore.http11 :: receive_response_body.complete
+2025-09-02 23:09:47,130 DEBUG httpcore.http11 :: response_closed.started
+2025-09-02 23:09:47,132 DEBUG httpcore.http11 :: response_closed.complete
+2025-09-02 23:09:47,135 DEBUG httpcore.connection :: close.started
+2025-09-02 23:09:47,135 DEBUG httpcore.connection :: close.complete
+2025-09-02 23:09:50,180 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '643'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'd37b71ef-8823-11f0-8574-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:09:50,670 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:50,674 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:50 GMT'
+2025-09-02 23:09:50,679 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'd3c7ab13-8823-11f0-ae4e-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:09:51,360 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:51,571 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:50 GMT'
+2025-09-02 23:09:51,829 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_Ypl7jU28aKGtcD95XGcDvqOU?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'd47731d6-8823-11f0-8b76-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:52,323 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_Ypl7jU28aKGtcD95XGcDvqOU?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:52,525 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:51 GMT'
+2025-09-02 23:09:52,783 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_Ypl7jU28aKGtcD95XGcDvqOU?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'd5089462-8823-11f0-9461-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:53,148 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_Ypl7jU28aKGtcD95XGcDvqOU?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:53,351 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:52 GMT'
+2025-09-02 23:09:53,604 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_Ypl7jU28aKGtcD95XGcDvqOU?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'd585f3b2-8823-11f0-82a7-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:54,066 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_Ypl7jU28aKGtcD95XGcDvqOU?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:09:54,269 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:53 GMT'
+2025-09-02 23:09:54,272 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'd5ebf7fc-8823-11f0-9f77-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:09:54,676 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:09:54,679 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:39:54 GMT'
+2025-09-02 23:10:05,549 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '60'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'dca48e9b-8823-11f0-8b6a-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:10:06,075 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:06,080 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:05 GMT'
+2025-09-02 23:10:06,086 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'dcf696b8-8823-11f0-9b4a-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:10:06,642 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:06,845 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:05 GMT'
+2025-09-02 23:10:07,100 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'dd9144c8-8823-11f0-a7d4-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:07,546 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:07,750 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:06 GMT'
+2025-09-02 23:10:08,006 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'de1b6d1d-8823-11f0-a19e-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:08,745 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:08,951 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:08 GMT'
+2025-09-02 23:10:09,207 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ded2d889-8823-11f0-99e2-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:09,690 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:09,893 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:09 GMT'
+2025-09-02 23:10:10,151 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'df629c7e-8823-11f0-ab47-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:10,631 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_LdxZYxNYwRCuwhI5Vuj6vrv0?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:10,835 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:09 GMT'
+2025-09-02 23:10:10,841 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'dfcc19b7-8823-11f0-98bf-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:11,532 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:10:11,535 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:10 GMT'
+2025-09-02 23:10:21,860 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '52'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e65d642c-8823-11f0-b01f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:10:22,318 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:22,322 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:21 GMT'
+2025-09-02 23:10:22,328 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e6a4d682-8823-11f0-9e0b-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:10:23,436 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:23,665 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:22 GMT'
+2025-09-02 23:10:23,922 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_9uCMnVhtxqmZN9ZzyieXCbFi?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e7981ecb-8823-11f0-af29-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:24,398 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_9uCMnVhtxqmZN9ZzyieXCbFi?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:24,601 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:23 GMT'
+2025-09-02 23:10:24,858 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_9uCMnVhtxqmZN9ZzyieXCbFi?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e826eb6f-8823-11f0-aa10-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:25,436 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_9uCMnVhtxqmZN9ZzyieXCbFi?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:25,639 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:24 GMT'
+2025-09-02 23:10:25,894 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_9uCMnVhtxqmZN9ZzyieXCbFi?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e8c51b37-8823-11f0-97a7-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:26,343 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_9uCMnVhtxqmZN9ZzyieXCbFi?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:26,591 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:25 GMT'
+2025-09-02 23:10:26,596 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'e93016d8-8823-11f0-a972-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:27,062 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:10:27,067 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:26 GMT'
+2025-09-02 23:10:32,861 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '40'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ecec2aa1-8823-11f0-b1fb-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:10:33,313 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:33,316 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:32 GMT'
+2025-09-02 23:10:33,320 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=REDACTED'
+Request method: 'POST'
+Request headers:
+    'Content-Type': 'application/json'
+    'Content-Length': '66'
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ed321a20-8823-11f0-96c8-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+A body is sent with the request
+2025-09-02 23:10:34,130 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "POST /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:34,333 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:33 GMT'
+2025-09-02 23:10:34,589 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'edf3dae7-8823-11f0-ade2-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:35,019 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:35,230 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:34 GMT'
+2025-09-02 23:10:35,486 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ee7c79ac-8823-11f0-a35f-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:35,940 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:36,143 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:35 GMT'
+2025-09-02 23:10:36,398 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ef07c28e-8823-11f0-af3a-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:36,830 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:37,062 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:36 GMT'
+2025-09-02 23:10:37,316 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'ef93de48-8823-11f0-8cb8-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:37,741 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/runs/run_c8c56yxIE6aVXnOK8WCv5bPD?api-version=v1 HTTP/1.1" 200 None
+2025-09-02 23:10:37,953 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:36 GMT'
+2025-09-02 23:10:37,959 INFO azure.core.pipeline.policies.http_logging_policy :: Request URL: 'https://pvispute-azure-agent-resource.services.ai.azure.com/api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=REDACTED&limit=REDACTED&order=REDACTED'
+Request method: 'GET'
+Request headers:
+    'Accept': 'application/json'
+    'x-ms-client-request-id': 'eff5f167-8823-11f0-9735-d4e98a21b44c'
+    'User-Agent': 'AIProjectClient azsdk-python-ai-agents/1.1.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)'
+    'Authorization': 'REDACTED'
+No body was attached to the request
+2025-09-02 23:10:38,446 DEBUG urllib3.connectionpool :: https://pvispute-azure-agent-resource.services.ai.azure.com:443 "GET /api/projects/pvispute-azure-agent/threads/thread_2RPtgJc0DDqeUFBP7qljhiu6/messages?api-version=v1&limit=20&order=desc HTTP/1.1" 200 None
+2025-09-02 23:10:38,648 INFO azure.core.pipeline.policies.http_logging_policy :: Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Request-Context': 'REDACTED'
+    'x-ms-response-type': 'REDACTED'
+    'x-ms-middleware-request-id': 'REDACTED'
+    'openai-version': 'REDACTED'
+    'openai-organization': 'REDACTED'
+    'X-Request-ID': 'REDACTED'
+    'openai-processing-ms': 'REDACTED'
+    'Strict-Transport-Security': 'REDACTED'
+    'apim-request-id': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'x-ms-region': 'REDACTED'
+    'azureml-served-by-cluster': 'REDACTED'
+    'x-request-time': 'REDACTED'
+    'Date': 'Tue, 02 Sep 2025 17:40:37 GMT'

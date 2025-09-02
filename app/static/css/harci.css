@@ -213,3 +213,11 @@ section.briefing-scroll{
   outline-offset: 2px;
   box-shadow: none !important;
 }
+/* Kill long-press callouts just on the mic button */
+#btnHoldMic, #btnHoldMic * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  touch-action: none !important;   /* no gesture triggers */
+}

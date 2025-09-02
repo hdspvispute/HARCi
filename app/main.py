@@ -421,23 +421,35 @@ def _now_local_str() -> str:
 async def assist_run(req: Request, body: dict = Body(default={})):
     text = (body.get("text") or "").strip()
     sid  = body.get("session_id") or req.cookies.get(SESSION_COOKIE)
+    # Prepare session log file path
+    session_log_dir = os.path.join(_APP_ROOT, "session_logs")
+    os.makedirs(session_log_dir, exist_ok=True)
+    log_file_path = os.path.join(session_log_dir, f"SessLog_{sid}.txt")
+    sess = get_session(sid)
+    user_name = getattr(sess, "name", "Guest") if sess else "Guest"
 
     if not agent_config_ok() or AIProjectClient is None:
         topic = text or "Welcome"
+        narration = f"{topic}: Here's what you need to know for the HARC AI Launch."
+        briefing_md = (
+            f"### {topic}\n"
+            f"- Venue: Hall A (Ground Floor)\n"
+            f"- Time: 10:00–17:00\n"
+            f"- Tip: Use the quick chips (Agenda, Venue Map, Speakers, Help)\n"
+        )
+        # Log interaction
+        with open(log_file_path, "a", encoding="utf-8") as f:
+            f.write(f"User: {user_name}: {text}\n")
+            f.write(f"HARCi: {narration}\n")
+            f.write(f"Briefing: {briefing_md}\n\n")
         return JSONResponse({
-            "narration": f"{topic}: Here's what you need to know for the HARC AI Launch.",
-            "briefing_md": (
-                f"### {topic}\n"
-                f"- Venue: Hall A (Ground Floor)\n"
-                f"- Time: 10:00–17:00\n"
-                f"- Tip: Use the quick chips (Agenda, Venue Map, Speakers, Help)\n"
-            ),
+            "narration": narration,
+            "briefing_md": briefing_md,
             "image": {"url": "/static/assets/venue-map.png", "alt": "Venue map"}
         })
 
     try:
         project, agent = _get_client_and_agent()
-        sess = get_session(sid)
         thread_id = getattr(sess, "agent_thread_id", None) or ""
         if not thread_id:
             thread = project.agents.threads.create()
@@ -471,8 +483,14 @@ async def assist_run(req: Request, body: dict = Body(default={})):
 
         if getattr(run, "status", None) == "failed":
             log.error("Agent run failed: %s", getattr(run, "last_error", None))
+            narration = "Agent run failed."
+            briefing_md = f"### Error\n- {getattr(run, 'last_error', 'unknown')}"
+            with open(log_file_path, "a", encoding="utf-8") as f:
+                f.write(f"User: {user_name}: {text}\n")
+                f.write(f"HARCi: {narration}\n")
+                f.write(f"Briefing: {briefing_md}\n\n")
             return JSONResponse(
-                {"narration": "Agent run failed.", "briefing_md": f"### Error\n- {getattr(run, 'last_error', 'unknown')}"},
+                {"narration": narration, "briefing_md": briefing_md},
                 status_code=500
             )
 
@@ -481,6 +499,7 @@ async def assist_run(req: Request, body: dict = Body(default={})):
         except Exception:
             output_ids = []
 
+        response_logged = False
         if output_ids:
             get_by_id = getattr(project.agents.messages, "get", None)
             if callable(get_by_id):
@@ -494,8 +513,16 @@ async def assist_run(req: Request, body: dict = Body(default={})):
                         continue
                     txt = _extract_text(m)
                     if txt:
+                        payload = _parse_payload(txt)
+                        narration = payload.get("narration", "")
+                        briefing_md = payload.get("briefing_md", "")
+                        with open(log_file_path, "a", encoding="utf-8") as f:
+                            f.write(f"User: {user_name}: {text}\n")
+                            f.write(f"HARCi: {narration}\n")
+                            f.write(f"Briefing: {briefing_md}\n\n")
+                        response_logged = True
                         touch_sid(sid or "")
-                        return JSONResponse(_parse_payload(txt))
+                        return JSONResponse(payload)
 
         list_kwargs = {"thread_id": thread_id, "limit": 20}
         if ListSortOrder is not None:
@@ -522,17 +549,29 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             if txt:
                 chosen_payload = _parse_payload(txt)
 
+        narration = chosen_payload.get("narration", "") if chosen_payload else "No agent reply found."
+        briefing_md = chosen_payload.get("briefing_md", "") if chosen_payload else ""
+        with open(log_file_path, "a", encoding="utf-8") as f:
+            f.write(f"User: {user_name}: {text}\n")
+            f.write(f"HARCi: {narration}\n")
+            f.write(f"Briefing: {briefing_md}\n\n")
         touch_sid(sid or "")
         return JSONResponse(chosen_payload or {
-            "narration": "No agent reply found.",
-            "briefing_md": "",
+            "narration": narration,
+            "briefing_md": briefing_md,
             "image": None
         })
     except Exception:
         log.exception("assist_run agent SDK error")
+        narration = "I couldn’t reach the agent service just now. Here’s a quick brief."
+        briefing_md = f"### {text or 'Info'}\n- The service is temporarily unavailable.\n- Please try again in a moment."
+        with open(log_file_path, "a", encoding="utf-8") as f:
+            f.write(f"User: {user_name}: {text}\n")
+            f.write(f"HARCi: {narration}\n")
+            f.write(f"Briefing: {briefing_md}\n\n")
         return JSONResponse({
-            "narration": "I couldn’t reach the agent service just now. Here’s a quick brief.",
-            "briefing_md": f"### {text or 'Info'}\n- The service is temporarily unavailable.\n- Please try again in a moment.",
+            "narration": narration,
+            "briefing_md": briefing_md,
         }, status_code=200)
 
 # ===== Personalized welcome (Agent-powered) ===================================

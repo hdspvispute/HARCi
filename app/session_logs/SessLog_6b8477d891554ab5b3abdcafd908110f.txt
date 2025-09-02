@@ -1,0 +1,30 @@
+User: Ruchita: What is the agenda for today?
+HARCi: Today's agenda includes arrivals, demos, keynotes, and networking. Let me outline the full schedule for you.
+Briefing: ### Today's Agenda (Sep 16)
+- **5:30–5:45 pm:** Arrivals & Networking
+- **5:45–5:55 pm:** Welcome & Overview of Demo Experience
+- **5:45–6:30 pm:** Demos & Networking
+- **6:40–7:10 pm:** Transition to **1st Floor Lobby** (Dinner, Drinks, Networking)
+- **7:10 pm:** Overview of Agentic AI
+- **7:25 pm:** CTO Fireside Chat + Q&A
+- **7:50 pm:** Hitachi AI R&D + Q&A
+- **8:00 pm:** Dessert & Final Networking
+- _Need venue directions or help finding a session? Just ask!_
+
+User: Ruchita: Who are the speakers?
+HARCi: Our featured speakers include industry leaders sharing insights on mission-critical AI. Let me list them for you.
+Briefing: ### Featured Speakers
+- **Opening Welcome:** Hitachi Digital Services leadership team
+- **Agentic AI Overview:** Thought leader in AI strategy
+- **CTO Fireside Chat:** CTO sharing future-vision and live Q&A
+- **Hitachi AI R&D Spotlight:** Experts presenting cutting-edge advancements
+- _Have a specific question or want speaker profiles? Just ask!_
+
+User: Ruchita: Venue Map
+HARCi: Venue directions are now available in your HARCi experience. Let me show you where to go.
+Briefing: ### Venue Map Highlights
+- Start on **Floor 8** in the Hitachi Digital Services office, left of elevators.
+- At **6:40 pm**, transition to **Floor 1 Lobby** for dinner, drinks, and keynotes.
+- Restrooms: **Main hallway**, with **men’s** by the lobby and **women’s** near the breakroom.
+- _Need specific demo or session help? Just ask!_
+

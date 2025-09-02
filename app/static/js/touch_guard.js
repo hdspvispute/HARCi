@@ -1,98 +1,44 @@
-// app/static/js/touch_guard.js
+// touch_guard.js – mic long-press guard for Samsung/Android
 (() => {
-  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child)
-    ? window.HARCI_LOG.child('touch')
-    : console;
+  const mic = document.getElementById('btnHoldMic');
+  if (!mic) return;
 
-  // Any element matching these selectors will be "hardened"
-  const SEL = [
-    '.btn', '.btn-brand', '.btn-outline', '.btn-plain',
-    '.btn-mic-rect', '#btnHoldMic',
-    '.chip',
-    'button',
-    '[role="button"]',
-    '[data-no-callout]'
-  ].join(',');
+  const swallow = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
 
-  function harden(el) {
-    if (!el || el.__touchHardened) return;
-    el.__touchHardened = true;
-
-    // Visual feedback class on press for big mic / buttons
-    const addPressed = () => {
-      if (el.matches('.btn-mic-rect, #btnHoldMic, .btn')) el.classList.add('is-pressed');
-    };
-    const rmPressed = () => el.classList.remove('is-pressed');
-
-    // Attributes that help across browsers
-    el.setAttribute('draggable', 'false');
-    el.setAttribute('aria-live', el.getAttribute('aria-live') || 'off');
-    try {
-      el.style.webkitTapHighlightColor = 'transparent';
-      // Don’t rely solely on CSS classes; force it here too
-      el.style.webkitUserSelect = 'none';
-      el.style.userSelect = 'none';
-      el.style.touchAction = 'manipulation';
-      el.style.webkitTouchCallout = 'none';
-    } catch {}
-
-    // Block context menus / text selection / drags
-    el.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-    el.addEventListener('selectstart', (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-    el.addEventListener('dragstart',   (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-
-    // Some mobile browsers emit a pinch "gesturestart" event
-    el.addEventListener('gesturestart', (e) => { try { e.preventDefault(); } catch {} }, { capture: true });
-
-    // Pointer press visuals (does NOT change your app logic)
-    el.addEventListener('pointerdown', (e) => {
-      try { el.setPointerCapture?.(e.pointerId); } catch {}
-      addPressed();
-    }, { passive: true });
-
-    const end = () => rmPressed();
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach((evt) =>
-      el.addEventListener(evt, end, { passive: true })
-    );
-  }
-
-  function hardenAll(root = document) {
-    root.querySelectorAll(SEL).forEach(harden);
-  }
-
-  // Initial pass
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => hardenAll());
-  } else {
-    hardenAll();
-  }
-
-  // Watch for dynamically added buttons (e.g., ID swaps desktop/mobile)
-  const mo = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      m.addedNodes && m.addedNodes.forEach((n) => {
-        if (!(n instanceof Element)) return;
-        if (n.matches && n.matches(SEL)) harden(n);
-        if (n.querySelectorAll) hardenAll(n);
-      });
-    }
+  // Always block these directly on the mic
+  ['contextmenu','dragstart','selectstart','gesturestart'].forEach(ev => {
+    mic.addEventListener(ev, swallow, { capture: true });
   });
-  try {
-    mo.observe(document.documentElement, { subtree: true, childList: true });
-  } catch (e) {
-    LOG.warn('[touch] MutationObserver failed', e);
-  }
 
-  // Global safety nets (in case something slips through)
-  window.addEventListener('contextmenu', (e) => {
-    const el = e.target.closest?.(SEL);
-    if (el) { e.preventDefault(); e.stopPropagation(); }
-  }, { capture: true });
+  let pressed = false;
+  const docBlock = (e) => { if (pressed) { e.preventDefault(); e.stopPropagation(); } };
 
-  window.addEventListener('selectstart', (e) => {
-    const el = e.target.closest?.(SEL);
-    if (el) { e.preventDefault(); e.stopPropagation(); }
-  }, { capture: true });
+  const startPress = (e) => {
+    // Ensure the browser knows we've handled the gesture
+    swallow(e);
+    pressed = true;
+    try { mic.setPointerCapture?.(e.pointerId); } catch {}
+    // While held, kill any context menu anywhere
+    document.addEventListener('contextmenu', docBlock, { capture: true });
+    document.addEventListener('selectstart', docBlock, { capture: true });
+  };
 
-  LOG.info('[touch] guard armed');
+  const endPress = (e) => {
+    swallow(e);
+    pressed = false;
+    document.removeEventListener('contextmenu', docBlock, { capture: true });
+    document.removeEventListener('selectstart', docBlock, { capture: true });
+  };
+
+  // Prefer pointer events; fall back to mouse/touch
+  mic.addEventListener('pointerdown', startPress, { passive: false });
+  mic.addEventListener('pointerup', endPress, { passive: false });
+  mic.addEventListener('pointercancel', endPress, { passive: false });
+  mic.addEventListener('lostpointercapture', endPress, { passive: false });
+
+  // Extra safety for older stacks
+  mic.addEventListener('touchstart', startPress, { passive: false });
+  mic.addEventListener('touchend', endPress, { passive: false });
+  mic.addEventListener('mousedown', startPress, { passive: false });
+  mic.addEventListener('mouseup', endPress, { passive: false });
 })();
