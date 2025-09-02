@@ -7,18 +7,19 @@
   :root{
     --brand-red:#E60027;
 
-    /* Static fallback; JS will overwrite --footer-h-actual with the real measured height */
-    --footer-h:176px;
-    --footer-h-actual: var(--footer-h);
-
     /* iOS safe areas */
     --sai-b: env(safe-area-inset-bottom);
     --sai-t: env(safe-area-inset-top);
+
+    /* Footer heights (class-switched, no measuring) */
+    --footer-h-collapsed: 128px;  /* chips + mic */
+    --footer-h-expanded:  184px;  /* chips + mic + ask form */
+    --footer-h: var(--footer-h-collapsed);
   }
-  @media (min-width:768px){ :root{ --footer-h:120px; } }
 
   html,body{ height:100%; }
   html{ -webkit-tap-highlight-color:transparent; }
+  body.ask-open { --footer-h: var(--footer-h-expanded); }
 }
 
 /* ===== Utilities ===== */
@@ -27,11 +28,6 @@
   .no-callout{ -webkit-touch-callout:none; }
   .no-select{ -webkit-user-select:none; user-select:none; }
   .tap-manipulation{ touch-action:manipulation; }
-  .conversation-shell{
-    height:calc(var(--app-h,100dvh) - var(--hdr,0px));
-    min-height:calc(var(--app-h,100dvh) - var(--hdr,0px));
-    overflow:hidden;
-  }
   .scrollbar-none{ -ms-overflow-style:none; scrollbar-width:none; }
   .scrollbar-none::-webkit-scrollbar{ display:none; }
 }
@@ -56,17 +52,14 @@
   /* Large rectangular mic */
   .btn-mic-rect{
     @apply rounded-xl h-12 w-[min(100%,32rem)] md:h-14 md:w-[22rem]
-           text-sm md:text-base font-semibold shadow-lg
-           no-select no-callout tap-manipulation;
+           text-sm md:text-base font-semibold shadow-lg;
     background:var(--brand-red);
   }
   .btn-mic-rect.is-pressed{ filter:brightness(.98); }
-  #btnHoldMic.is-pressed{ transform:translate(-50%,-50%) scale(.995) translateY(1px); }
 
   .chip{
     @apply px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm
-           hover:bg-white/10 whitespace-nowrap
-           no-select no-callout tap-manipulation;
+           hover:bg-white/10 whitespace-nowrap;
   }
 
   .input{
@@ -87,30 +80,6 @@
   .input:disabled,.input[aria-disabled="true"]{ @apply bg-neutral-700/20 text-white/60 border-white/15; }
   .input:disabled::placeholder,.input[aria-disabled="true"]::placeholder{ @apply text-white/30; }
 
-  /* App state overlays */
-  body.ui-inactive footer,
-  body.ui-inactive #quickChips, body.ui-inactive #quickChipsDesk,
-  body.ui-inactive #askForm,    body.ui-inactive #askFormDesk,
-  body.ui-inactive #btnHoldMic{ @apply opacity-50 grayscale contrast-75; }
-
-  body.ui-busy footer,
-  body.ui-busy #quickChips, body.ui-busy #quickChipsDesk,
-  body.ui-busy #askForm,    body.ui-busy #askFormDesk,
-  body.ui-busy #btnHoldMic{ @apply opacity-45 grayscale contrast-75 pointer-events-none; }
-
-  body.ui-busy::after{
-    content:""; position:fixed; inset:0;
-    background:radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0) 0%, rgba(0,0,0,.14) 100%);
-    pointer-events:none; z-index:40;
-  }
-
-  /* Mobile footer spacing — uses helper classes we’ll add in the markup */
-  @media (max-width:767px){
-    footer .mic-lane{    margin-bottom:.5rem; } /* mic → divider */
-    footer .mic-divider{ margin-bottom:.5rem; } /* divider → chips */
-    footer .chips-block{ /* nothing; form spacing already handled by space-y-2 */ }
-  }
-
   /* Chip scrollers fade edges */
   .chip-scroll{
     @apply overflow-x-auto scrollbar-none;
@@ -121,8 +90,7 @@
 
 /* ===== States / Effects ===== */
 body.idle #remoteVideo{ filter:brightness(.88) saturate(.95); }
-#quickChips:has(button:disabled),
-#quickChipsDesk:has(button:disabled){ filter:grayscale(100%) brightness(.9); }
+#quickChips:has(button:disabled){ filter:grayscale(100%) brightness(.9); }
 
 /* ===== Prose tweaks ===== */
 .prose h1{ @apply text-xl font-bold mt-2 mb-1; }
@@ -135,44 +103,53 @@ body.idle #remoteVideo{ filter:brightness(.88) saturate(.95); }
 #remoteVideo{ @apply w-full h-full object-cover bg-black; }
 #briefImage { @apply w-full object-cover; }
 
-/* ===== Status dot & mic hardening ===== */
+/* ===== Status dot ===== */
 #statusDot{ background:#10B981; }
 #btnHoldMic{ -webkit-touch-callout:none; }
 
 /* ========================================================================== */
-/*        HARD LAYOUT: fixed header/footer, single scrollable briefing        */
+/*            HARD LAYOUT: fixed header/footer, scrollable briefing           */
 /* ========================================================================== */
 html,body{ overflow:hidden; }
-body{ height:100dvh; }
 
 /* Fixed header */
-header{ position:fixed; top:0; left:0; right:0; z-index:50; height:4rem; padding-top:max(0px, var(--sai-t)); }
+header{
+  position:fixed; top:0; left:0; right:0; z-index:50; height:4rem;
+  padding-top:max(0px, var(--sai-t));
+}
 
-/* Page area below header */
-main{ padding-top:4rem; height:calc(100dvh - 4rem); overflow:hidden; }
-
-/* Fixed footer (natural height, then JS writes --footer-h-actual for layout calc) */
+/* Footer is fixed */
 footer{
-  position:fixed; left:0; right:0; bottom:0;
-  z-index:9999;
-  /* no explicit height here; content determines height */
+  position:fixed; left:0; right:0; bottom:0; z-index:40;
 }
-
-/* Reserve space for the footer so content never sits underneath it */
-main > #guide-viewport{
-  height: calc(100% - var(--footer-h-actual, var(--footer-h)));
-  overflow: hidden;
-}
-
-
-/* Only the briefing section scrolls */
-section.briefing-scroll{ overflow:auto; -webkit-overflow-scrolling:touch; }
-#briefing{ overflow:visible; max-height:none; }
 
 /* Subtle busy hint on video */
 body.ui-busy #remoteVideo{ filter:brightness(.85) saturate(.95); }
 
-@media (max-width: 767px){
-  footer .mic-lane    { margin-bottom: .75rem; } /* mic → divider */
-  footer .mic-divider { margin-bottom: .75rem; } /* divider → chips  */
+/* Fill <main> (which already has h-[calc(100dvh-4rem)]) */
+#guide-viewport{
+  height: 100%;
+  overflow: hidden;   /* only the briefing section scrolls */
 }
+
+/* Only the briefing section scrolls; reserve space for the fixed footer */
+section.briefing-scroll{
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+
+  /* Keep content above chips + mic; expands when .ask-open toggles footer size */
+  padding-bottom: calc(var(--footer-h) + var(--sai-b) + 16px) !important;
+  scroll-padding-bottom: calc(var(--footer-h) + var(--sai-b) + 16px);
+}
+
+/* Optional: slightly tighter desktop pad */
+@media (min-width:768px){
+  section.briefing-scroll{
+    padding-bottom: calc(var(--footer-h) + var(--sai-b) + 8px) !important;
+    scroll-padding-bottom: calc(var(--footer-h) + var(--sai-b) + 8px);
+  }
+}
+
+/* Keep the inner #briefing content unconstrained */
+#briefing{ overflow:visible; max-height:none; }

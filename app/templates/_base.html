@@ -5,65 +5,26 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="{{ cfg.brandRed or '#E60027' }}">
   <meta name="format-detection" content="telephone=no, address=no, email=no" />
+  <meta name="color-scheme" content="dark light" />
+
   <link rel="manifest" href="{{ url_for('static', path='manifest.webmanifest') }}">
   <link rel="icon" href="{{ url_for('static', path='favicon.ico') }}">
   <title>{% block title %}HARCi Concierge{% endblock %}</title>
 
   <!-- Tailwind-built CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=25" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/harci.built.css') }}?v=28" />
   <style>:root{ --brand-red: {{ cfg.brandRed or '#E60027' }}; }</style>
 
   <!-- Speech SDK (global; needed on Guide) -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
-
-  <!-- Set --app-h (device height), --hdr (header px), and --footer-h (footer px) with VisualViewport awareness -->
-  <script>
-  (function () {
-    const rs = document.documentElement;
-    const $hdr = () => document.querySelector('header');
-    const $ftr = () => document.querySelector('footer');
-
-    function setHdr(){ const h = $hdr(); if (h) rs.style.setProperty('--hdr', h.offsetHeight + 'px'); }
-    function setAppH(){
-      const vv = window.visualViewport;
-      const h = vv ? vv.height : (window.innerHeight || rs.clientHeight || 0);
-      rs.style.setProperty('--app-h', h + 'px');
-    }
-    function setFtr(){
-      const f = $ftr();
-      if (!f) return;
-      // offsetHeight already includes any safe-area padding if present
-      rs.style.setProperty('--footer-h-actual', f.offsetHeight + 'px');
-    }
-
-    let raf;
-    function reflow(){
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => { setAppH(); setHdr(); setFtr(); });
-    }
-
-    reflow();
-    window.addEventListener('resize', reflow, { passive:true });
-    window.addEventListener('orientationchange', reflow, { passive:true });
-    window.addEventListener('load', reflow, { passive:true });
-    document.addEventListener('readystatechange', reflow);
-    try{
-      const vv = window.visualViewport;
-      if (vv){
-        vv.addEventListener('resize', reflow, { passive:true });
-        vv.addEventListener('scroll', reflow, { passive:true });
-      }
-    }catch{}
-  })();
-</script>
-
-
 </head>
 
-<body class="bg-neutral-900 text-neutral-100 overflow-hidden" style="height: var(--app-h);">
-  <!-- Header (fixed; never scrolls) -->
-  <header class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur">
-    <div class="mx-auto h-full w-screen px-4 md:px-6 lg:px-8 flex items-center gap-3">
+<body class="bg-neutral-900 text-neutral-100 overflow-hidden">
+  <!-- Header (fixed) -->
+  <header class="fixed top-0 inset-x-0 z-50 h-16 w-screen border-b border-white/10 bg-neutral-950/60 backdrop-blur relative">
+
+    <div class="mx-auto h-full max-w-screen px-4 md:px-6 lg:px-8 flex items-center gap-3">
+
       <img
         src="{{ url_for('static', path='assets/hitachi_logo_wh.png') }}"
         alt="Hitachi Logo"
@@ -79,11 +40,12 @@
         End session
       </button>
     </div>
-    <div id="busyBar" class="h-2 bg-[var(--brand-red)] w-0 transition-all"></div>
+    <div id="busyBar" class="absolute bottom-0 left-0 right-0 h-2 bg-[var(--brand-red)] w-0 transition-all"></div>
+
   </header>
 
-  <!-- Page content area (no page scroll). Guide viewport lives here. -->
-  <main id="page-root" class="pt-16 h-[calc(100dvh-4rem)] w-screen overflow-hidden">
+  <!-- Page content area (no page scroll). Guide viewport sets its own height in CSS. -->
+  <main id="page-root" class="pt-16 w-screen overflow-hidden">
     {% block content %}{% endblock %}
   </main>
 
