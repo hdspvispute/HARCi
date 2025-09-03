@@ -574,7 +574,27 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             "briefing_md": briefing_md,
         }, status_code=200)
 
-# ===== Personalized welcome (Agent-powered) ===================================
+from fastapi import Request, Form
+
+# ===== Feedback endpoints ====================================================
+from fastapi.responses import RedirectResponse
+
+@app.get("/feedback")
+async def feedback_form(request: Request):
+    sid = request.cookies.get(SESSION_COOKIE, "")
+    return templates.TemplateResponse("feedback.html", {"request": request, "session_id": sid, "message": None, "cfg": ui_cfg()})
+
+@app.post("/feedback")
+async def feedback_submit(request: Request, name: str = Form(""), session_id: str = Form(""), feedback: str = Form(...)):
+    feedback_dir = os.path.join(_APP_ROOT, "session_logs")
+    os.makedirs(feedback_dir, exist_ok=True)
+    fname = f"Feedback_{session_id or 'unknown'}.txt"
+    fpath = os.path.join(feedback_dir, fname)
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    with open(fpath, "a", encoding="utf-8") as f:
+        f.write(f"Time: {now}\nName: {name}\nSession: {session_id}\nFeedback: {feedback}\n\n")
+    msg = "Thank you for your feedback!"
+    return templates.TemplateResponse("feedback.html", {"request": request, "session_id": session_id, "message": msg, "cfg": ui_cfg()})
 @app.post("/assist/welcome")
 async def assist_welcome(req: Request):
     sid = req.cookies.get(SESSION_COOKIE)

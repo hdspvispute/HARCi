@@ -1,0 +1,22 @@
+{% extends "_base.html" %}
+{% block title %}Share Feedback · HARCi{% endblock %}
+{% block content %}
+<div class="w-screen h-full grid place-items-center px-4 overflow-hidden">
+  <section class="w-full max-w-xl rounded-2xl border border-white/10 bg-neutral-900/40 shadow-lg p-8 text-center overflow-auto">
+    <h2 class="text-xl md:text-2xl font-semibold mb-2">Share your feedback</h2>
+    <form method="post" action="/feedback" class="space-y-4">
+      <input type="hidden" name="session_id" value="{{ session_id }}" />
+      <div>
+        <label class="block mb-1 text-sm text-neutral-300" for="name">Your name</label>
+        <input id="name" name="name" class="input w-full" placeholder="Name (optional)" autocomplete="name" />
+      </div>
+      <div>
+        <label class="block mb-1 text-sm text-neutral-300" for="feedback">Feedback</label>
+        <textarea id="feedback" name="feedback" class="input w-full" rows="4" required placeholder="Your feedback..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-brand w-full mt-2">Submit</button>
+    </form>
+    {% if message %}<div class="mt-4 text-green-400">{{ message }}</div>{% endif %}
+  </section>
+</div>
+{% endblock %}
