@@ -18,6 +18,7 @@ EVENT_NAME = os.getenv("EVENT_NAME", "Powering Mission-Critical AI")
 
 # Session TTL (seconds) — controls both cookie Max-Age and server-side session retention
 SESSION_TTL_SECS = int(os.getenv("SESSION_TTL_SECS", "86400"))
+SECURE_COOKIES   = os.getenv("SECURE_COOKIES", "0").lower() in ("1", "true", "yes")
 
 # Ensure Azure CLI path is set for Windows (dev convenience)
 if os.name == "nt":
@@ -68,6 +69,9 @@ AVATAR_ID        = os.getenv("AVATAR_ID", "lisa")
 AVATAR_STYLE     = os.getenv("AVATAR_STYLE", "casual-sitting")
 SPEECH_LANG      = os.getenv("SPEECH_LANG", "en-US")
 SPEECH_VOICE     = os.getenv("SPEECH_VOICE", "en-US-JennyNeural")
+
+# NEW: allow client STT to opt-in to use the warmed MediaStream directly
+STT_USE_WARM_STREAM = os.getenv("STT_USE_WARM_STREAM", "0").lower() in ("1", "true", "yes")
 
 LOG_LEVEL        = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_FILE         = os.getenv("LOG_FILE")  # If set, logs will also be written to this file (rotating)
@@ -192,6 +196,8 @@ def ui_cfg():
         "avatarStyle": AVATAR_STYLE,
         "speechLang": SPEECH_LANG,
         "speechVoice": SPEECH_VOICE,
+        # NEW: surface STT warm-stream toggle to client (used by stt.js)
+        "sttUseWarmStream": STT_USE_WARM_STREAM,
         "event": {
             "tz":   EVENT_TZ,
             "date": EVENT_DATE,
@@ -257,7 +263,7 @@ async def api_register(name: str = Form(...), company: str = Form(...)):
         max_age=SESSION_TTL_SECS,
         expires=expires_http,
         path="/",
-        # secure=True,  # enable when served over HTTPS only
+        secure=SECURE_COOKIES,  # enable with SECURE_COOKIES=1 when serving over HTTPS
     )
     return res
 
@@ -574,27 +580,24 @@ async def assist_run(req: Request, body: dict = Body(default={})):
             "briefing_md": briefing_md,
         }, status_code=200)
 
-from fastapi import Request, Form
-
-# ===== Feedback endpoints ====================================================
-from fastapi.responses import RedirectResponse
-
+# ===== Feedback endpoints =====================================================
 @app.get("/feedback")
 async def feedback_form(request: Request):
-    sid = request.cookies.get(SESSION_COOKIE, "")
-    return templates.TemplateResponse("feedback.html", {"request": request, "session_id": sid, "message": None, "cfg": ui_cfg()})
+  sid = request.cookies.get(SESSION_COOKIE, "")
+  return templates.TemplateResponse("feedback.html", {"request": request, "session_id": sid, "message": None, "cfg": ui_cfg()})
 
 @app.post("/feedback")
 async def feedback_submit(request: Request, name: str = Form(""), session_id: str = Form(""), feedback: str = Form(...)):
-    feedback_dir = os.path.join(_APP_ROOT, "session_logs")
-    os.makedirs(feedback_dir, exist_ok=True)
-    fname = f"Feedback_{session_id or 'unknown'}.txt"
-    fpath = os.path.join(feedback_dir, fname)
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    with open(fpath, "a", encoding="utf-8") as f:
-        f.write(f"Time: {now}\nName: {name}\nSession: {session_id}\nFeedback: {feedback}\n\n")
-    msg = "Thank you for your feedback!"
-    return templates.TemplateResponse("feedback.html", {"request": request, "session_id": session_id, "message": msg, "cfg": ui_cfg()})
+  feedback_dir = os.path.join(_APP_ROOT, "session_logs")
+  os.makedirs(feedback_dir, exist_ok=True)
+  fname = f"Feedback_{session_id or 'unknown'}.txt"
+  fpath = os.path.join(feedback_dir, fname)
+  now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+  with open(fpath, "a", encoding="utf-8") as f:
+      f.write(f"Time: {now}\nName: {name}\nSession: {session_id}\nFeedback: {feedback}\n\n")
+  msg = "Thank you for your feedback!"
+  return templates.TemplateResponse("feedback.html", {"request": request, "session_id": session_id, "message": msg, "cfg": ui_cfg()})
+
 @app.post("/assist/welcome")
 async def assist_welcome(req: Request):
     sid = req.cookies.get(SESSION_COOKIE)

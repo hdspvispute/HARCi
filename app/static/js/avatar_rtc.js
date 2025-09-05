@@ -52,6 +52,16 @@
     return { cfg: cfg, st: st, rt: rt };
   }
 
+  function fireAudioUnlockedEventOnce() {
+    try {
+      if (!window.__harci_audio_unlocked_event_fired) {
+        window.__harci_audio_unlocked_event_fired = true;
+        window.dispatchEvent(new Event('harci:audio-unlocked'));
+        LOG.event?.('audio.unlocked.event');
+      }
+    } catch {}
+  }
+
   /**
    * Try to unlock audio playback. MUST be called from a user gesture.
    * Returns true if an AudioContext was created & resumed.
@@ -72,11 +82,22 @@
       audioUnlocked = true;
       window.__harci_audio_ok = true;
       LOG.info('[avatar] Audio unlocked (user gesture)');
+      fireAudioUnlockedEventOnce();
       return true;
     } catch (e) {
       LOG.warn('[avatar] Audio unlock failed (likely not a gesture):', e);
       return false;
     }
+  }
+
+  function loggedPlay(el, tag) {
+    try {
+      if (!el || !el.play) return;
+      return el.play().then(
+        function(){ LOG.info('[avatar] ' + tag + '.play.ok'); },
+        function(err){ LOG.warn('[avatar] ' + tag + '.play.fail', { name: err?.name, message: err?.message }); }
+      );
+    } catch (e) { LOG.warn('[avatar] ' + tag + '.play.error', e); }
   }
 
   // Central pronunciation tweaks
@@ -154,6 +175,15 @@
         scheduleReconnect('ice-failed');
       }
     };
+
+    // Detailed ICE errors (esp. useful on iOS/captive networks)
+    try {
+      _pc.addEventListener('icecandidateerror', function (e) {
+        LOG.error('[avatar] icecandidateerror', {
+          errorCode: e?.errorCode, errorText: e?.errorText, url: e?.url, hostCandidate: e?.hostCandidate
+        });
+      });
+    } catch {}
   }
 
   async function startAvatarOnPc(_pc, S, avcfg) {
@@ -165,12 +195,13 @@
     _pc.ontrack = function (ev) {
       var stream = ev && ev.streams && ev.streams[0];
       if (!stream) return;
+      LOG.info('[avatar] ontrack', { kind: ev?.track?.kind });
 
       if (ev.track && ev.track.kind === 'video' && $video) {
         $video.srcObject = stream;
         $video.muted = outputMuted;
         $video.playsInline = true;
-        if ($video.play) $video.play().catch(function () {});
+        loggedPlay($video, 'video');
       }
 
       if (ev.track && ev.track.kind === 'audio' && $audio) {
@@ -178,10 +209,22 @@
         $audio.muted = outputMuted;
         $audio.volume = 1.0;
         $audio.playsInline = true;
-        // If user hasn’t enabled audio yet, this may reject — harmless.
-        if ($audio.play) $audio.play().catch(function (err) {
-          LOG.debug('[avatar] audio play blocked (awaiting user gesture)', err && err.name);
-        });
+
+        var tryPlay = function(){
+          loggedPlay($audio, 'audio');
+        };
+
+        if (audioUnlocked || window.__harci_audio_ok) {
+          tryPlay();
+        } else {
+          LOG.info('[avatar] audio play deferred; waiting for user unlock');
+          var onUnlock = function () {
+            audioUnlocked = true;
+            tryPlay();
+          };
+          // handle once, even if multiple sources dispatch
+          window.addEventListener('harci:audio-unlocked', onUnlock, { once: true });
+        }
       }
 
       // Ensure receiver tracks reflect current mute state
@@ -373,7 +416,12 @@
   // Fallback: if the page receives *any* first pointer gesture, try to unlock once.
   // (Safe no-op if UI already did it.)
   window.addEventListener('pointerdown', function once() {
-    if (!audioUnlocked) unlockAudioPlayback();
-    window.removeEventListener('pointerdown', once, { capture: false });
+    if (!audioUnlocked) { unlockAudioPlayback(); }
+    window.removeEventListener('pointerdown', once);
   }, { passive: true });
+
+  // If another script fired the unlock event (e.g., Guide button), sync our flag.
+  window.addEventListener('harci:audio-unlocked', function () {
+    audioUnlocked = true;
+  }, { once: true });
 })();

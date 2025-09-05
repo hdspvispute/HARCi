@@ -42,7 +42,8 @@
     outline-offset: 2px;
   }
 
-  .pressing{ transform: scale(.99); filter: brightness(.98); }
+  /* DO NOT scale on press; keep only visual hint */
+  .pressing{ transform: none !important; filter: brightness(.98); }
 }
 
 /* ===== Components ===== */
@@ -52,7 +53,7 @@
   .btn{
     @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5
            border border-white/10 bg-white/5 text-white hover:bg-white/10
-           transition duration-200 active:scale-[.99]
+           transition duration-200
            disabled:opacity-50 disabled:cursor-not-allowed
            no-select no-callout tap-manipulation focus-ring;
     line-height:1;
@@ -175,49 +176,70 @@ section.briefing-scroll{
 /* Keep the inner #briefing content unconstrained */
 #briefing{ overflow:visible; max-height:none; }
 
-/* ===================== Mic stability (single source of truth) ===================== */
+/* ===================== Mic stability (no transform changes) ===================== */
 
-/* Keep mic button’s box model stable */
-.btn-mic-rect{
-  box-sizing: border-box;
-  transform-origin: center center;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Neutralize the base .btn active scale ONLY for the mic */
-.btn-mic-rect:active{
-  transform: none !important;
-}
-
-/* Hard-lock the mic in the horizontal center (immune to flex jitter) */
+/* Mic: never transform; reset Tailwind transform vars as well */
 #btnHoldMic{
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);   /* always centered */
-  margin: 0 !important;           /* ignore flex auto margins */
-  flex-shrink: 0;                 /* never compress */
+  position: static;
+  margin: 0 !important;
+  flex-shrink: 0;
   backface-visibility: hidden;
-  will-change: transform;
+  -webkit-font-smoothing: antialiased;
+  --tw-translate-x: 0 !important;
+  --tw-translate-y: 0 !important;
+  --tw-scale-x: 1 !important;
+  --tw-scale-y: 1 !important;
+  transform: none !important;
+  transition: none !important;
 }
 
-/* Keep the same transform when pressed/disabled */
+/* Neutralize ALL press-time transforms (active and any .pressing usage) */
 #btnHoldMic:active,
-#btnHoldMic[disabled],
-#btnHoldMic[aria-disabled="true"]{
-  transform: translateX(-50%) !important;
+.btn-mic-rect:active,
+.btn-mic-rect.pressing,
+#btnHoldMic.pressing{
+  --tw-translate-x: 0 !important;
+  --tw-translate-y: 0 !important;
+  --tw-scale-x: 1 !important;
+  --tw-scale-y: 1 !important;
+  transform: none !important;
+  transition: none !important;
 }
 
-/* Outline-only press highlight (no ring/box-shadow growth) */
-.mic-pressed{
-  outline: 2px solid rgba(255,255,255,.5);
-  outline-offset: 2px;
-  box-shadow: none !important;
-}
-/* Kill long-press callouts just on the mic button */
+/* Keep a visual cue without layout shift */
+.btn-mic-rect.is-pressed{ filter: brightness(.98); }
+
+/* Prevent long-press menus / selection just for the mic */
 #btnHoldMic, #btnHoldMic * {
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
   user-select: none !important;
   -webkit-user-drag: none !important;
-  touch-action: none !important;   /* no gesture triggers */
+  touch-action: none !important;
+}
+
+/* === Mic stability: keep the same transform even when "pressed" === */
+
+/* Center it once */
+#btnHoldMic{
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);   /* anchor horizontally */
+  margin: 0 !important;
+  flex-shrink: 0;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Keep the same transform while pressed/disabled AND if a ".pressing" class is toggled */
+#btnHoldMic:active,
+#btnHoldMic[disabled],
+#btnHoldMic[aria-disabled="true"],
+#btnHoldMic.pressing,           /* ← NEW: cancel .pressing scale on mic */
+.btn-mic-rect.pressing{         /* ← NEW: also catch the class on the component class */
+  --tw-translate-x: -50% !important;
+  --tw-translate-y: 0 !important;
+  --tw-scale-x: 1 !important;
+  --tw-scale-y: 1 !important;
+  transform: translateX(-50%) !important;
 }

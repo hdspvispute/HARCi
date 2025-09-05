@@ -1,6 +1,8 @@
 // app/static/js/stt.js
 (() => {
-  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('stt') : console;
+  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child)
+    ? window.HARCI_LOG.child('stt')
+    : console;
 
   // --- Event bus --------------------------------------------------------------
   const listeners = {};
@@ -18,9 +20,13 @@
   let sessionActive = false;    // whether we've warmed the mic for this session
 
   // Hidden, persistent mic stream to keep permissions/DSP active all session.
-  // We DO NOT pipe this stream to the SDK directly (keeps compatibility stable);
-  // the SDK will still use the default system mic, but cold-start risk is gone.
+  // We DO NOT pipe this stream to the SDK directly by default (keeps compatibility);
+  // the SDK will still use the default system mic, but cold-start risk is reduced.
+  // You can opt-in to use it via window.HARCI_CONFIG.sttUseWarmStream = true.
   let persistentStream = null;
+
+  // iOS audio unlock awareness (set by Guide/Avatar after a user gesture)
+  let audioUnlocked = !!(window.__harci_audio_ok || window.__audio_unlocked);
 
   // --- Helpers ----------------------------------------------------------------
   async function getAuth() {
@@ -38,6 +44,16 @@
     stopping = false;
   }
 
+  async function logPermissionSnapshot() {
+    try {
+      if (!navigator.permissions || !navigator.permissions.query) return;
+      // Not all browsers support 'microphone'; Safari may throw — catch below.
+      const p = await navigator.permissions.query({ name: 'microphone' });
+      LOG.info('[stt] permission', { state: p.state });
+      p.onchange = () => LOG.info('[stt] permission.change', { state: p.state });
+    } catch { /* ignore unsupported */ }
+  }
+
   async function warmMicStream() {
     // Already warm and alive?
     if (persistentStream?.active) return persistentStream;
@@ -51,7 +67,8 @@
           noiseSuppression: true,
           autoGainControl: true,
           channelCount: 1
-        }
+        },
+        video: false
       });
 
       // If device changes or the track ends (BT switch, OS revoke), drop and re-warm.
@@ -63,7 +80,19 @@
       });
       LOG.info('[stt] mic warmed for session');
     } catch (e) {
-      LOG.warn('[stt] mic warm failed/denied; STT will still try on hold', e);
+      const name = e && e.name;
+      LOG.warn('[stt] mic warm failed/denied; STT will still try on hold', { name, message: e?.message });
+
+      // On iOS, warming outside a user gesture often throws NotAllowedError.
+      // If we aren’t unlocked yet, retry once after harci:audio-unlocked.
+      if (!audioUnlocked && name === 'NotAllowedError') {
+        const retry = async () => {
+          window.removeEventListener('harci:audio-unlocked', retry);
+          audioUnlocked = true;
+          try { await warmMicStream(); } catch {}
+        };
+        window.addEventListener('harci:audio-unlocked', retry, { once: true });
+      }
       persistentStream = null;
     }
     return persistentStream;
@@ -79,7 +108,19 @@
     });
   } catch {}
 
+  // Keep a tidy shutdown on page hide (iOS backgrounding)
+  window.addEventListener('pagehide', () => {
+    try { persistentStream?.getTracks()?.forEach(t => t.stop()); } catch {}
+    persistentStream = null;
+  }, { capture: true });
+
   const DRAIN_MS = 300, STOP_TIMEOUT_MS = 2000;
+
+  // Initial environment/permission snapshot
+  (async () => { await logPermissionSnapshot(); })();
+
+  // Sync audio unlock flag if other modules dispatch it later
+  window.addEventListener('harci:audio-unlocked', () => { audioUnlocked = true; }, { once: true });
 
   // --- Public API -------------------------------------------------------------
   const STT = {
@@ -138,8 +179,19 @@
         speechConfig.setProperty(S.PropertyId.SpeechServiceResponse_PostProcessingOption, 'TrueText');
       } catch {}
 
-      // Default mic input (we only keep a separate warm stream alive)
-      const audioConfig = S.AudioConfig.fromDefaultMicrophoneInput();
+      // Default: system mic input. Optional: use the warm stream if configured.
+      let audioConfig;
+      try {
+        const useWarm = !!cfg.sttUseWarmStream;
+        if (useWarm && persistentStream && persistentStream.active && S.AudioConfig.fromStreamInput) {
+          audioConfig = S.AudioConfig.fromStreamInput(persistentStream);
+          LOG.info('[stt] using warm stream for recognizer input');
+        } else {
+          audioConfig = S.AudioConfig.fromDefaultMicrophoneInput();
+        }
+      } catch {
+        audioConfig = S.AudioConfig.fromDefaultMicrophoneInput();
+      }
 
       recognizer = new S.SpeechRecognizer(speechConfig, audioConfig);
       lastPartial = '';
@@ -165,7 +217,7 @@
       };
 
       recognizer.canceled = (_, e) => {
-        LOG.warn('[stt] canceled event', e?.reason, e?.errorDetails);
+        LOG.warn('[stt] canceled', { reason: e?.reason, error: e?.errorDetails });
       };
       recognizer.sessionStarted = () => LOG.info('[stt] sessionStarted');
       recognizer.sessionStopped = () => LOG.info('[stt] sessionStopped');

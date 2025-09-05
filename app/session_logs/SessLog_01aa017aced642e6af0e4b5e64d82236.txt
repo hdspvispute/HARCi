@@ -1,6 +1,0 @@
-User: Prafulla Vispute: Hi, how are you?
-HARCi: Hello! I’m here to help, thank you for asking. How can I assist you during the event?
-Briefing: - **Need help?** Ask about the agenda, directions, or demos.
-- **Quick start:** Say, “What’s happening now?”
-- _Looking for something specific? Let me know!_
-

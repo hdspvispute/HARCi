@@ -19,25 +19,27 @@
       </div>
 
       <div class="aspect-video md:h-full">
-        <video id="remoteVideo" class="h-full w-full object-cover bg-black" playsinline autoplay muted></video>
+        <video id="remoteVideo"
+               class="h-full w-full object-cover bg-black"
+               playsinline webkit-playsinline autoplay muted></video>
       </div>
-      <audio id="remoteAudio" playsinline></audio>
+      <audio id="remoteAudio" autoplay playsinline></audio>
 
       <!-- Single, stateful status pill -->
       <div id="statusPill"
            class="absolute left-3 top-3 rounded-full border border-white/10 bg-neutral-900/70
-                  px-3 py-1 text-[12px] flex items-center gap-2 shadow">
+                  px-3 py-1 text-[12px] flex items-center gap-2 shadow z-20">
         <span id="statusDot" class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
         <span id="statusText" aria-live="polite">Preparing…</span>
       </div>
     </section>
 
-    <!-- Briefing column (no Tips bar) -->
+    <!-- Briefing column -->
     <section class="rounded-2xl border border-white/10 bg-neutral-800/50
                     md:col-span-5 lg:col-span-4 flex flex-col min-h-0">
 
-      <!-- Scrollable briefing content -->
-      <div class="flex-1 min-h-0 overflow-auto overscroll-contain px-4 py-4">
+      <!-- Scrollable briefing content (make this the scroller) -->
+      <div class="briefing-scroll flex-1 min-h-0 overflow-auto overscroll-contain px-4 pt-4 pb-0">
         <div id="briefing" class="prose prose-invert max-w-none text-sm leading-snug">
           <h2 class="text-base font-semibold mb-1">Getting started</h2>
           <ul class="mt-1">
@@ -59,7 +61,7 @@
 <!-- Sticky/Fixed footer controls -->
 <footer class="fixed inset-x-0 bottom-0 border-t border-white/10 bg-neutral-950/70 backdrop-blur">
   <div class="footer-inner w-full max-w-screen px-4 pt-2"
-       style="padding-bottom: calc(var(--safe-bottom) + 0.5rem);">
+       style="padding-bottom: calc(var(--sai-b) + 0.5rem);">
 
     <!-- Chips row (with Ask toggle on the right) -->
     <div class="flex items-center gap-2">
@@ -78,21 +80,19 @@
 
     <!-- Primary mic button -->
     <div class="w-full grid place-items-center mt-1">
-    <button
-  id="btnHoldMic"
-  type="button"
-  aria-label="Hold to speak"
-  draggable="false"
-  oncontextmenu="return false"
-  class="btn btn-brand btn-mic-rect select-none touch-none"
->
-  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3z" />
-    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 0 1-14 0m7 7v-2" />
-  </svg>
-  <span class="ml-2 font-semibold">Hold &amp; Speak</span>
-</button>
-
+  <button id="btnHoldMic"
+        type="button"
+        class="btn btn-brand btn-mic-rect select-none touch-none"
+        oncontextmenu="return false"
+        draggable="false"
+        style="position:relative;left:50%;transform:translateX(-50%);">
+       
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 0 1-14 0m7 7v-2" />
+        </svg>
+        <span class="ml-2 font-semibold">Hold &amp; Speak</span>
+      </button>
     </div>
 
     <!-- Toggleable Ask form (hidden by default) -->
@@ -110,16 +110,21 @@
   </div>
 </footer>
 
-<!-- Audio unlock (simple, no layout coupling) -->
+<!-- Audio unlock (dispatch event for iOS; reuse existing logger) -->
 <script>
 (() => {
+  const LOG = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('audio') : console;
   const nudge = document.getElementById('audioNudge');
   const btn   = document.getElementById('btnEnableAudio');
   if (!btn) return;
+  try { LOG.info?.('nudge.visible'); } catch {}
+
   btn.addEventListener('click', async () => {
     try {
+      LOG.event?.('nudge.tap');
       if (window.HARCI_AVATAR?.ensureAudioUnlocked) {
         await window.HARCI_AVATAR.ensureAudioUnlocked();
+        LOG.info?.('ensureAudioUnlocked.ok');
       } else {
         const AC = window.AudioContext || window.webkitAudioContext;
         if (AC) {
@@ -127,11 +132,16 @@
           const osc = ctx.createOscillator(); const g = ctx.createGain();
           g.gain.value = 0; osc.connect(g).connect(ctx.destination);
           osc.start(); osc.stop(ctx.currentTime + 0.02);
+          LOG.info?.('audioctx.ping.ok');
         }
       }
       window.__audio_unlocked = true;
+      window.dispatchEvent(new Event('harci:audio-unlocked')); // iOS Safari needs a gesture gate
       try { window.HARCI_AVATAR?.setOutputMuted?.(false); } catch {}
-    } catch {}
+      LOG.event?.('audio.unlocked');
+    } catch (e) {
+      LOG.error?.('audio.unlock.fail', { name: e?.name, message: e?.message });
+    }
     nudge?.classList.add('hidden');
   }, { once: true });
 })();
@@ -140,6 +150,7 @@
 <!-- Ask toggle (mic vs text) -->
 <script>
 (() => {
+  const LOG  = (window.HARCI_LOG && window.HARCI_LOG.child) ? window.HARCI_LOG.child('ui') : console;
   const btn  = document.getElementById('btnToggleAsk');
   const form = document.getElementById('askForm');
   if (!btn || !form) return;
@@ -149,6 +160,7 @@
     form.classList.toggle('hidden', !open);
     btn.setAttribute('aria-expanded', String(open));
     btn.textContent = open ? 'Hide' : 'Aa';
+    try { LOG.event?.('ask.toggle', { open }); } catch {}
   };
 
   btn.addEventListener('click', () => setState(!document.body.classList.contains('ask-open')));
