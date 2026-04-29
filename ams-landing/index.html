@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AMS — Agent Management System. Unified AgentOps, Governance, Security, Observability, and Control Plane for Enterprise AI Agents." />
+  <title>AMS — Agent Management System | Enterprise AgentOps Platform</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===================== NAVIGATION ===================== -->
+  <nav class="nav" id="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner container">
+      <a href="#hero" class="nav-logo" aria-label="AMS Home">
+        <span class="logo-mark">AMS</span>
+        <span class="logo-sub">Agent Management System</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks" role="list">
+        <li><a href="#why-ams" class="nav-link">Why AMS</a></li>
+        <li><a href="#platform" class="nav-link">Platform</a></li>
+        <li><a href="#calculator" class="nav-link">Pricing Calculator</a></li>
+        <li><a href="#competitors" class="nav-link">Competitors</a></li>
+        <li><a href="#deployment" class="nav-link">Deployment</a></li>
+        <li>
+          <a href="#calculator" class="btn btn-primary btn-sm">Estimate Pricing</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="hero" aria-labelledby="hero-heading">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="hero-grid"></div>
+        <div class="hero-glow hero-glow-1"></div>
+        <div class="hero-glow hero-glow-2"></div>
+        <div class="hero-glow hero-glow-3"></div>
+      </div>
+      <div class="container hero-inner">
+        <div class="hero-content">
+          <div class="hero-badge">Enterprise AgentOps Platform</div>
+          <h1 class="hero-heading" id="hero-heading">
+            Operate Every AI Agent<br />
+            <span class="gradient-text">With Confidence.</span>
+          </h1>
+          <p class="hero-sub">
+            AMS gives enterprises one control plane to register, observe, secure, govern, and optimize AI agents across Copilot Studio, Dify, LangGraph, Azure AI Foundry, custom apps, engineering tools, and future runtimes.
+          </p>
+          <div class="hero-actions">
+            <a href="#calculator" class="btn btn-primary btn-lg">Estimate AMS Pricing</a>
+            <a href="#platform" class="btn btn-outline btn-lg">Explore Platform</a>
+          </div>
+          <div class="hero-stats" role="list" aria-label="Platform statistics">
+            <div class="hero-stat" role="listitem">
+              <span class="stat-num" data-target="5">0</span>
+              <span class="stat-label">Core Modules</span>
+            </div>
+            <div class="hero-stat" role="listitem">
+              <span class="stat-num" data-target="12">0</span>
+              <span class="stat-label">Supported Runtimes</span>
+            </div>
+            <div class="hero-stat" role="listitem">
+              <span class="stat-num" data-target="360">0</span>
+              <span class="stat-label">° Agent Visibility</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="orbit-diagram">
+            <div class="orbit-center">
+              <div class="orbit-core">
+                <span class="orbit-core-text">AMS</span>
+                <div class="orbit-pulse"></div>
+              </div>
+            </div>
+            <svg class="orbit-svg" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Connector lines -->
+              <line x1="210" y1="210" x2="210" y2="48" class="orbit-line" />
+              <line x1="210" y1="210" x2="362" y2="148" class="orbit-line" />
+              <line x1="210" y1="210" x2="306" y2="330" class="orbit-line" />
+              <line x1="210" y1="210" x2="114" y2="330" class="orbit-line" />
+              <line x1="210" y1="210" x2="58" y2="148" class="orbit-line" />
+              <!-- Orbit ring -->
+              <circle cx="210" cy="210" r="162" class="orbit-ring" fill="none" />
+            </svg>
+            <!-- Module nodes -->
+            <div class="orbit-node orbit-node--top" data-module="ARE">
+              <div class="node-icon">⬡</div>
+              <div class="node-label">Agent Registration<br/>Engine</div>
+            </div>
+            <div class="orbit-node orbit-node--top-right" data-module="CC">
+              <div class="node-icon">◈</div>
+              <div class="node-label">Command<br/>Center</div>
+            </div>
+            <div class="orbit-node orbit-node--bottom-right" data-module="CP">
+              <div class="node-icon">⬢</div>
+              <div class="node-label">Control<br/>Plane</div>
+            </div>
+            <div class="orbit-node orbit-node--bottom-left" data-module="FO">
+              <div class="node-icon">◆</div>
+              <div class="node-label">FortifyOps</div>
+            </div>
+            <div class="orbit-node orbit-node--top-left" data-module="EO">
+              <div class="node-icon">◉</div>
+              <div class="node-label">Engineering<br/>Observability</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WHY AMS / PROBLEM ===================== -->
+    <section class="section section-problem" id="why-ams" aria-labelledby="problem-heading">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">The Problem</div>
+          <h2 class="section-title" id="problem-heading">
+            AI Agent Sprawl Is Becoming<br />the Next Enterprise Risk
+          </h2>
+          <p class="section-sub">
+            As enterprises deploy AI agents across platforms and teams, critical visibility and control gaps are emerging.
+          </p>
+        </div>
+        <div class="problem-grid" role="list">
+          <article class="problem-card" role="listitem">
+            <div class="problem-icon problem-icon--blue" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 class="problem-card-title">Agent Sprawl Is Rising</h3>
+            <p class="problem-card-body">AI agents are being deployed across business units, runtimes, and cloud platforms without centralized registration, ownership, or governance. No enterprise-wide agent inventory exists.</p>
+          </article>
+          <article class="problem-card" role="listitem">
+            <div class="problem-icon problem-icon--violet" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 class="problem-card-title">Observability Is Fragmented</h3>
+            <p class="problem-card-body">Agent logs, traces, metrics, and sessions are scattered across Datadog, Azure Monitor, LangSmith, and custom tooling. There is no unified view of agent health, cost, or performance.</p>
+          </article>
+          <article class="problem-card" role="listitem">
+            <div class="problem-icon problem-icon--red" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 class="problem-card-title">Agent Security Risk Is New</h3>
+            <p class="problem-card-body">AI agents carry prompt injection, tool misuse, and data exfiltration risks that existing security tooling was not built to detect. Traditional SAST/DAST tools do not scan agent-specific risk surfaces.</p>
+          </article>
+          <article class="problem-card" role="listitem">
+            <div class="problem-icon problem-icon--green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 class="problem-card-title">AI Cost Is Unpredictable</h3>
+            <p class="problem-card-body">LLM token consumption, telemetry retention, and agent session volumes are growing without visibility. Finance and engineering teams lack the intelligence to optimize or forecast AI infrastructure spend.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PLATFORM MODULES ===================== -->
+    <section class="section section-platform" id="platform" aria-labelledby="platform-heading">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">The Platform</div>
+          <h2 class="section-title" id="platform-heading">Five Core Modules.<br />One AgentOps Platform.</h2>
+          <p class="section-sub">Each module is purpose-built for a dimension of enterprise AI agent management. Together they form a complete AgentOps layer.</p>
+        </div>
+        <div class="modules-grid" role="list">
+
+          <article class="module-card" role="listitem">
+            <div class="module-header">
+              <div class="module-badge module-badge--blue">ARE</div>
+              <div class="module-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <h3 class="module-title">Agent Registration Engine</h3>
+            <p class="module-desc">Enterprise inventory of all AI agents across business units. Manage ownership, metadata, lifecycle status, and business unit mapping in a single authoritative registry.</p>
+            <ul class="module-features" aria-label="ARE features">
+              <li>Enterprise agent inventory</li>
+              <li>Agent ownership &amp; metadata</li>
+              <li>Business unit mapping</li>
+              <li>Lifecycle status tracking</li>
+              <li>Manual registration + future auto-discovery</li>
+            </ul>
+          </article>
+
+          <article class="module-card module-card--highlight" role="listitem">
+            <div class="module-header">
+              <div class="module-badge module-badge--cyan">CC</div>
+              <div class="module-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <h3 class="module-title">Command Center</h3>
+            <p class="module-desc">Unified observability layer for all AI agents. Logs, traces, metrics, sessions, failures, and health in a single view — plus cost visibility, LLM usage, telemetry volume, and performance intelligence.</p>
+            <ul class="module-features" aria-label="Command Center features">
+              <li>Agent logs, traces &amp; metrics</li>
+              <li>Session &amp; failure intelligence</li>
+              <li>LLM token cost &amp; usage</li>
+              <li>Telemetry volume &amp; retention cost</li>
+              <li>Performance optimization recommendations</li>
+            </ul>
+            <div class="module-callout">Includes cost &amp; performance intelligence</div>
+          </article>
+
+          <article class="module-card" role="listitem">
+            <div class="module-header">
+              <div class="module-badge module-badge--violet">CP</div>
+              <div class="module-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <h3 class="module-title">Control Plane</h3>
+            <p class="module-desc">Runtime lifecycle management for all registered agents. Start, stop, disable, scale, sync, onboard, and offboard agents from a single operational interface.</p>
+            <ul class="module-features" aria-label="Control Plane features">
+              <li>Start, stop &amp; disable agents</li>
+              <li>Scale &amp; sync agent instances</li>
+              <li>Onboard &amp; offboard workflows</li>
+              <li>Runtime lifecycle management</li>
+              <li>Multi-platform runtime actions</li>
+            </ul>
+          </article>
+
+          <article class="module-card" role="listitem">
+            <div class="module-header">
+              <div class="module-badge module-badge--orange">FO</div>
+              <div class="module-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <h3 class="module-title">FortifyOps</h3>
+            <p class="module-desc">Agent-native security scans designed for the risk surfaces unique to AI agents — prompt injection, tool misuse, policy violations, and runtime security posture assessment.</p>
+            <ul class="module-features" aria-label="FortifyOps features">
+              <li>Prompt risk checks</li>
+              <li>Tool access review</li>
+              <li>Runtime security posture</li>
+              <li>Policy compliance checks</li>
+              <li>Red-team style scans</li>
+            </ul>
+          </article>
+
+          <article class="module-card" role="listitem">
+            <div class="module-header">
+              <div class="module-badge module-badge--green">EO</div>
+              <div class="module-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <h3 class="module-title">Engineering Observability</h3>
+            <p class="module-desc">Visibility into engineering AI tool adoption and impact. Track GitHub Copilot usage, Cursor activity, code-assist acceptance rates, and premium model consumption at the team level.</p>
+            <ul class="module-features" aria-label="Engineering Observability features">
+              <li>GitHub Copilot &amp; Cursor usage</li>
+              <li>Code-assist acceptance rates</li>
+              <li>Premium model usage tracking</li>
+              <li>Developer productivity analytics</li>
+              <li>Team-level insights</li>
+            </ul>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING CALCULATOR ===================== -->
+    <section class="section section-calculator" id="calculator" aria-labelledby="calc-heading">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">Pricing Calculator</div>
+          <h2 class="section-title" id="calc-heading">Estimate Your AMS SaaS Cost</h2>
+          <p class="section-sub">A directional pricing model based on users, active agents, agent sessions, observability volume, FortifyOps scans, and engineering AI usage.</p>
+        </div>
+
+        <div class="calc-layout">
+          <!-- Inputs Panel -->
+          <div class="calc-inputs" role="form" aria-label="Pricing calculator inputs">
+
+            <fieldset class="calc-fieldset">
+              <legend class="calc-legend">Core Usage</legend>
+
+              <div class="calc-field">
+                <label for="numUsers" class="calc-label">AMS Users</label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="numUsers" class="calc-input" value="50" min="1" max="100000" aria-describedby="usersHint" />
+                  <span class="calc-unit">users</span>
+                </div>
+                <p class="calc-hint" id="usersHint">Platform users with AMS access</p>
+              </div>
+
+              <div class="calc-field">
+                <label for="numAgents" class="calc-label">Active AI Agents</label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="numAgents" class="calc-input" value="100" min="1" max="100000" aria-describedby="agentsHint" />
+                  <span class="calc-unit">agents</span>
+                </div>
+                <p class="calc-hint" id="agentsHint">Unique agents registered and actively managed</p>
+              </div>
+
+              <div class="calc-field">
+                <label for="numSessions" class="calc-label">Monthly Agent Sessions / Runs</label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="numSessions" class="calc-input" value="100000" min="0" max="100000000" aria-describedby="sessionsHint" />
+                  <span class="calc-unit">sessions</span>
+                </div>
+                <p class="calc-hint" id="sessionsHint">First 100,000 sessions included in base</p>
+              </div>
+
+              <div class="calc-field">
+                <label for="telemetryGB" class="calc-label">Monthly Telemetry Volume</label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="telemetryGB" class="calc-input" value="50" min="0" max="100000" aria-describedby="telemetryHint" />
+                  <span class="calc-unit">GB / month</span>
+                </div>
+                <p class="calc-hint" id="telemetryHint">Logs, traces, and metrics ingested into Command Center</p>
+              </div>
+
+              <div class="calc-field">
+                <label for="numScans" class="calc-label">FortifyOps Scans / Month</label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="numScans" class="calc-input" value="50" min="0" max="100000" aria-describedby="scansHint" />
+                  <span class="calc-unit">scans</span>
+                </div>
+                <p class="calc-hint" id="scansHint">Security scans run against registered agents</p>
+              </div>
+
+              <div class="calc-field">
+                <label for="numDevs" class="calc-label">Developers (Engineering Observability)</label>
+                <div class="calc-input-wrap">
+                  <input type="number" id="numDevs" class="calc-input" value="25" min="0" max="100000" aria-describedby="devsHint" />
+                  <span class="calc-unit">developers</span>
+                </div>
+                <p class="calc-hint" id="devsHint">Developers using GitHub Copilot, Cursor, or other AI coding tools</p>
+              </div>
+            </fieldset>
+
+            <!-- Advanced Settings -->
+            <div class="calc-advanced">
+              <button class="calc-advanced-toggle" id="advancedToggle" aria-expanded="false" aria-controls="advancedPanel">
+                <span>Advanced Settings</span>
+                <svg class="toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="calc-advanced-panel" id="advancedPanel" hidden>
+                <fieldset class="calc-fieldset calc-fieldset--inner">
+                  <legend class="calc-legend">Deployment &amp; Infrastructure</legend>
+
+                  <div class="calc-field">
+                    <label for="deploymentType" class="calc-label">Deployment Type</label>
+                    <select id="deploymentType" class="calc-select">
+                      <option value="saas">SaaS (managed)</option>
+                      <option value="private-saas">Private SaaS (+25%)</option>
+                      <option value="self-hosted">Self-hosted (+40%)</option>
+                    </select>
+                  </div>
+
+                  <div class="calc-field">
+                    <label for="retentionDays" class="calc-label">Telemetry Retention</label>
+                    <select id="retentionDays" class="calc-select">
+                      <option value="30">30 days (included)</option>
+                      <option value="60">60 days (+20%)</option>
+                      <option value="90">90 days (+50%)</option>
+                      <option value="180">180 days (+120%)</option>
+                    </select>
+                  </div>
+                </fieldset>
+
+                <fieldset class="calc-fieldset calc-fieldset--inner">
+                  <legend class="calc-legend">Intelligence &amp; Security</legend>
+
+                  <div class="calc-field">
+                    <label for="llmLevel" class="calc-label">LLM Intelligence Level</label>
+                    <select id="llmLevel" class="calc-select">
+                      <option value="off">Off ($0)</option>
+                      <option value="standard" selected>Standard ($300/mo)</option>
+                      <option value="advanced">Advanced ($1,500/mo)</option>
+                      <option value="premium">Premium ($4,000/mo)</option>
+                    </select>
+                  </div>
+
+                  <div class="calc-field">
+                    <label for="scanDepth" class="calc-label">FortifyOps Scan Depth</label>
+                    <select id="scanDepth" class="calc-select">
+                      <option value="basic">Basic ($2/scan)</option>
+                      <option value="standard" selected>Standard ($8/scan)</option>
+                      <option value="deep">Deep ($25/scan)</option>
+                    </select>
+                  </div>
+                </fieldset>
+
+                <fieldset class="calc-fieldset calc-fieldset--inner">
+                  <legend class="calc-legend">Support</legend>
+                  <div class="calc-field">
+                    <label for="supportTier" class="calc-label">Support Tier</label>
+                    <select id="supportTier" class="calc-select">
+                      <option value="standard">Standard (included)</option>
+                      <option value="premium">Premium (+15%)</option>
+                      <option value="dedicated">Dedicated (+30%)</option>
+                    </select>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+
+            <div class="calc-actions">
+              <button class="btn btn-primary" id="calculateBtn">Calculate Estimate</button>
+              <button class="btn btn-ghost" id="resetBtn">Reset</button>
+            </div>
+          </div>
+
+          <!-- Results Panel -->
+          <div class="calc-results" id="calcResults" aria-live="polite" aria-label="Pricing estimate results">
+            <div class="results-placeholder" id="resultsPlaceholder">
+              <div class="placeholder-icon" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="32" cy="32" r="28"/><path d="M32 20v12l8 8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <p>Adjust inputs and click <strong>Calculate Estimate</strong> to see your directional AMS pricing.</p>
+            </div>
+
+            <div class="results-content" id="resultsContent" hidden>
+              <!-- Recommended Plan + Cost Summary -->
+              <div class="results-summary">
+                <div class="results-plan" id="resultsPlan"></div>
+                <div class="results-cost">
+                  <div class="cost-monthly">
+                    <span class="cost-label">Est. Monthly Cost</span>
+                    <span class="cost-value" id="costMonthly">$0</span>
+                  </div>
+                  <div class="cost-annual">
+                    <span class="cost-label">Est. Annual Cost</span>
+                    <span class="cost-value cost-value--annual" id="costAnnual">$0</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cost Breakdown -->
+              <div class="results-breakdown">
+                <h3 class="results-section-title">Cost Breakdown</h3>
+                <div class="breakdown-list" id="breakdownList" role="list"></div>
+              </div>
+
+              <!-- Top Cost Drivers -->
+              <div class="results-drivers">
+                <h3 class="results-section-title">Top Cost Drivers</h3>
+                <ol class="drivers-list" id="driversList"></ol>
+              </div>
+
+              <!-- Optimization Suggestions -->
+              <div class="results-suggestions">
+                <h3 class="results-section-title">Optimization Suggestions</h3>
+                <ul class="suggestions-list" id="suggestionsList" role="list"></ul>
+              </div>
+
+              <div class="results-actions">
+                <button class="btn btn-outline btn-sm" id="exportBtn">Export Estimate</button>
+              </div>
+
+              <p class="results-disclaimer">
+                <strong>Disclaimer:</strong> This calculator provides directional pricing for planning and discussion. Final pricing depends on contract terms, deployment model, data residency, integration scope, and support level.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING TIERS ===================== -->
+    <section class="section section-pricing" id="pricing" aria-labelledby="pricing-heading">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">Plans</div>
+          <h2 class="section-title" id="pricing-heading">Choose the Right Starting Point</h2>
+          <p class="section-sub">All plans are customized at contract. These are starting reference points for planning conversations.</p>
+        </div>
+        <div class="pricing-grid" role="list">
+
+          <article class="pricing-card" role="listitem">
+            <div class="pricing-tier-badge">Starter</div>
+            <div class="pricing-price">
+              <span class="price-from">Starting at</span>
+              <span class="price-amount">$2,500</span>
+              <span class="price-period">/month</span>
+            </div>
+            <p class="pricing-best-for">Best for teams beginning AI agent governance</p>
+            <ul class="pricing-features" aria-label="Starter plan features">
+              <li>Agent registry (ARE)</li>
+              <li>Basic Command Center observability</li>
+              <li>Basic FortifyOps scans</li>
+              <li>Up to 50 users / 100 agents</li>
+              <li>Standard dashboards</li>
+              <li>Standard support</li>
+            </ul>
+            <a href="#calculator" class="btn btn-outline btn-full">Estimate My Cost</a>
+          </article>
+
+          <article class="pricing-card pricing-card--featured" role="listitem">
+            <div class="pricing-card-badge">Most Popular</div>
+            <div class="pricing-tier-badge">Professional</div>
+            <div class="pricing-price">
+              <span class="price-from">Starting at</span>
+              <span class="price-amount">$7,500</span>
+              <span class="price-period">/month</span>
+            </div>
+            <p class="pricing-best-for">Best for enterprise teams scaling AgentOps</p>
+            <ul class="pricing-features" aria-label="Professional plan features">
+              <li>Multi-team AgentOps</li>
+              <li>Advanced Command Center observability</li>
+              <li>Cost &amp; performance intelligence</li>
+              <li>Engineering observability</li>
+              <li>Standard FortifyOps scans</li>
+              <li>RBAC &amp; governance workflows</li>
+              <li>Up to 500 users / 1,000 agents</li>
+              <li>Premium support</li>
+            </ul>
+            <a href="#calculator" class="btn btn-primary btn-full">Estimate My Cost</a>
+          </article>
+
+          <article class="pricing-card" role="listitem">
+            <div class="pricing-tier-badge">Enterprise</div>
+            <div class="pricing-price">
+              <span class="price-from">Starting at</span>
+              <span class="price-amount">$18,000</span>
+              <span class="price-period">/month</span>
+            </div>
+            <p class="pricing-best-for">Best for large enterprise AI control plane</p>
+            <ul class="pricing-features" aria-label="Enterprise plan features">
+              <li>Enterprise-scale agent registry</li>
+              <li>Multi-platform control plane</li>
+              <li>Deep FortifyOps security scans</li>
+              <li>Executive dashboards</li>
+              <li>Advanced governance</li>
+              <li>Custom telemetry retention</li>
+              <li>SSO / RBAC / audit logs</li>
+              <li>Dedicated support</li>
+              <li>Private SaaS or self-hosted option</li>
+            </ul>
+            <a href="#calculator" class="btn btn-outline btn-full">Estimate My Cost</a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COMPETITOR COMPARISON ===================== -->
+    <section class="section section-competitors" id="competitors" aria-labelledby="comp-heading">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">Market Context</div>
+          <h2 class="section-title" id="comp-heading">How AMS Stands Apart</h2>
+          <p class="section-sub">AMS brings together capabilities that are fragmented across best-of-breed tools into one unified AgentOps layer.</p>
+        </div>
+
+        <div class="comp-table-wrap" role="region" aria-label="Competitor comparison table" tabindex="0">
+          <table class="comp-table" aria-label="AMS vs competitors feature comparison">
+            <thead>
+              <tr>
+                <th scope="col" class="comp-th comp-th--capability">Capability</th>
+                <th scope="col" class="comp-th comp-th--ams">AMS</th>
+                <th scope="col" class="comp-th">Datadog</th>
+                <th scope="col" class="comp-th">Microsoft<br/>Agent 365</th>
+                <th scope="col" class="comp-th">Zenity</th>
+                <th scope="col" class="comp-th">ServiceNow<br/>AI Control Tower</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="comp-td comp-td--capability">Agent registry</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Multi-platform AgentOps</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Deep logs / traces / metrics</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">LLM observability</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Agent security scans</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Runtime control actions</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Engineering observability</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Cost &amp; performance intelligence</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-medium" aria-label="Medium">●●○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+              </tr>
+              <tr>
+                <td class="comp-td comp-td--capability">Governance workflows</td>
+                <td class="comp-td comp-td--ams"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-weak" aria-label="Weak">●○○</span></td>
+                <td class="comp-td"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+                <td class="comp-td"><span class="comp-strong" aria-label="Strong">●●●</span></td>
+              </tr>
+              <tr class="comp-tr--bestfit">
+                <td class="comp-td comp-td--capability">Best fit</td>
+                <td class="comp-td comp-td--ams comp-td--fit">Unified AgentOps across registry, observability, security, control, engineering, &amp; cost</td>
+                <td class="comp-td comp-td--fit">Deep infra &amp; app observability, telemetry, APM</td>
+                <td class="comp-td comp-td--fit">Microsoft ecosystem agent registry &amp; governance</td>
+                <td class="comp-td comp-td--fit">AI agent security, risk &amp; governance</td>
+                <td class="comp-td comp-td--fit">AI governance, lifecycle &amp; workflow automation</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="comp-legend" aria-label="Table legend">
+          <span class="legend-item"><span class="comp-strong" aria-label="Strong">●●●</span> Strong</span>
+          <span class="legend-item"><span class="comp-medium" aria-label="Medium">●●○</span> Moderate</span>
+          <span class="legend-item"><span class="comp-weak" aria-label="Weak">●○○</span> Limited</span>
+        </div>
+
+        <div class="comp-summary">
+          <p>AMS is designed to complement and unify enterprise tools by becoming the AgentOps layer across platforms, runtimes, telemetry sources, security posture, engineering AI usage, and cost/performance intelligence.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DEPLOYMENT ===================== -->
+    <section class="section section-deployment" id="deployment" aria-labelledby="deploy-heading">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">Deployment</div>
+          <h2 class="section-title" id="deploy-heading">Deploy Where Your Enterprise Needs</h2>
+          <p class="section-sub">AMS is available as a managed SaaS or as a private deployment for regulated and data-sensitive environments.</p>
+        </div>
+        <div class="deploy-grid" role="list">
+
+          <article class="deploy-card" role="listitem">
+            <div class="deploy-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 class="deploy-title">AMS SaaS</h3>
+            <p class="deploy-desc">Managed cloud deployment. Start in days, not months.</p>
+            <ul class="deploy-features" aria-label="SaaS features">
+              <li>Fastest adoption path</li>
+              <li>Managed upgrades &amp; infrastructure</li>
+              <li>Usage-based pricing</li>
+              <li>Best for pilots and enterprise rollout</li>
+              <li>Multi-tenant isolation</li>
+            </ul>
+            <div class="deploy-multiplier">Pricing multiplier: <strong>1.0×</strong></div>
+          </article>
+
+          <article class="deploy-card deploy-card--alt" role="listitem">
+            <div class="deploy-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12H3l9-9 9 9h-2M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 class="deploy-title">AMS Self-hosted / Private</h3>
+            <p class="deploy-desc">Customer-managed deployment in your own environment.</p>
+            <ul class="deploy-features" aria-label="Self-hosted features">
+              <li>Customer-managed environment</li>
+              <li>Full data residency control</li>
+              <li>Integrates with your observability stack</li>
+              <li>Best for regulated industries</li>
+              <li>Private SaaS or full self-hosted option</li>
+            </ul>
+            <div class="deploy-multiplier">Pricing multiplier: <strong>1.25× – 1.4×</strong></div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FINAL CTA ===================== -->
+    <section class="section section-cta" id="cta" aria-labelledby="cta-heading">
+      <div class="container">
+        <div class="cta-inner">
+          <div class="cta-glow" aria-hidden="true"></div>
+          <h2 class="cta-title" id="cta-heading">Ready to bring every AI agent under control?</h2>
+          <p class="cta-sub">Start with a directional cost estimate or connect with the AMS team for a tailored evaluation.</p>
+          <div class="cta-actions">
+            <a href="#calculator" class="btn btn-primary btn-lg">Estimate Pricing</a>
+            <a href="mailto:demo@ams-platform.io" class="btn btn-outline btn-lg">Request Demo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-mark">AMS</span>
+        <span class="footer-tagline">Agent Management System</span>
+      </div>
+      <p class="footer-disclaimer">
+        Pricing figures shown are illustrative and for planning purposes only. All trademarks referenced belong to their respective owners. AMS is not affiliated with Datadog, Microsoft, Zenity, or ServiceNow.
+      </p>
+      <p class="footer-copy">&copy; 2025 AMS — Agent Management System. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
